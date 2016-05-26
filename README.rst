@@ -1,2 +1,3 @@
-# PersianTools
+PersianTools
+========================
 Python Library for Persian 
