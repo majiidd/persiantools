@@ -6,8 +6,8 @@ def en_to_fa(string):
     """Convert EN digits to Persian
 
     Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.en_to_fa("0123456789")
+    from persiantools import digits
+    converted = digits.en_to_fa("0123456789")
 
     :param string:  A string, will be converted
     :rtype: str
@@ -32,8 +32,8 @@ def ar_to_fa(string):
     """Convert Arabic digits to Persian
 
         Usage::
-            >>> from persiantools import digits
-            >>> converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
+        from persiantools import digits
+        converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
 
         :param string: A string, will be converted
         :rtype: str

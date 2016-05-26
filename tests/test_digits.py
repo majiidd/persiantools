@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
+
 from nose import tools
 
 from persiantools import digits
