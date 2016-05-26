@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __title__ = 'persiantools'
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __build__ = __version__
 __author__ = 'Majid Hajiloo'
 __license__ = 'MIT'
