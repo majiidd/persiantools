@@ -9,7 +9,7 @@ Python Library for Persian. Convert Arabic character to Persian
 
 ### Install Package
 ```
-pip install persian
+pip install persiantools
 ```
 
 ### How to use

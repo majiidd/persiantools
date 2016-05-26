@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='persiantools',
-      version='0.0.2',
+      version='0.0.3',
       description='Python Library for Persian',
       long_description=readme(),
       classifiers=[
