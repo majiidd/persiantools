@@ -5,13 +5,14 @@ python:
   - "3.4"
   - "3.5"
   - "3.5-dev"
+  - "nightly"
 
 install:
   - pip install coveralls
   - pip install -r requirements.txt
 
 script:
-  nosetests --with-coverage
+  nosetests --with-coverage --cover-package=persiantools
 
 after_success:
   coveralls

@@ -2,12 +2,12 @@ from setuptools import setup
 
 
 def readme():
-    with open('README.rst') as f:
+    with open('README.md') as f:
         return f.read()
 
 
 setup(name='persiantools',
-      version='0.0.1',
+      version='0.0.2',
       description='Python Library for Persian',
       long_description=readme(),
       classifiers=[
@@ -16,7 +16,6 @@ setup(name='persiantools',
           'Natural Language :: Persian',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
