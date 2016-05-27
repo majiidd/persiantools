@@ -23,6 +23,12 @@ class TestDigits(TestCase):
 
         self.assertEqual(converted, "۰۹۸۷۶۵۴۳۲۱")
 
+    def test_fa_to_en(self):
+        self.assertEqual(digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱"), "0987654321")
+
+    def test_fa_to_ar(self):
+        self.assertEqual(digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱"), "٠٩٨٧٦٥٤٣٢١")
+
     @tools.raises(ValueError)
     def test_int_arg(self):
         digits.en_to_fa(12345)

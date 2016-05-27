@@ -26,6 +26,13 @@ class TestDigits(TestCase):
             characters.ar_to_fa("ظ ط ذ د ز ر و ، . ش س ي ب ل ا ت ن م ك ض ص ث ق ف غ ع ه خ ح ؟"),
             "ظ ط ذ د ز ر و ، . ش س ی ب ل ا ت ن م ک ض ص ث ق ف غ ع ه خ ح ؟")
 
+    def test_fa_to_ar(self):
+        self.assertEqual(characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست"), "اي چرخ فلك خرابي از كينه تست")
+
     @tools.raises(ValueError)
-    def test_int_arg(self):
+    def test_int_arg_ar_to_fa(self):
+        characters.ar_to_fa(12345)
+
+    @tools.raises(ValueError)
+    def test_int_arg_fa_to_ar(self):
         characters.ar_to_fa(12345)
