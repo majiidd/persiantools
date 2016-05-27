@@ -19,7 +19,9 @@ from persiantools import digits
 
 digits.en_to_fa("0987654321") # return: ۰۹۸۷۶۵۴۳۲۱
 digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١") # return: ۰۹۸۷۶۵۴۳۲۱
+digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱") # return: 0987654321
+digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱") # return: ٠٩٨٧٦٥٤٣٢١
 
-characters.ar_to_fa("علي")  # return: علی
-characters.ar_to_fa("راك")  # return: راک
+characters.ar_to_fa("راك") # return: راک
+characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست") # return: اي چرخ فلك خرابي از كينه تست
 ```
