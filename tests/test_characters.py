@@ -10,7 +10,9 @@ from persiantools import digits
 class TestDigits(TestCase):
     def test_ar_to_fa(self):
         self.assertEqual(characters.ar_to_fa("السلام عليكم"), "السلام علیکم")
-        characters.ar_to_fa("راك")  # return: راک
+
+    def test_fa_to_fa(self):
+        self.assertEqual(characters.ar_to_fa("السلام علیکم"), "السلام علیکم")
 
     def test_long_ar_to_fa(self):
         orig = "السلام عليكم ٠١٢٣٤٥٦٧٨٩"
