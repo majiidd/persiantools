@@ -13,6 +13,9 @@ class TestDigits(TestCase):
     def test_ar_to_fa(self):
         self.assertEqual(digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١"), "۰۹۸۷۶۵۴۳۲۱")
 
+    def test_fa_to_fa(self):
+        self.assertEqual(digits.en_to_fa("۰۹۸۷۶۵۴۳۲۱"), "۰۹۸۷۶۵۴۳۲۱")
+
     def test_ar_en_to_fa(self):
         orig = "0987٦٥٤٣۲۱"
         converted = digits.en_to_fa(orig)
