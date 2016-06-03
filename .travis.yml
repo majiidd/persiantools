@@ -6,6 +6,8 @@ python:
   - "3.5"
   - "3.5-dev"
   - "nightly"
+  - "pypy"
+  - "pypy3"
 
 install:
   - pip install coveralls
