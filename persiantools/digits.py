@@ -5,12 +5,12 @@ from persiantools import utils
 def en_to_fa(string):
     """Convert EN digits to Persian
 
-    Usage::
-    from persiantools import digits
-    converted = digits.en_to_fa("0123456789")
+        Usage::
+        from persiantools import digits
+        converted = digits.en_to_fa("0123456789")
 
-    :param string:  A string, will be converted
-    :rtype: str
+        :param string:  A string, will be converted
+        :rtype: str
     """
     dic = {
         '0': '۰',

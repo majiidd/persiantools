@@ -18,3 +18,7 @@ script:
 
 after_success:
   coveralls
+
+addons:
+  code_climate:
+    repo_token: 64224dc4a53d3701203a0075f9571a3c0b66f4dbea20750891b6f7e779e69e00
