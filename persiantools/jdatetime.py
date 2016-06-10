@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import date, timedelta
 
-from persiantools import digits
-from persiantools import utils
+from persiantools import digits, utils
 
 MINYEAR = 1
 MAXYEAR = 9377

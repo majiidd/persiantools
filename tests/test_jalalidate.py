@@ -152,8 +152,13 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1395, 12, 30) - JalaliDate(1395, 1, 1), timedelta(days=365))
 
     def test_pickle(self):
-        pickle.dump(JalaliDate(1369, 7, 1), open("save.p", "wb"))
-        j = pickle.load(open("save.p", "rb"))
+        file = open("save.p", "wb")
+        pickle.dump(JalaliDate(1369, 7, 1), file)
+        file.close()
+
+        file2 = open("save.p", "rb")
+        j = pickle.load(file2)
+        file2.close()
 
         self.assertEqual(j, JalaliDate(1369, 7, 1))
 
