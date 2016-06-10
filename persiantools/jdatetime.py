@@ -54,10 +54,10 @@ class JalaliDate(object):
             jdate = self.to_jalali(year)
             year, month, day = jdate.year, jdate.month, jdate.day
 
-        elif month is None and isinstance(year, str) and day is None:
+        elif isinstance(year, str) and month is None and day is None:
             # Pickle support, Python > 2.7
             year = year.strip("[]").split(",")
-            if 1 <= int(year[2]) <= 12:
+            if 1 <= int(year[2]) <= 12 and 1 <= int(year[3]) <= 31:
                 month = int(year[2])
                 day = int(year[3])
                 year = int(year[0]) * 256 + int(year[1])
@@ -77,7 +77,6 @@ class JalaliDate(object):
         self.__locale = locale
         self.__hashcode = -1
 
-    # Read-only field accessors
     @property
     def year(self):
         return self.__year
