@@ -96,7 +96,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(j.strftime("%x"), "95/3/1")
         self.assertEqual(format(j, "%c"), j.ctime())
         self.assertEqual(format(j), "1395-03-01")
-        self.assertEqual(j.__repr__(), "JalaliDate(1395, 3, 1)")
+        self.assertEqual(j.__repr__(), "JalaliDate(1395, 03, 01, Shanbeh)")
 
         j.locale = "fa"
 
@@ -107,7 +107,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(j.strftime("%c"), "شنبه ۱ خرداد ۱۳۹۵")
         self.assertEqual(j.strftime("%x"), "۹۵/۳/۱")
         self.assertEqual(format(j, "%c"), j.ctime())
-        self.assertEqual(j.__repr__(), "JalaliDate(1395, 3, 1)")
+        self.assertEqual(j.__repr__(), "JalaliDate(1395, 03, 01, Shanbeh)")
 
         self.assertEqual(format(j), "۱۳۹۵-۰۳-۰۱")
 

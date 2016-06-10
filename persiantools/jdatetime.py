@@ -41,7 +41,7 @@ _MONTH_COUNT = [
 
 
 class JalaliDate(object):
-    # __slots__ = '__year', '__month', '__day', '__locale', '__hashcode'
+    __slots__ = '__year', '__month', '__day', '__locale', '__hashcode'
 
     def __init__(self, year, month=None, day=None, locale="en"):
         if isinstance(year, JalaliDate):
@@ -54,8 +54,16 @@ class JalaliDate(object):
             jdate = self.to_jalali(year)
             year, month, day = jdate.year, jdate.month, jdate.day
 
+        elif month is None and isinstance(year, str) and day is None:
+            # Pickle support, Python > 2.7
+            year = year.strip("[]").split(",")
+            if 1 <= int(year[2]) <= 12:
+                month = int(year[2])
+                day = int(year[3])
+                year = int(year[0]) * 256 + int(year[1])
+
         elif isinstance(year, bytes) and len(year) == 4 and 1 <= year[2] <= 12 and month is None:
-            # Pickle support
+            # Pickle support, Python > 3.3
             self.__setstate__(year)
             year = self.__year
             month = self.__month
@@ -164,8 +172,8 @@ class JalaliDate(object):
         jy = 0 if year <= 1600 else 979
         year -= 621 if year <= 1600 else 1600
         year2 = year + 1 if month > 2 else year
-        days = (365 * year) + int((year2 + 3) / 4) - int((year2 + 99) / 100) + int((year2 + 399) / 400) - 80 + day + g_d_m[
-            month - 1]
+        days = (365 * year) + int((year2 + 3) / 4) - int((year2 + 99) / 100) + int((year2 + 399) / 400) - 80 + day + \
+               g_d_m[month - 1]
         jy += 33 * int(days / 12053)
         days %= 12053
         jy += 4 * int(days / 1461)
@@ -272,10 +280,7 @@ class JalaliDate(object):
         return self.__class__, self.__getstate__()
 
     def __repr__(self):
-        return "%s(%d, %d, %d)" % (self.__class__.__name__,
-                                   self.__year,
-                                   self.__month,
-                                   self.__day)
+        return self.strftime("JalaliDate(%Y, %m, %d, %A)", "en")
 
     resolution = timedelta(1)
 
@@ -327,12 +332,15 @@ class JalaliDate(object):
     def ctime(self):
         return self.strftime("%c")
 
-    def strftime(self, fmt):
-        month_names = MONTH_NAMES_EN if self.__locale == "en" else MONTH_NAMES_FA
-        month_names_abbr = MONTH_NAMES_ABBR_EN if self.__locale == "en" else MONTH_NAMES_ABBR_FA
-        day_names = WEEKDAY_NAMES_EN if self.__locale == "en" else WEEKDAY_NAMES_FA
-        day_names_abbr = WEEKDAY_NAMES_ABBR_EN if self.__locale == "en" else WEEKDAY_NAMES_ABBR_FA
-        am = "AM" if self.__locale == "en" else "ق ظ"
+    def strftime(self, fmt, locale=None):
+        if locale is None or locale not in ["fa", "en"]:
+            locale = self.__locale
+
+        month_names = MONTH_NAMES_EN if locale == "en" else MONTH_NAMES_FA
+        month_names_abbr = MONTH_NAMES_ABBR_EN if locale == "en" else MONTH_NAMES_ABBR_FA
+        day_names = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
+        day_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
+        am = "AM" if locale == "en" else "ق ظ"
 
         format_time = {
             "%a": day_names_abbr[self.weekday()],
@@ -389,7 +397,7 @@ class JalaliDate(object):
 
         result = utils.replace(fmt, format_time)
 
-        if self.__locale == "fa":
+        if locale == "fa":
             result = digits.en_to_fa(result)
 
         return result
