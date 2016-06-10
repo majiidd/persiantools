@@ -192,6 +192,7 @@ class JalaliDate(object):
         return cls(jy, jm, jd)
 
     def to_gregorian(self):
+        """based on jdf.scr.ir"""
         month = self.month
         day = self.day
         year = self.year
