@@ -84,7 +84,7 @@ class TestJalaliDate(TestCase):
         j.locale = "fa"
 
         self.assertEqual(j.isoformat(), "۱۳۶۷-۰۲-۱۴")
-        self.assertEqual(j.strftime("%a %A %w"), "چه چهارشنبه ۴")
+        self.assertEqual(j.strftime("%a %A %w"), "چ چهارشنبه ۴")
 
         j = JalaliDate(1395, 3, 1)
 
@@ -102,7 +102,7 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(j.strftime("%d %-d %b %B"), "۰۱ ۱ خرد خرداد")
         self.assertEqual(j.strftime("%m %-m %y %Y"), "۰۳ ۳ ۹۵ ۱۳۹۵")
-        self.assertEqual(j.strftime("%p %j %-j %U %W %%"), "ق ظ ۰۶۳ ۶۳ ۱۰ ۱۰ %")
+        self.assertEqual(j.strftime("%p %j %-j %U %W %%"), "ق.ظ ۰۶۳ ۶۳ ۱۰ ۱۰ %")
         self.assertEqual(j.strftime("%c"), j.ctime())
         self.assertEqual(j.strftime("%c"), "شنبه ۱ خرداد ۱۳۹۵")
         self.assertEqual(j.strftime("%x"), "۹۵/۳/۱")
