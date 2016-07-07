@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import os
+import pickle
 import time
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time as _time
 from unittest import TestCase
 
 import pytz
@@ -17,13 +19,40 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 14, 1, 9111),
                          JalaliDateTime(JalaliDateTime(1369, 7, 1, 14, 14, 1, 9111)))
 
+        g = JalaliDateTime.now()
+        self.assertEqual(g.time(), _time(g.hour, g.minute, g.second, g.microsecond))
+
+        g = g.replace(tzinfo=pytz.timezone("America/Los_Angeles"))
+        self.assertEqual(g.timetz(),
+                         _time(g.hour, g.minute, g.second, g.microsecond, pytz.timezone("America/Los_Angeles")))
+
+        self.assertEqual(JalaliDateTime.fromtimestamp(578723400, pytz.utc),
+                         JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc))
+        self.assertEqual(JalaliDateTime.utcfromtimestamp(578723400), JalaliDateTime(1367, 2, 14, 4, 30, 0, 0))
+
+        try:
+            JalaliDateTime._check_time_fields(20, 1, 61, 1000)
+        except ValueError:
+            assert True
+        else:
+            assert False
+
+        try:
+            JalaliDateTime._check_time_fields("20", 1, 61, 1000)
+        except TypeError:
+            assert True
+        else:
+            assert False
+
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time()) <= JalaliDateTime.now())
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
-        self.assertEqual(JalaliDateTime.fromtimestamp(578723400, pytz.utc), JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc))
+        self.assertEqual(JalaliDateTime.fromtimestamp(578723400, pytz.utc),
+                         JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).jdate(), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).date(), date(1988, 5, 4))
-        self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).__repr__(), 'JalaliDateTime(1367, 2, 14, 4, 30)')
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).replace(tzinfo=pytz.utc).__repr__(),
+                         'JalaliDateTime(1367, 2, 14, 4, 30, tzinfo=<UTC>)')
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).replace(year=1395, day=3, minute=59),
                          JalaliDateTime(1395, 2, 3, 4, 59, 4, 4444))
 
@@ -72,3 +101,17 @@ class TestJalaliDate(TestCase):
                          {JalaliDateTime(j1.year, j1.month, j1.day, j1.hour, j1.minute, j1.second,
                                          j1.microsecond, j1.tzinfo): "today",
                           JalaliDateTime(1369, 7, 1, 0, 0, 0, 0): "mini2"})
+
+    def test_pickle(self):
+        file = open("save.p", "wb")
+        now = JalaliDateTime.now().replace(tzinfo=pytz.timezone("Asia/Tehran"))
+        pickle.dump(now, file)
+        file.close()
+
+        file2 = open("save.p", "rb")
+        j = pickle.load(file2)
+        file2.close()
+
+        self.assertEqual(j, now)
+
+        os.remove("save.p")

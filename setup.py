@@ -1,14 +1,17 @@
 from setuptools import setup
 
 
+version = '1.0b1'
+
+
 def readme():
-    with open('README.md') as f:
+    with open('README.rst') as f:
         return f.read()
 
 
 setup(name='persiantools',
-      version='0.0.7',
-      description='Python Library for Persian',
+      version=version,
+      description='Jalali date and datetime with other tools',
       long_description=readme(),
       classifiers=[
           'Intended Audience :: Developers',
@@ -20,12 +23,13 @@ setup(name='persiantools',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: Implementation :: CPython'
           'Topic :: Software Development :: Libraries',
           'Topic :: Software Development :: Libraries :: Python Modules',
           'Topic :: Software Development :: Localization',
           'Topic :: Utilities',
       ],
-      keywords='persian digits characters converter jalali date shamsi jdate',
+      keywords='jalali shamsi persian digits characters converter jalalidate jalalidatetime date datetime',
       url='https://github.com/mhajiloo/persiantools',
       author='Majid Hajiloo',
       author_email='majid.hajiloo@gmail.com',

@@ -88,24 +88,24 @@ class TestJalaliDate(TestCase):
 
         j = JalaliDate(1395, 3, 1)
 
-        self.assertEqual(j.strftime("%d %-d %b %B"), "01 1 Kho Khordad")
-        self.assertEqual(j.strftime("%m %-m %y %Y"), "03 3 95 1395")
-        self.assertEqual(j.strftime("%p %j %-j %U %W %%"), "AM 063 63 10 10 %")
+        self.assertEqual(j.strftime("%d %b %B"), "01 Kho Khordad")
+        self.assertEqual(j.strftime("%m %m %y %Y"), "03 03 95 1395")
+        self.assertEqual(j.strftime("%p %j %j %U %W %%"), "AM 063 063 10 10 %")
         self.assertEqual(j.strftime("%c"), j.ctime())
-        self.assertEqual(j.strftime("%c"), "Shanbeh 1 Khordad 1395")
-        self.assertEqual(j.strftime("%x"), "95/3/1")
+        self.assertEqual(j.strftime("%c"), "Shanbeh 01 Khordad 1395")
+        self.assertEqual(j.strftime("%x"), "95/03/01")
         self.assertEqual(format(j, "%c"), j.ctime())
         self.assertEqual(format(j), "1395-03-01")
         self.assertEqual(j.__repr__(), "JalaliDate(1395, 03, 01, Shanbeh)")
 
         j.locale = "fa"
 
-        self.assertEqual(j.strftime("%d %-d %b %B"), "۰۱ ۱ خرد خرداد")
-        self.assertEqual(j.strftime("%m %-m %y %Y"), "۰۳ ۳ ۹۵ ۱۳۹۵")
-        self.assertEqual(j.strftime("%p %j %-j %U %W %%"), "ق.ظ ۰۶۳ ۶۳ ۱۰ ۱۰ %")
+        self.assertEqual(j.strftime("%d %b %B"), "۰۱ خرد خرداد")
+        self.assertEqual(j.strftime("%m %m %y %Y"), "۰۳ ۰۳ ۹۵ ۱۳۹۵")
+        self.assertEqual(j.strftime("%p %j %j %U %W %%"), "ق.ظ ۰۶۳ ۰۶۳ ۱۰ ۱۰ %")
         self.assertEqual(j.strftime("%c"), j.ctime())
-        self.assertEqual(j.strftime("%c"), "شنبه ۱ خرداد ۱۳۹۵")
-        self.assertEqual(j.strftime("%x"), "۹۵/۳/۱")
+        self.assertEqual(j.strftime("%c"), "شنبه ۰۱ خرداد ۱۳۹۵")
+        self.assertEqual(j.strftime("%x"), "۹۵/۰۳/۰۱")
         self.assertEqual(format(j, "%c"), j.ctime())
         self.assertEqual(j.__repr__(), "JalaliDate(1395, 03, 01, Shanbeh)")
 

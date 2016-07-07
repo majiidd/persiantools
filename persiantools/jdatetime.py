@@ -53,14 +53,6 @@ class JalaliDate(object):
             jdate = self.to_jalali(year)
             year, month, day = jdate.year, jdate.month, jdate.day
 
-        elif isinstance(year, str) and month is None and day is None:
-            # Pickle support, Python > 2.7
-            year = year.strip("[]").split(",")
-            if 1 <= int(year[2]) <= 12 and 1 <= int(year[3]) <= 31:
-                month = int(year[2])
-                day = int(year[3])
-                year = int(year[0]) * 256 + int(year[1])
-
         elif isinstance(year, bytes) and len(year) == 4 and 1 <= year[2] <= 12 and month is None:
             # Pickle support, Python > 3.3
             self.__setstate__(year)
@@ -348,21 +340,17 @@ class JalaliDate(object):
             "%w": str(self.weekday()),
 
             "%d": "%02d" % self._day,
-            "%-d": "%d" % self._day,
 
             "%b": month_names_abbr[self._month],
             "%B": month_names[self._month],
 
             "%m": "%02d" % self._month,
-            "%-m": "%d" % self._month,
 
-            "%y": "%d" % (self._year % 100),
-            "%Y": "%d" % self._year,
+            "%y": "%02d" % (self._year % 100),
+            "%Y": "%04d" % self._year,
 
             "%H": "00",
-            "%-H": "0",
             "%I": "00",
-            "%-I": "0",
 
             "%p": am,
 
@@ -378,10 +366,9 @@ class JalaliDate(object):
             "%Z": "",
 
             "%j": "%03d" % (self.days_before_month(self._month) + self._day),
-            "%-j": "%d" % (self.days_before_month(self._month) + self._day),
 
             "%U": "%02d" % self.week_of_year(),
-            "%W": "%d" % self.week_of_year(),
+            "%W": "%02d" % self.week_of_year(),
 
             "%X": "00:00:00",
 
@@ -389,10 +376,10 @@ class JalaliDate(object):
         }
 
         if "%c" in fmt:
-            fmt = utils.replace(fmt, {"%c": self.strftime("%A %-d %B %Y")})
+            fmt = utils.replace(fmt, {"%c": self.strftime("%A %d %B %Y")})
 
         if "%x" in fmt:
-            fmt = utils.replace(fmt, {"%x": self.strftime("%y/%-m/%-d")})
+            fmt = utils.replace(fmt, {"%x": self.strftime("%y/%m/%d")})
 
         result = utils.replace(fmt, format_time)
 
@@ -477,7 +464,7 @@ class JalaliDate(object):
         return NotImplemented
 
     @classmethod
-    def strptime(cls, data_string, format):
+    def strptime(cls, data_string, fmt):
         raise NotImplemented
 
 
@@ -513,20 +500,17 @@ class JalaliDateTime(JalaliDate):
 
             year = j.year
 
-        elif isinstance(year, str) and month is None and day is None:
-            # Pickle support, Python > 2.7
-            year = year.strip("[]").split(",")
-            if 1 <= int(year[2]) <= 12 and 1 <= int(year[3]) <= 31:
-                month = int(year[2])
-                day = int(year[3])
-                year = int(year[0]) * 256 + int(year[1])
-
-        elif isinstance(year, bytes) and len(year) == 10 and month is None:
+        elif isinstance(year, bytes) and len(year) == 10:
             # Pickle support, Python > 3.3
-            self.__setstate__(year)
+            self.__setstate__(year, month)
             year = self._year
             month = self._month
             day = self._day
+            hour = self._hour
+            minute = self._minute
+            second = self._second
+            microsecond = self._microsecond
+            tzinfo = self._tzinfo
 
         super(JalaliDateTime, self).__init__(year, month, day, locale)
         self._check_tzinfo_arg(tzinfo)
@@ -652,14 +636,6 @@ class JalaliDateTime(JalaliDate):
             raise TypeError("tzinfo argument must be None or of a tzinfo subclass")
 
     @classmethod
-    def fromtimestamp(cls, t, tz=None):
-        return cls(dt.fromtimestamp(t, tz))
-
-    @classmethod
-    def utcfromtimestamp(cls, t):
-        return cls(dt.utcfromtimestamp(t))
-
-    @classmethod
     def combine(cls, jdate, time_v):
         if not isinstance(jdate, JalaliDate):
             raise TypeError("date argument must be a JalaliDate instance")
@@ -677,8 +653,7 @@ class JalaliDateTime(JalaliDate):
         raise NotImplemented
 
     def astimezone(self, tz=None):
-        d = self.to_gregorian()
-        return JalaliDateTime(d.astimezone(tz))
+        return JalaliDateTime(self.to_gregorian().astimezone(tz))
 
     def ctime(self):
         month_names = MONTH_NAMES_EN if self.locale == "en" else MONTH_NAMES_FA
@@ -791,21 +766,21 @@ class JalaliDateTime(JalaliDate):
                                         microsecond=self._microsecond, tzinfo=self._tzinfo))
 
     @classmethod
-    def strptime(cls, data_string, format):
+    def strptime(cls, data_string, fmt):
         raise NotImplemented
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
-        L = [self._year, self._month, self._day,  # These are never zero
+        l = [self._year, self._month, self._day,  # These are never zero
              self._hour, self._minute, self._second, self._microsecond]
 
-        if L[-1] == 0:
-            del L[-1]
+        if l[-1] == 0:
+            del l[-1]
 
-        if L[-1] == 0:
-            del L[-1]
+        if l[-1] == 0:
+            del l[-1]
 
-        s = ", ".join(map(str, L))
+        s = ", ".join(map(str, l))
         s = "%s(%s)" % ('JalaliDateTime', s)
 
         if self._tzinfo is not None:
