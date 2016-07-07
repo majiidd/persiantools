@@ -3,7 +3,8 @@ PersianTools
 
 | |pypi-ver| |PyPI-license| |travic-build| |Coverage Status| |python-ver|
 
--  Jalali (Shamsi) date and datetime (based on python datetime’s module)
+
+-  Jalali (Shamsi) date and datetime (based on python datetime's module)
     -  Convert Jalali to Gregorian date/datetime and vice versa
     -  Support comparition and arithmetic operators such as +, -, ==, >=
     -  Support timezone
@@ -58,6 +59,7 @@ Datetime:
 
     >>> JalaliDateTime.now(pytz.timezone("Asia/Tehran"))
     JalaliDateTime(1395, 4, 18, 1, 53, 30, 407770, tzinfo=<DstTzInfo 'Asia/Tehran' IRDT+4:30:00 DST>)
+    
     >>> JalaliDateTime.now(pytz.utc)
     JalaliDateTime(1395, 4, 17, 21, 23, 53, 474618, tzinfo=<UTC>)
 
@@ -71,14 +73,19 @@ Digit/Character converter:
 
     >>> digits.en_to_fa("0987654321")
     '۰۹۸۷۶۵۴۳۲۱'
+    
     >>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")
     '۰۹۸۷۶۵۴۳۲۱'
+    
     >>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
     '0987654321'
+    
     >>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱") 
     '٠٩٨٧٦٥٤٣٢١'
+    
     >>> characters.ar_to_fa("راك")
     'راک'
+    
     >>> characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست")
     'اي چرخ فلك خرابي از كينه تست'
 
