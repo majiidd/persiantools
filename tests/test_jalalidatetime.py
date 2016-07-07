@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from datetime import datetime, date, timedelta, timezone
+from datetime import datetime, date, timedelta
 from unittest import TestCase
 
 import pytz
@@ -19,7 +19,7 @@ class TestJalaliDate(TestCase):
 
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time()) <= JalaliDateTime.now())
-        self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).timestamp(), 578710800)
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
         self.assertEqual(JalaliDateTime.fromtimestamp(578710800), JalaliDateTime(1367, 2, 14, 4, 30, 0, 0))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).jdate(), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).date(), date(1988, 5, 4))
@@ -27,7 +27,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).replace(year=1395, day=3, minute=59),
                          JalaliDateTime(1395, 2, 3, 4, 59, 4, 4444))
 
-        self.assertEqual(JalaliDateTime.now(timezone.utc).tzname(), "UTC+00:00")
+        self.assertEqual(JalaliDateTime.now(pytz.utc).tzname(), "UTC")
         self.assertEqual(JalaliDateTime.now(pytz.timezone("Asia/Tehran")).replace(month=2).dst(), timedelta(hours=1))
         self.assertIsNone(JalaliDateTime.today().tzname())
         self.assertIsNone(JalaliDateTime.today().dst())
@@ -55,7 +55,7 @@ class TestJalaliDate(TestCase):
         self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= JalaliDateTime(1369, 7, 1, 1, 0, 0, 0))
         self.assertTrue(JalaliDateTime(1395, 4, 15, 20, 13, 59, 0) == JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
         self.assertTrue(
-            JalaliDateTime(1395, 4, 15, 20, 13, 59, 0, timezone.utc) != JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
+            JalaliDateTime(1395, 4, 15, 20, 13, 59, 0, pytz.utc) != JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
         self.assertTrue(JalaliDateTime.now() != JalaliDateTime.now())
 
         self.assertEqual(
@@ -64,7 +64,7 @@ class TestJalaliDate(TestCase):
             pytz.timezone("Asia/Tehran")._utcoffset)
 
     def test_hash(self):
-        j1 = JalaliDateTime.today().replace(tzinfo=timezone.utc)
+        j1 = JalaliDateTime.today().replace(tzinfo=pytz.utc)
         j2 = JalaliDateTime(1369, 7, 1, 0, 0, 0, 0)
         j3 = JalaliDateTime(datetime(1990, 9, 23, 0, 0, 0, 0))
 
