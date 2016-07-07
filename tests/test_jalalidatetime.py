@@ -20,7 +20,7 @@ class TestJalaliDate(TestCase):
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time()) <= JalaliDateTime.now())
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
-        self.assertEqual(JalaliDateTime.fromtimestamp(578710800), JalaliDateTime(1367, 2, 14, 4, 30, 0, 0))
+        self.assertEqual(JalaliDateTime.fromtimestamp(578723400, pytz.utc), JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).jdate(), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).date(), date(1988, 5, 4))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).__repr__(), 'JalaliDateTime(1367, 2, 14, 4, 30)')
