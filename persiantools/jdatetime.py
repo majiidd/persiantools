@@ -671,8 +671,7 @@ class JalaliDateTime(JalaliDate):
                    time_v.tzinfo)
 
     def timestamp(self):
-        d = self.to_gregorian()
-        return d.timestamp()
+        return self.to_gregorian().timestamp()
 
     def utctimetuple(self):
         raise NotImplemented
