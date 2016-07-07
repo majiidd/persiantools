@@ -3,7 +3,6 @@ PersianTools
 
 | |pypi-ver| |PyPI-license| |travic-build| |Coverage Status| |python-ver|
 
-
 -  Jalali (Shamsi) date and datetime (based on python datetime's module)
     -  Convert Jalali to Gregorian date/datetime and vice versa
     -  Support comparition and arithmetic operators such as +, -, ==, >=
@@ -15,7 +14,7 @@ Install Package
 
 .. code:: bash
 
-    $ pip install persiantools
+    $ pip install persiantools==1.0b2
 
 How to use
 ----------
@@ -133,7 +132,7 @@ Serializing and de-serializing
    :target: https://pypi.python.org/pypi/persiantools
 .. |PyPI-license| image:: https://img.shields.io/pypi/l/persiantools.svg
    :target: https://pypi.python.org/pypi/persiantools
-.. |travic-build| image:: https://travis-ci.org/mhajiloo/persiantools.png?branch=master
+.. |travic-build| image:: https://img.shields.io/travis/mhajiloo/persiantools/master.svg
    :target: https://travis-ci.org/mhajiloo/persiantools
 .. |Coverage Status| image:: https://coveralls.io/repos/github/mhajiloo/persiantools/badge.svg?branch=master
    :target: https://coveralls.io/github/mhajiloo/persiantools?branch=master
