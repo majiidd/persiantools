@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import date, timedelta, tzinfo, datetime, time as _time
+from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 
 from persiantools import digits, utils
 
@@ -68,7 +68,7 @@ class JalaliDate(object):
             month = self._month
             day = self._day
 
-        year, month, day, locale = self.__check_date_fields(year, month, day, locale)
+        year, month, day, locale = self._check_date_fields(year, month, day, locale)
 
         self._year = year
         self._month = month
@@ -98,7 +98,7 @@ class JalaliDate(object):
         self._locale = locale
 
     @classmethod
-    def __check_date_fields(cls, year, month, day, locale):
+    def _check_date_fields(cls, year, month, day, locale):
         year = utils.check_int_field(year)
         month = utils.check_int_field(month)
         day = utils.check_int_field(day)
@@ -121,7 +121,7 @@ class JalaliDate(object):
     @classmethod
     def chack_date(cls, year, month, day):
         try:
-            cls.__check_date_fields(year, month, day, "en")
+            cls._check_date_fields(year, month, day, "en")
         except (ValueError, TypeError):
             return False
         else:
@@ -490,10 +490,16 @@ class JalaliDateTime(JalaliDate):
     def __init__(self, year, month=None, day=None, hour=0, minute=0, second=0, microsecond=0, tzinfo=None, locale="en"):
         # Pickle support
 
-        if isinstance(year, JalaliDateTime):
-            pass
+        if isinstance(year, JalaliDateTime) and month is None:
+            month = year.month
+            day = year.day
+            hour = year.hour
+            minute = year.minute
+            second = year.second
+            microsecond = year.microsecond
+            year = year.year
 
-        elif isinstance(year, datetime) and month is None:
+        elif isinstance(year, dt) and month is None:
             j = JalaliDate(year.date())
             month = j.month
             day = j.day
@@ -523,8 +529,8 @@ class JalaliDateTime(JalaliDate):
             day = self._day
 
         super(JalaliDateTime, self).__init__(year, month, day, locale)
-        self.__check_tzinfo_arg(tzinfo)
-        self.__check_time_fields(hour, minute, second, microsecond)
+        self._check_tzinfo_arg(tzinfo)
+        self._check_time_fields(hour, minute, second, microsecond)
 
         self._hour = hour
         self._minute = minute
@@ -533,7 +539,7 @@ class JalaliDateTime(JalaliDate):
         self._tzinfo = tzinfo
 
     @staticmethod
-    def __check_time_fields(hour, minute, second, microsecond):
+    def _check_time_fields(hour, minute, second, microsecond):
         if not isinstance(hour, int):
             raise TypeError('int expected')
 
@@ -571,11 +577,11 @@ class JalaliDateTime(JalaliDate):
 
     @classmethod
     def fromtimestamp(cls, t, tz=None):
-        return cls(datetime.fromtimestamp(t, tz))
+        return cls(dt.fromtimestamp(t, tz))
 
     @classmethod
     def utcfromtimestamp(cls, t):
-        return cls(datetime.utcfromtimestamp(t))
+        return cls(dt.utcfromtimestamp(t))
 
     def date(self):
         return JalaliDate(self.year, self.month, self.day).to_gregorian()
@@ -622,32 +628,36 @@ class JalaliDateTime(JalaliDate):
         if locale is None:
             locale = self.locale
 
-        self.__check_date_fields(year, month, day)
-        self.__check_time_fields(hour, minute, second, microsecond)
-        self.__check_tzinfo_arg(tzinfo)
+        self._check_date_fields(year, month, day, locale)
+        self._check_time_fields(hour, minute, second, microsecond)
+        self._check_tzinfo_arg(tzinfo)
 
         return JalaliDateTime(year, month, day, hour, minute, second, microsecond, tzinfo, locale)
 
     @classmethod
     def now(cls, tz=None):
-        return cls(datetime.now(tz))
+        return cls(dt.now(tz))
+
+    @classmethod
+    def today(cls):
+        return cls.now()
 
     @classmethod
     def utcnow(cls):
-        return cls(datetime.utcnow())
+        return cls(dt.utcnow())
 
     @staticmethod
-    def __check_tzinfo_arg(tz):
+    def _check_tzinfo_arg(tz):
         if tz is not None and not isinstance(tz, tzinfo):
             raise TypeError("tzinfo argument must be None or of a tzinfo subclass")
 
     @classmethod
     def fromtimestamp(cls, t, tz=None):
-        return cls(datetime.fromtimestamp(t, tz))
+        return cls(dt.fromtimestamp(t, tz))
 
     @classmethod
     def utcfromtimestamp(cls, t):
-        return cls(datetime.utcfromtimestamp(t))
+        return cls(dt.utcfromtimestamp(t))
 
     @classmethod
     def combine(cls, jdate, time_v):
@@ -662,29 +672,22 @@ class JalaliDateTime(JalaliDate):
 
     def timestamp(self):
         d = self.to_gregorian()
-        dt = datetime(d.year, d.month, d.day, self.hour, self.minute, self.second, self.microsecond, self.tzinfo)
-
-        return dt.timestamp()
+        return d.timestamp()
 
     def utctimetuple(self):
-        d = self.to_gregorian()
-        dt = datetime(d.year, d.month, d.day, self.hour, self.minute, self.second, self.microsecond, self.tzinfo)
-
-        return dt.utctimetuple()
+        raise NotImplemented
 
     def astimezone(self, tz=None):
         d = self.to_gregorian()
-        dt = datetime(d.year, d.month, d.day, self.hour, self.minute, self.second, self.microsecond, self.tzinfo)
-
-        return JalaliDateTime(dt.astimezone(tz))
+        return JalaliDateTime(d.astimezone(tz))
 
     def ctime(self):
         month_names = MONTH_NAMES_EN if self.locale == "en" else MONTH_NAMES_FA
         day_names = WEEKDAY_NAMES_EN if self.locale == "en" else WEEKDAY_NAMES_FA
 
-        c = "%s %02d %s %d %02d:%02d:%02d %04d" % (
+        c = "%s %02d %s %d %02d:%02d:%02d" % (
             day_names[self.weekday()], self.day, month_names[self.month],
-            self.year, self.hour, self.minute, self.second, self.microsecond
+            self.year, self.hour, self.minute, self.second
         )
 
         if self.locale == "fa":
@@ -716,7 +719,7 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        offset = self._tzinfo.utcoffset(self)
+        offset = self._tzinfo.utcoffset(self.to_gregorian())
         self.check_utc_offset("utcoffset", offset)
 
         return offset
@@ -725,7 +728,7 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        name = getattr(self._tzinfo, "tzname")(self)
+        name = getattr(self._tzinfo, "tzname")(self.to_gregorian())
 
         if name is not None and not isinstance(name, str):
             raise TypeError("tzinfo.tzname() must return None or string, "
@@ -737,7 +740,7 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        offset = self._tzinfo.dst(self)
+        offset = self._tzinfo.dst(self.to_gregorian())
         self.check_utc_offset("dst", offset)
 
         return offset
@@ -767,7 +770,7 @@ class JalaliDateTime(JalaliDate):
 
     @classmethod
     def to_jalali(cls, year, month=None, day=None, hour=None, minute=None, second=None, microsecond=None, tzinfo=None):
-        if month is None and isinstance(year, datetime):
+        if month is None and isinstance(year, dt):
             month = year.month
             day = year.day
             hour = year.hour
@@ -785,8 +788,8 @@ class JalaliDateTime(JalaliDate):
     def to_gregorian(self):
         g_date = super(JalaliDateTime, self).to_gregorian()
 
-        return datetime.combine(g_date, _time(hour=self._hour, minute=self._minute, second=self._second,
-                                              microsecond=self._microsecond, tzinfo=self._tzinfo))
+        return dt.combine(g_date, _time(hour=self._hour, minute=self._minute, second=self._second,
+                                        microsecond=self._microsecond, tzinfo=self._tzinfo))
 
     @classmethod
     def strptime(cls, data_string, format):
@@ -982,6 +985,3 @@ class JalaliDateTime(JalaliDate):
 
     def __reduce__(self):
         return self.__class__, self.__getstate__()
-
-
-j = JalaliDateTime.to_jalali(datetime.now())
