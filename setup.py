@@ -23,7 +23,7 @@ setup(name='persiantools',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: Implementation :: CPython'
+          'Programming Language :: Python :: Implementation :: CPython',
           'Topic :: Software Development :: Libraries',
           'Topic :: Software Development :: Libraries :: Python Modules',
           'Topic :: Software Development :: Localization',
