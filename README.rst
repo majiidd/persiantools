@@ -5,7 +5,7 @@ PersianTools
 
 -  Jalali (Shamsi) date and datetime (based on python datetime's module)
     -  Convert Jalali to Gregorian date/datetime and vice versa
-    -  Support comparition and arithmetic operators such as +, -, ==, >=
+    -  Support comparison and arithmetic operators such as +, -, ==, >=
     -  Support timezone
 -  Convert Arabic and Persian characters/digits to each other
 
