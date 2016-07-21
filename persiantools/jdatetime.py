@@ -8,17 +8,15 @@ MAXYEAR = 9377
 _MAXORDINAL = 3424878
 
 MONTH_NAMES_EN = [None, 'Farvardin', 'Ordibehesht', 'Khordad', 'Tir', 'Mordad',
-                  'Shahrivar', 'Mehr', 'Aban',
-                  'Azar', 'Dey', 'Bahman', 'Esfand']
+                  'Shahrivar', 'Mehr', 'Aban', 'Azar', 'Dey', 'Bahman',
+                  'Esfand']
 MONTH_NAMES_FA = [None, 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد',
-                  'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'یهمن',
-                  'اسفند']
+                  'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'یهمن', 'اسفند']
 
 MONTH_NAMES_ABBR_EN = [None, 'Far', 'Ord', 'Kho', 'Tir', 'Mor', 'Sha', 'Meh',
                        'Aba', 'Aza', 'Dey', 'Bah', 'Esf']
 MONTH_NAMES_ABBR_FA = [None, 'فرو', 'ارد', 'خرد', 'تیر', 'مرد', 'شهر', 'مهر',
-                       'آبا', 'آذر', 'دی',
-                       'بهم', 'اسف']
+                       'آبا', 'آذر', 'دی', 'بهم', 'اسف']
 
 WEEKDAY_NAMES_EN = ['Shanbeh', 'Yekshanbeh', 'Doshanbeh', 'Seshanbeh',
                     'Chaharshanbeh', 'Panjshanbeh', 'Jomeh']
@@ -59,9 +57,8 @@ class JalaliDate(object):
             jdate = self.to_jalali(year)
             year, month, day = jdate.year, jdate.month, jdate.day
 
-        elif isinstance(year, bytes) and len(year) == 4 and 1 <= year[
-            2] <= 12 and month is None:
-            # Pickle support
+        elif isinstance(year, bytes) and len(year) == 4 \
+                and 1 <= year[2] <= 12 and month is None:
             self.__setstate__(year)
             year = self._year
             month = self._month
@@ -164,9 +161,8 @@ class JalaliDate(object):
         jy = 0 if year <= 1600 else 979
         year -= 621 if year <= 1600 else 1600
         year2 = year + 1 if month > 2 else year
-        days = (365 * year) + int((year2 + 3) / 4) - int(
-            (year2 + 99) / 100) + int((year2 + 399) / 400) - 80 + day + \
-               g_d_m[month - 1]
+        days = (365 * year) + int((year2 + 3) / 4) - int((year2 + 99) / 100)
+        days += int((year2 + 399) / 400) - 80 + day + g_d_m[month - 1]
         jy += 33 * int(days / 12053)
         days %= 12053
         jy += 4 * int(days / 1461)
@@ -196,8 +192,8 @@ class JalaliDate(object):
         year -= 0 if year <= 979 else 979
 
         d = (month - 1) * 31 if month < 7 else ((month - 7) * 30) + 186
-        days = (365 * year) + (int(year / 33) * 8) + int(
-            ((year % 33) + 3) / 4) + 78 + day + d
+        days = (365 * year) + (int(year / 33) * 8) + int(((year % 33) + 3) / 4)
+        days += 78 + day + d
 
         gy += 400 * int(days / 146097)
         days %= 146097
@@ -219,10 +215,9 @@ class JalaliDate(object):
 
         gd = days + 1
 
-        g_d_m = [0, 31, 29 if (
-                              gy % 4 == 0 and gy % 100 != 0) or gy % 400 == 0 else 28,
-                 31, 30, 31, 30, 31, 31, 30, 31,
-                 30, 31]
+        g_d_m = [0, 31, 29 if (gy % 4 == 0 and gy % 100 != 0)
+                              or gy % 400 == 0 else 28, 31, 30, 31, 30, 31, 31,
+                 30, 31, 30, 31]
         gm = 0
 
         for gm, g in enumerate(g_d_m):
@@ -277,10 +272,9 @@ class JalaliDate(object):
         return self.__class__, self.__getstate__()
 
     def __repr__(self):
-        return "JalaliDate(%d, %d, %d, %s)" % (self._year, self._month,
-                                               self._day,
-                                               WEEKDAY_NAMES_EN[
-                                                   self.weekday()])
+        return "JalaliDate(%d, %d, %d, %s)" % (
+            self._year, self._month, self._day,
+            WEEKDAY_NAMES_EN[self.weekday()])
 
     resolution = timedelta(1)
 
@@ -337,9 +331,12 @@ class JalaliDate(object):
             locale = self._locale
 
         month_names = MONTH_NAMES_EN if locale == "en" else MONTH_NAMES_FA
-        month_names_abbr = MONTH_NAMES_ABBR_EN if locale == "en" else MONTH_NAMES_ABBR_FA
-        day_names = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
-        day_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
+        month_names_abbr = MONTH_NAMES_ABBR_EN if locale == "en" \
+            else MONTH_NAMES_ABBR_FA
+        day_names = WEEKDAY_NAMES_EN if locale == "en" \
+            else WEEKDAY_NAMES_FA
+        day_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" \
+            else WEEKDAY_NAMES_ABBR_FA
         am = "AM" if locale == "en" else "ق.ظ"
 
         format_time = {
@@ -402,7 +399,7 @@ class JalaliDate(object):
         y2, m2, d2 = other._year, other._month, other._day
 
         return 0 if (y, m, d) == (y2, m2, d2) else 1 if (y, m, d) > (
-        y2, m2, d2) else -1
+            y2, m2, d2) else -1
 
     def __eq__(self, other):
         if isinstance(other, JalaliDate):
@@ -481,7 +478,7 @@ _tzinfo_class = tzinfo
 
 class JalaliDateTime(JalaliDate):
     __slots__ = JalaliDate.__slots__ + (
-    '_hour', '_minute', '_second', '_microsecond', '_tzinfo')
+        '_hour', '_minute', '_second', '_microsecond', '_tzinfo')
 
     def __init__(self, year, month=None, day=None, hour=0, minute=0, second=0,
                  microsecond=0, tzinfo=None, locale="en"):
@@ -671,8 +668,10 @@ class JalaliDateTime(JalaliDate):
         return JalaliDateTime(self.to_gregorian().astimezone(tz))
 
     def ctime(self):
-        month_names = MONTH_NAMES_EN if self.locale == "en" else MONTH_NAMES_FA
-        day_names = WEEKDAY_NAMES_EN if self.locale == "en" else WEEKDAY_NAMES_FA
+        month_names = MONTH_NAMES_EN if self.locale == "en" \
+            else MONTH_NAMES_FA
+        day_names = WEEKDAY_NAMES_EN if self.locale == "en" \
+            else WEEKDAY_NAMES_FA
 
         c = "%s %02d %s %d %02d:%02d:%02d" % (
             day_names[self.weekday()], self.day, month_names[self.month],
@@ -845,11 +844,14 @@ class JalaliDateTime(JalaliDate):
     def __base_compare(self, other):
         assert isinstance(other, JalaliDateTime)
 
-        y, m, d, h, m, s, ms = self._year, self._month, self._day, self._hour, self._minute, self._second, self._microsecond
-        y2, m2, d2, h2, m2, s2, ms2 = other.year, other.month, other.day, other.hour, other.minute, other.second, other.microsecond
+        y, m, d, h, m, s, ms = [self._year, self._month, self._day, self._hour,
+                                self._minute, self._second, self._microsecond]
+        y2, m2, d2, h2, m2, s2, ms2 = [other.year, other.month, other.day,
+                                       other.hour, other.minute, other.second,
+                                       other.microsecond]
 
         return 0 if (y, m, d, h, m, s, ms) == (
-        y2, m2, d2, h2, m2, s2, ms2) else 1 if (y, m, d, h, m, s, ms) > (
+            y2, m2, d2, h2, m2, s2, ms2) else 1 if (y, m, d, h, m, s, ms) > (
             y2, m2, d2, h2, m2, s2, ms2) else -1
 
     def _cmp(self, other, allow_mixed=False):
@@ -904,7 +906,7 @@ class JalaliDateTime(JalaliDate):
             return NotImplemented
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
-            type(self).__name__, type(other).__name__))
+                type(self).__name__, type(other).__name__))
 
     def __lt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -913,7 +915,7 @@ class JalaliDateTime(JalaliDate):
             return NotImplemented
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
-            type(self).__name__, type(other).__name__))
+                type(self).__name__, type(other).__name__))
 
     def __ge__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -922,7 +924,7 @@ class JalaliDateTime(JalaliDate):
             return NotImplemented
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
-            type(self).__name__, type(other).__name__))
+                type(self).__name__, type(other).__name__))
 
     def __gt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -931,7 +933,7 @@ class JalaliDateTime(JalaliDate):
             return NotImplemented
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
-            type(self).__name__, type(other).__name__))
+                type(self).__name__, type(other).__name__))
 
     def __add__(self, other):
         if not isinstance(other, timedelta):

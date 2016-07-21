@@ -1,7 +1,7 @@
 PersianTools
 ============
-
 | |pypi-ver| |PyPI-license| |travic-build| |Coverage Status| |python-ver|
+
 
 -  Jalali (Shamsi) date and datetime (based on python datetime's module)
     -  Convert Jalali to Gregorian date/datetime and vice versa
@@ -28,19 +28,19 @@ Date:
     >>> import datetime
 
     >>> JalaliDate.today()
-    JalaliDate(1395, 04, 18, Jomeh)
+    JalaliDate(1395, 4, 18, Jomeh)
 
     >>> JalaliDate.today().to_gregorian()
     datetime.date(2016, 7, 8)
 
     >>> JalaliDate(1369, 7, 1)
-    JalaliDate(1369, 07, 01, Yekshanbeh)
+    JalaliDate(1369, 7, 1, Yekshanbeh)
 
     >>> JalaliDate(datetime.date(1990, 9, 23))
-    JalaliDate(1369, 07, 01, Yekshanbeh)
+    JalaliDate(1369, 7, 1, Yekshanbeh)
 
     >>> JalaliDate.to_jalali(2013, 9, 16)
-    JalaliDate(1392, 06, 25, Doshanbeh)
+    JalaliDate(1392, 6, 25, Doshanbeh)
 
 Datetime:
 ^^^^^^^^^
@@ -103,7 +103,7 @@ Operators
     False
 
     >>> JalaliDate(1395, 2, 14) + datetime.timedelta(days=38)
-    JalaliDate(1395, 03, 21, Jomeh)
+    JalaliDate(1395, 3, 21, Jomeh)
 
     >>> JalaliDateTime(1395, 12, 30) - JalaliDateTime(1395, 1, 1)
     datetime.timedelta(365)
@@ -126,7 +126,7 @@ Serializing and de-serializing
     >>> jalali = pickle.load(file)
     >>> file.close()
     >>> jalali
-    JalaliDate(1369, 07, 01, Yekshanbeh)
+    JalaliDate(1369, 7, 1, Yekshanbeh)
 
 .. |pypi-ver| image:: https://img.shields.io/pypi/v/persiantools.svg
    :target: https://pypi.python.org/pypi/persiantools
