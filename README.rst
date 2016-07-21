@@ -17,7 +17,7 @@ Install Package
 
 .. code:: bash
 
-    $ pip install persiantools==1.0b2
+    $ pip install persiantools
 
 How to use
 ----------
