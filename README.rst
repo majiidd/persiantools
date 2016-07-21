@@ -10,6 +10,8 @@ PersianTools
     - Support timezone
 - Convert Arabic and Persian characters/digits to each other
 
+------
+
 Install Package
 ---------------
 
