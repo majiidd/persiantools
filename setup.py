@@ -1,7 +1,6 @@
 from setuptools import setup
 
-
-version = '1.0b2'
+version = '1.1.0'
 
 
 def readme():
@@ -29,7 +28,8 @@ setup(name='persiantools',
           'Topic :: Software Development :: Localization',
           'Topic :: Utilities',
       ],
-      keywords='jalali shamsi persian digits characters converter jalalidate jalalidatetime date datetime',
+      keywords='jalali shamsi persian digits characters converter jalalidate '
+               'jalalidatetime date datetime',
       url='https://github.com/mhajiloo/persiantools',
       author='Majid Hajiloo',
       author_email='majid.hajiloo@gmail.com',

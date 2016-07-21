@@ -1,20 +1,23 @@
 PersianTools
 ============
-
 | |pypi-ver| |PyPI-license| |travic-build| |Coverage Status| |python-ver|
 
--  Jalali (Shamsi) date and datetime (based on python datetime's module)
-    -  Convert Jalali to Gregorian date/datetime and vice versa
-    -  Support comparison and arithmetic operators such as +, -, ==, >=
-    -  Support timezone
--  Convert Arabic and Persian characters/digits to each other
+------
+
+- Jalali (Shamsi) date and datetime (based on python datetime's module)
+    - Convert Jalali to Gregorian date/datetime and vice versa
+    - Support comparison and arithmetic operators such as +, -, ==, >=
+    - Support timezone
+- Convert Arabic and Persian characters/digits to each other
+
+------
 
 Install Package
 ---------------
 
 .. code:: bash
 
-    $ pip install persiantools==1.0b2
+    $ pip install persiantools
 
 How to use
 ----------
@@ -28,19 +31,19 @@ Date:
     >>> import datetime
 
     >>> JalaliDate.today()
-    JalaliDate(1395, 04, 18, Jomeh)
+    JalaliDate(1395, 4, 18, Jomeh)
 
     >>> JalaliDate.today().to_gregorian()
     datetime.date(2016, 7, 8)
 
     >>> JalaliDate(1369, 7, 1)
-    JalaliDate(1369, 07, 01, Yekshanbeh)
+    JalaliDate(1369, 7, 1, Yekshanbeh)
 
     >>> JalaliDate(datetime.date(1990, 9, 23))
-    JalaliDate(1369, 07, 01, Yekshanbeh)
+    JalaliDate(1369, 7, 1, Yekshanbeh)
 
     >>> JalaliDate.to_jalali(2013, 9, 16)
-    JalaliDate(1392, 06, 25, Doshanbeh)
+    JalaliDate(1392, 6, 25, Doshanbeh)
 
 Datetime:
 ^^^^^^^^^
@@ -62,13 +65,33 @@ Datetime:
     >>> JalaliDateTime.now(pytz.utc)
     JalaliDateTime(1395, 4, 17, 21, 23, 53, 474618, tzinfo=<UTC>)
 
+Format
+^^^^^^
+Based on python ``strftime()`` behavior
+
+.. code:: python
+
+    >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
+    >>> import pytz
+
+    >>> JalaliDate(1367, 2, 14).isoformat()
+    '1367-02-14'
+
+    >>> JalaliDate(1395, 3, 1).strftime("%Y/%m/%d")
+    '1395/03/01'
+
+    >>> JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%c")
+    'Yekshanbeh 01 Mehr 1369 14:00:10'
+
+    >>> JalaliDateTime.now(pytz.utc).strftime("%I:%M:%S.%f %p %z %Z")
+    '01:49:22.518523 PM +0000 UTC'
+
 Digit/Character converter:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
-    >>> from persiantools import characters
-    >>> from persiantools import digits
+    >>> from persiantools import characters, digits
 
     >>> digits.en_to_fa("0987654321")
     '۰۹۸۷۶۵۴۳۲۱'
@@ -103,7 +126,7 @@ Operators
     False
 
     >>> JalaliDate(1395, 2, 14) + datetime.timedelta(days=38)
-    JalaliDate(1395, 03, 21, Jomeh)
+    JalaliDate(1395, 3, 21, Jomeh)
 
     >>> JalaliDateTime(1395, 12, 30) - JalaliDateTime(1395, 1, 1)
     datetime.timedelta(365)
@@ -126,7 +149,7 @@ Serializing and de-serializing
     >>> jalali = pickle.load(file)
     >>> file.close()
     >>> jalali
-    JalaliDate(1369, 07, 01, Yekshanbeh)
+    JalaliDate(1369, 7, 1, Yekshanbeh)
 
 .. |pypi-ver| image:: https://img.shields.io/pypi/v/persiantools.svg
    :target: https://pypi.python.org/pypi/persiantools

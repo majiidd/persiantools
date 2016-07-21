@@ -115,3 +115,10 @@ class TestJalaliDate(TestCase):
         self.assertEqual(j, now)
 
         os.remove("save.p")
+
+    def test_format(self):
+        self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%X %p %z %Z"), "14:00:10 PM +0000 UTC")
+        self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%c"), "Yekshanbeh 01 Mehr 1369 14:00:10")
+        self.assertEqual(JalaliDateTime(1369, 7, 1, 11, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"), "11:00:10.000553 AM")
+        self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"), "02:00:10.000553 PM")
+
