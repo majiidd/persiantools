@@ -108,6 +108,27 @@ Operators
     >>> JalaliDateTime(1395, 12, 30) - JalaliDateTime(1395, 1, 1)
     datetime.timedelta(365)
 
+Format
+^^^^^^
+Based on python ``strftime()`` behavior
+
+.. code:: python
+
+    >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
+    >>> import pytz
+
+    >>> JalaliDate(1367, 2, 14).isoformat()
+    '1367-02-14'
+
+    >>> JalaliDate(1395, 3, 1).strftime("%Y/%m/%d")
+    '1395/03/01'
+
+    >>> JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%c")
+    'Yekshanbeh 01 Mehr 1369 14:00:10'
+
+    >>> JalaliDateTime.now(pytz.utc).strftime("%I:%M:%S.%f %p %z %Z")
+    '01:49:22.518523 PM +0000 UTC'
+
 Serializing and de-serializing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
