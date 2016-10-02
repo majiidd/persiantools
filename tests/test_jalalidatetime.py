@@ -57,7 +57,6 @@ class TestJalaliDate(TestCase):
                          JalaliDateTime(1395, 2, 3, 4, 59, 4, 4444))
 
         self.assertEqual(JalaliDateTime.now(pytz.utc).tzname(), "UTC")
-        self.assertEqual(JalaliDateTime.now(pytz.timezone("Asia/Tehran")).replace(month=2).dst(), timedelta(hours=1))
         self.assertIsNone(JalaliDateTime.today().tzname())
         self.assertIsNone(JalaliDateTime.today().dst())
 
@@ -85,7 +84,6 @@ class TestJalaliDate(TestCase):
         self.assertTrue(JalaliDateTime(1395, 4, 15, 20, 13, 59, 0) == JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
         self.assertTrue(
             JalaliDateTime(1395, 4, 15, 20, 13, 59, 0, pytz.utc) != JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
-        self.assertTrue(JalaliDateTime.now() != JalaliDateTime.now())
 
         self.assertEqual(
             JalaliDateTime(1395, 4, 16, 20, 14, 30, 0, pytz.utc) - JalaliDateTime(1395, 4, 16, 20, 14, 30, 0,
