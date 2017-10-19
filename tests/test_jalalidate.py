@@ -17,6 +17,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1395, 12, 30).to_gregorian(), date(2017, 3, 20))
         self.assertEqual(JalaliDate(1396, 1, 1).to_gregorian(), date(2017, 3, 21))
         self.assertEqual(JalaliDate(1400, 6, 31).to_gregorian(), date(2021, 9, 22))
+        self.assertEqual(JalaliDate(1396, 7, 27).to_gregorian(), date(2017, 10, 19))
 
         self.assertEqual(JalaliDate.today().to_gregorian(), date.today())
 
@@ -25,6 +26,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(date(2122, 1, 31)), JalaliDate(1500, 11, 11))
         self.assertEqual(JalaliDate(date(2017, 3, 20)), JalaliDate(1395, 12, 30))
         self.assertEqual(JalaliDate(date(2000, 1, 1)), JalaliDate(1378, 10, 11))
+        self.assertEqual(JalaliDate(date(2017, 10, 19)), JalaliDate(1396, 7, 27))
 
         self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
 
@@ -43,6 +45,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.chack_date("1300", "1", "1"), False)
         self.assertEqual(JalaliDate.chack_date(1396, 12, 30), False)
         self.assertEqual(JalaliDate.chack_date(1397, 7, 1), True)
+        self.assertEqual(JalaliDate.chack_date(1396, 7, 27), True)
 
     def test_additions(self):
         self.assertEqual(JalaliDate(JalaliDate(1395, 3, 21)), JalaliDate(1395, 3, 21))
@@ -52,10 +55,12 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(JalaliDate(1395, 1, 1).replace(1367), JalaliDate(1367, 1, 1))
         self.assertEqual(JalaliDate(1395, 1, 1).replace(month=2), JalaliDate(1395, 2, 1))
+        self.assertEqual(JalaliDate(1367, 1, 1).replace(year=1396, month=7), JalaliDate(1396, 7, 1))
         self.assertEqual(JalaliDate(1395, 1, 1, "en").replace(1367, 2, 14, "fa"), JalaliDate(1367, 2, 14, "en"))
 
         self.assertEqual(JalaliDate.fromtimestamp(time()), JalaliDate.today())
         self.assertEqual(JalaliDate.fromtimestamp(578707200), JalaliDate(1367, 2, 14))
+        self.assertEqual(JalaliDate.fromtimestamp(1508371200), JalaliDate(1396, 7, 27))
 
         try:
             JalaliDate(1400, 1, 1, "us")
@@ -131,12 +136,15 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1395, 1, 1).weekday(), 1)
         self.assertEqual(JalaliDate(1395, 3, 21).weekday(), 6)
         self.assertEqual(JalaliDate(1396, 1, 1).weekday(), 3)
+        self.assertEqual(JalaliDate(1396, 7, 27).weekday(), 5)
         self.assertEqual(JalaliDate(1397, 1, 1).weekday(), 4)
         self.assertEqual(JalaliDate(1400, 1, 1).weekday(), 1)
         self.assertEqual(JalaliDate(1400, 1, 1).isoweekday(), 2)
+        self.assertEqual(JalaliDate(1396, 7, 27).isoweekday(), 6)
 
     def test_operators(self):
         self.assertEqual(JalaliDate(1367, 2, 14) == JalaliDate(date(1988, 5, 4)), True)
+        self.assertEqual(JalaliDate(1396, 7, 27) == JalaliDate(date(2017, 10, 19)), True)
         self.assertEqual(JalaliDate(1367, 2, 14) != JalaliDate(date(1988, 5, 4)), False)
         self.assertEqual(JalaliDate(1367, 2, 14) < JalaliDate(1369, 1, 1), True)
         self.assertEqual(JalaliDate(1395, 12, 30) > JalaliDate(1395, 12, 29), True)
@@ -145,6 +153,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1367, 2, 14) >= JalaliDate(1369, 1, 1), False)
 
         self.assertEqual(JalaliDate(1395, 3, 21) + timedelta(days=2), JalaliDate(1395, 3, 23))
+        self.assertEqual(JalaliDate(1396, 7, 27) + timedelta(days=4), JalaliDate(1396, 8, 1))
         self.assertEqual(JalaliDate(1395, 3, 21) + timedelta(days=-38), JalaliDate(1395, 2, 14))
         self.assertEqual(JalaliDate(1395, 3, 21) - timedelta(days=38), JalaliDate(1395, 2, 14))
         self.assertEqual(JalaliDate(1395, 3, 21) - JalaliDate(1395, 2, 14), timedelta(days=38))
@@ -153,21 +162,21 @@ class TestJalaliDate(TestCase):
 
     def test_pickle(self):
         file = open("save.p", "wb")
-        pickle.dump(JalaliDate(1369, 7, 1), file, protocol=2)
+        pickle.dump(JalaliDate(1367, 2, 14), file, protocol=2)
         file.close()
 
         file2 = open("save.p", "rb")
         j = pickle.load(file2)
         file2.close()
 
-        self.assertEqual(j, JalaliDate(1369, 7, 1))
+        self.assertEqual(j, JalaliDate(1367, 2, 14))
 
         os.remove("save.p")
 
     def test_hash(self):
         j1 = JalaliDate.today()
-        j2 = JalaliDate(1369, 7, 1)
-        j3 = JalaliDate(date(1990, 9, 23))
+        j2 = JalaliDate(1367, 2, 14)
+        j3 = JalaliDate(date(1988, 5, 4))
 
-        self.assertEqual({j1: "today", j2: "mini1", j3: "mini2"},
-                         {JalaliDate.today(): "today", JalaliDate(1369, 7, 1): "mini2"})
+        self.assertEqual({j1: "today", j2: "majid1", j3: "majid2"},
+                         {JalaliDate.today(): "today", JalaliDate(1367, 2, 14): "majid2"})
