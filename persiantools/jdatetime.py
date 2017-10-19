@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 
 from persiantools import digits, utils
@@ -222,8 +223,7 @@ class JalaliDate(object):
 
         gd = days + 1
 
-        g_d_m = [0, 31, 29 if (gy % 4 == 0 and gy % 100 != 0)
-                              or gy % 400 == 0 else 28, 31, 30, 31, 30, 31, 31,
+        g_d_m = [0, 31, 29 if (gy % 4 == 0 and gy % 100 != 0) or gy % 400 == 0 else 28, 31, 30, 31, 30, 31, 31,
                  30, 31, 30, 31]
         gm = 0
 
@@ -403,7 +403,7 @@ class JalaliDate(object):
         assert isinstance(other, JalaliDate)
 
         y, m, d = self._year, self._month, self._day
-        y2, m2, d2 = other._year, other._month, other._day
+        y2, m2, d2 = other.year, other.month, other.day
 
         return 0 if (y, m, d) == (y2, m2, d2) else 1 if (y, m, d) > (
             y2, m2, d2) else -1
@@ -672,7 +672,11 @@ class JalaliDateTime(JalaliDate):
                    time_v.tzinfo)
 
     def timestamp(self):
-        return self.to_gregorian().timestamp()
+        if sys.version_info >= (3, 3):
+            return self.to_gregorian().timestamp()
+        else:
+            gregorian_dt = self.to_gregorian()
+            return (gregorian_dt - dt(1970, 1, 1, tzinfo=gregorian_dt.tzinfo)).total_seconds()
 
     def utctimetuple(self):
         raise NotImplemented
@@ -711,9 +715,9 @@ class JalaliDateTime(JalaliDate):
                 off = -off
             else:
                 sign = "+"
-            hh, mm = divmod(off, timedelta(hours=1))
-            assert not mm % timedelta(minutes=1), "whole minute"
-            mm //= timedelta(minutes=1)
+            hh, mm = divmod(off.total_seconds(), timedelta(hours=1).total_seconds())
+            assert not mm % timedelta(minutes=1).total_seconds(), "whole minute"
+            mm //= timedelta(minutes=1).total_seconds()
             s += "%s%02d:%02d" % (sign, hh, mm)
         return s
 
@@ -871,7 +875,7 @@ class JalaliDateTime(JalaliDate):
         assert isinstance(other, JalaliDateTime)
 
         mytz = self._tzinfo
-        ottz = other._tzinfo
+        ottz = other.tzinfo
         myoff = otoff = None
 
         if mytz is ottz:
