@@ -2,7 +2,7 @@
 import os
 import pickle
 import time
-from datetime import datetime, date, timedelta, time as _time
+from datetime import datetime, date, timedelta, time as _time, tzinfo
 from unittest import TestCase
 
 import pytz
@@ -61,6 +61,7 @@ class TestJalaliDate(TestCase):
         self.assertIsNone(JalaliDateTime.today().dst())
 
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).ctime(), "Chaharshanbeh 14 Ordibehesht 1367 04:30:00")
+        self.assertEqual(JalaliDateTime(1396, 7, 27, 21, 48, 0, 0).ctime(), "Panjshanbeh 27 Mehr 1396 21:48:00")
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).replace(locale="fa").ctime(),
                          "چهارشنبه ۱۴ اردیبهشت ۱۳۶۷ ۰۴:۳۰:۰۰")
 
