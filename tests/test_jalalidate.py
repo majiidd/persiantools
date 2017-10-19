@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+import pickle
 from datetime import date, timedelta
 from time import time
 from unittest import TestCase
 
-import six
-
 from persiantools.jdatetime import JalaliDate
-
-if six.PY3:
-    import pickle
-else:
-    import cPickle as pickle
 
 
 class TestJalaliDate(TestCase):

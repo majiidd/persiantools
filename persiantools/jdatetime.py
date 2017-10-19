@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 
 from persiantools import digits, utils
@@ -47,7 +48,7 @@ class JalaliDate(object):
     __slots__ = '_year', '_month', '_day', '_locale', '_hashcode'
 
     def __init__(self, year, month=None, day=None, locale="en"):
-        if isinstance(year, JalaliDate):
+        if isinstance(year, JalaliDate) and month is None:
             month = year.month
             day = year.day
             locale = year.locale
@@ -60,6 +61,17 @@ class JalaliDate(object):
         elif isinstance(year, bytes) and len(year) == 4 \
                 and 1 <= year[2] <= 12 and month is None:
             self.__setstate__(year)
+            year = self._year
+            month = self._month
+            day = self._day
+
+        elif isinstance(year, str) and \
+                re.match("^\[(\d{1,2}, ){3}\d{1,2}\]$", year):
+            import ast
+
+            yhi, ylo, self._month, self._day = ast.literal_eval(year)
+            self._year = yhi * 256 + ylo
+
             year = self._year
             month = self._month
             day = self._day
