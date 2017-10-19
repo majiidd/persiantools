@@ -153,11 +153,11 @@ class TestJalaliDate(TestCase):
 
     def test_pickle(self):
         file = open("save.p", "wb")
-        pickle.dump(JalaliDate(1369, 7, 1), file)
+        pickle.dump(JalaliDate(1369, 7, 1), file, protocol=2)
         file.close()
 
         file2 = open("save.p", "rb")
-        j = pickle.load(file2, encoding="utf8")
+        j = pickle.load(file2)
         file2.close()
 
         self.assertEqual(j, JalaliDate(1369, 7, 1))
