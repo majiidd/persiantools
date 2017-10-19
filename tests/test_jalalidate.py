@@ -157,7 +157,7 @@ class TestJalaliDate(TestCase):
         file.close()
 
         file2 = open("save.p", "rb")
-        j = pickle.load(file2)
+        j = pickle.load(file2, encoding="utf8")
         file2.close()
 
         self.assertEqual(j, JalaliDate(1369, 7, 1))
