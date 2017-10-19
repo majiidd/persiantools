@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
 from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 
 from persiantools import digits, utils
@@ -58,19 +57,14 @@ class JalaliDate(object):
             jdate = self.to_jalali(year)
             year, month, day = jdate.year, jdate.month, jdate.day
 
-        elif isinstance(year, bytes) and len(year) == 4 \
-                and 1 <= year[2] <= 12 and month is None:
-            self.__setstate__(year)
-            year = self._year
-            month = self._month
-            day = self._day
-
-        elif isinstance(year, str) and \
-                re.match("^\[(\d{1,2}, ){3}\d{1,2}\]$", year):
-            import ast
-
-            yhi, ylo, self._month, self._day = ast.literal_eval(year)
-            self._year = yhi * 256 + ylo
+        elif (isinstance(year, bytes) and len(year) == 4
+              and 1 <= year[2] <= 12) or (isinstance(year, str)
+                                          and year.startswith("[", 0, 1)):
+            if isinstance(year, bytes):
+                self.__setstate__(year)
+            else:
+                import ast
+                self.__setstate__(ast.literal_eval(year))
 
             year = self._year
             month = self._month
@@ -519,9 +513,14 @@ class JalaliDateTime(JalaliDate):
 
             year = j.year
 
-        elif isinstance(year, bytes) and len(year) == 10:
-            # Pickle support, Python > 3.3
-            self.__setstate__(year, month)
+        elif (isinstance(year, bytes) and len(year) == 10) \
+                or (isinstance(year, str) and year.startswith("[", 0, 1)):
+            if isinstance(year, bytes):
+                self.__setstate__(year, month)
+            else:
+                import ast
+                self.__setstate__(ast.literal_eval(year), month)
+
             year = self._year
             month = self._month
             day = self._day
