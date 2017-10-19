@@ -60,11 +60,12 @@ class JalaliDate(object):
         elif (isinstance(year, bytes) and len(year) == 4
               and 1 <= year[2] <= 12) or (isinstance(year, str)
                                           and year.startswith("[", 0, 1)):
-            if isinstance(year, bytes):
-                self.__setstate__(year)
-            else:
+            import sys
+            if sys.version_info < (3,):
                 import ast
                 self.__setstate__(ast.literal_eval(year))
+            else:
+                self.__setstate__(year)
 
             year = self._year
             month = self._month
@@ -515,11 +516,12 @@ class JalaliDateTime(JalaliDate):
 
         elif (isinstance(year, bytes) and len(year) == 10) \
                 or (isinstance(year, str) and year.startswith("[", 0, 1)):
-            if isinstance(year, bytes):
-                self.__setstate__(year, month)
-            else:
+            import sys
+            if sys.version_info < (3,):
                 import ast
                 self.__setstate__(ast.literal_eval(year), month)
+            else:
+                self.__setstate__(year, month)
 
             year = self._year
             month = self._month
