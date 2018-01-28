@@ -1,10 +1,11 @@
+from io import open
 from setuptools import setup
 
-version = '1.2.0'
+version = '1.2.1'
 
 
 def readme():
-    with open('README.rst', encoding='utf8') as f:
+    with open('README.rst', encoding='utf-8') as f:
         return f.read()
 
 
