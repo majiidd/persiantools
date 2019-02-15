@@ -12,7 +12,7 @@ MONTH_NAMES_EN = [None, 'Farvardin', 'Ordibehesht', 'Khordad', 'Tir', 'Mordad',
                   'Shahrivar', 'Mehr', 'Aban', 'Azar', 'Dey', 'Bahman',
                   'Esfand']
 MONTH_NAMES_FA = [None, 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد',
-                  'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'یهمن', 'اسفند']
+                  'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
 
 MONTH_NAMES_ABBR_EN = [None, 'Far', 'Ord', 'Kho', 'Tir', 'Mor', 'Sha', 'Meh',
                        'Aba', 'Aza', 'Dey', 'Bah', 'Esf']
