@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pytest
 from unittest import TestCase
 
 from persiantools import utils
@@ -12,16 +13,8 @@ class TestUtils(TestCase):
     def test_int(self):
         self.assertEqual(utils.check_int_field(100010001), 100010001)
 
-        try:
+        with pytest.raises(TypeError):
             utils.check_int_field(1111.9999)
-        except TypeError:
-            assert True
-        else:
-            assert False
 
-        try:
+        with pytest.raises(TypeError):
             utils.check_int_field("1000")
-        except TypeError:
-            assert True
-        else:
-            assert False
