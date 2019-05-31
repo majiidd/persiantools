@@ -131,6 +131,15 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1367, 2, 14), JalaliDate.fromisoformat("1367-02-14"))
         self.assertEqual(JalaliDate(1397, 12, 9), JalaliDate.fromisoformat("۱۳۹۷-۱۲-۰۹"))
 
+        with pytest.raises(TypeError):
+            JalaliDate.fromisoformat(13670214)
+
+        with pytest.raises(ValueError, match="Invalid date separator: /"):
+            JalaliDate.fromisoformat("1367/02/14")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1367-02/14")
+
     def test_week(self):
         self.assertEqual(JalaliDate(1394, 3, 30).week_of_year(), 14)
         self.assertEqual(JalaliDate(1394, 7, 30).week_of_year(), 31)

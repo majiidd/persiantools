@@ -30,11 +30,21 @@ class TestJalaliDate(TestCase):
                          JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc))
         self.assertEqual(JalaliDateTime.utcfromtimestamp(578723400), JalaliDateTime(1367, 2, 14, 4, 30, 0, 0))
 
-        with pytest.raises(ValueError):
-            JalaliDateTime._check_time_fields(20, 1, 61, 1000)
-
         with pytest.raises(TypeError):
             JalaliDateTime._check_time_fields("20", 1, 61, 1000)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime(1367, 2, 14, 25, 0, 0, 0)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime(1367, 2, 14, 22, 61, 0, 0)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime(1367, 2, 14, 22, 1, 722, 0)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime(1367, 2, 14, 22, 1, 0, 1000000)
+        
 
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time()) <= JalaliDateTime.now())
