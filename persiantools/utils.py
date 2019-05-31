@@ -9,7 +9,7 @@ except NameError:
 
 def replace(string, dictionary):
     if not isinstance(string, basestring):
-        raise ValueError("accept string type")
+        raise TypeError("accept string type")
 
     pattern = re.compile('|'.join(dictionary.keys()))
     return pattern.sub(lambda x: dictionary[x.group()], string)

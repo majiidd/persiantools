@@ -29,5 +29,5 @@ class TestDigits(TestCase):
         self.assertEqual(digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱"), "٠٩٨٧٦٥٤٣٢١")
 
     def test_int_arg(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             digits.en_to_fa(12345)

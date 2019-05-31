@@ -30,9 +30,9 @@ class TestDigits(TestCase):
         self.assertEqual(characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست"), "اي چرخ فلك خرابي از كينه تست")
 
     def test_int_arg_ar_to_fa(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             characters.ar_to_fa(12345)
 
     def test_int_arg_fa_to_ar(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             characters.ar_to_fa(12345)
