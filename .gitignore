@@ -59,4 +59,4 @@ docs/_build/
 target/
 .idea/
 cover/
-.vscode/settings.json
+.vscode/
