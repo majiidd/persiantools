@@ -102,7 +102,8 @@ Based on python `strftime()` behavior
 >>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")  
 '0987654321'  
   
->>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱") '٠٩٨٧٦٥٤٣٢١'  
+>>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")  
+'٠٩٨٧٦٥٤٣٢١'  
   
 >>> characters.ar_to_fa("راك")  
 'راک'  

@@ -258,6 +258,34 @@ class JalaliDate(object):
     def fromordinal(cls, n):
         return cls(date.fromordinal(n + 226894))
 
+    @classmethod
+    def fromisoformat(cls, date_string):
+        """Construct a date from the output of JalaliDate.isoformat()."""
+        if not isinstance(date_string, str):
+            raise TypeError('fromisoformat: argument must be str')
+
+        try:
+            assert len(date_string) == 10
+            return cls(*cls._parse_isoformat_date(digits.fa_to_en(date_string)))
+        except Exception:
+            raise ValueError('Invalid isoformat string: %s' % date_string)
+
+    def _parse_isoformat_date(dtstr):
+        # It is assumed that this function will only be called with a
+        # string of length exactly 10, and (though this is not used) ASCII-only
+        year = int(dtstr[0:4])
+        if dtstr[4] != '-':
+            raise ValueError('Invalid date separator: %s' % dtstr[4])
+
+        month = int(dtstr[5:7])
+
+        if dtstr[7] != '-':
+            raise ValueError('Invalid date separator')
+
+        day = int(dtstr[8:10])
+
+        return [year, month, day]
+
     def __hash__(self):
         if self._hashcode == -1:
             self._hashcode = hash(self.__getstate__())
@@ -308,6 +336,8 @@ class JalaliDate(object):
         return (self.toordinal() + 4) % 7
 
     def __format__(self, fmt):
+        if not isinstance(fmt, str):
+            raise TypeError("must be str, not %s" % type(fmt).__name__)
         if len(fmt) != 0:
             return self.strftime(fmt)
 

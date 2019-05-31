@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
 import pickle
-import pytest
 from datetime import date, timedelta
 from time import time
 from unittest import TestCase
+
+import pytest
 
 from persiantools.jdatetime import JalaliDate
 
@@ -127,6 +128,9 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(j.strftime("%c"), "دوشنبه ۲۹ بهمن ۱۳۹۷")
         self.assertEqual(format(j), "۱۳۹۷-۱۱-۲۹")
+
+        self.assertEqual(JalaliDate(1367, 2, 14), JalaliDate.fromisoformat("1367-02-14"))
+        self.assertEqual(JalaliDate(1397, 12, 9), JalaliDate.fromisoformat("۱۳۹۷-۱۲-۰۹"))
 
     def test_week(self):
         self.assertEqual(JalaliDate(1394, 3, 30).week_of_year(), 14)
