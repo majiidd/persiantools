@@ -264,11 +264,7 @@ class JalaliDate(object):
         if not isinstance(date_string, str):
             raise TypeError('fromisoformat: argument must be str')
 
-        try:
-            assert len(date_string) == 10
-            return cls(*cls._parse_isoformat_date(digits.fa_to_en(date_string)))
-        except Exception:
-            raise ValueError('Invalid isoformat string: %s' % date_string)
+        return cls(*cls._parse_isoformat_date(digits.fa_to_en(date_string)))
 
     @classmethod
     def _parse_isoformat_date(cls, dtstr):
