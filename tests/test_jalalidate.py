@@ -4,7 +4,6 @@ import pickle
 from datetime import date, timedelta
 from time import time
 from unittest import TestCase
-
 import pytest
 
 from persiantools.jdatetime import JalaliDate
