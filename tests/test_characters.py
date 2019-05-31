@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import pytest
 from unittest import TestCase
+import pytest
 
 from persiantools import characters
 from persiantools import digits
