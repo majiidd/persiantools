@@ -270,7 +270,8 @@ class JalaliDate(object):
         except Exception:
             raise ValueError('Invalid isoformat string: %s' % date_string)
 
-    def _parse_isoformat_date(dtstr):
+    @classmethod
+    def _parse_isoformat_date(cls, dtstr):
         # It is assumed that this function will only be called with a
         # string of length exactly 10, and (though this is not used) ASCII-only
         year = int(dtstr[0:4])
