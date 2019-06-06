@@ -4,7 +4,7 @@
 from io import open
 from setuptools import setup
 
-version = '1.2.2'
+version = '1.3.0'
 
 
 def readme():
