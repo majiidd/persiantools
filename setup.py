@@ -16,7 +16,7 @@ setup(name='persiantools',
       version=version,
       description='Jalali date and datetime with other tools',
       long_description=readme(),
-      long_description_content_type="text/markdown",
+      long_description_content_type='text/markdown',
       classifiers=[
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',
