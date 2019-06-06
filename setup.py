@@ -38,7 +38,7 @@ setup(name='persiantools',
           'Topic :: Utilities',
       ],
       keywords='jalali shamsi persian digits characters converter jalalidate '
-               'jalalidatetime date datetime jdatetime',
+               'jalalidatetime date datetime jdate jdatetime',
       url='https://github.com/mhajiloo/persiantools',
       author='Majid Hajiloo',
       author_email='majid.hajiloo@gmail.com',
