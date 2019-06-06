@@ -1,26 +1,23 @@
+dist: xenial
 language: python
 python:
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
-  - "3.5-dev"
   - "3.6"
-  - "3.6-dev"
+  - "3.7"
   - "3.7-dev"
+  - "3.8-dev"
   - "pypy"
   - "pypy3"
+  - "pypy3.5"
 
 install:
   - pip install coveralls
   - pip install -r requirements.txt
 
 script:
-  nosetests --with-coverage --cover-package=persiantools
+  py.test --cov=persiantools tests/
 
 after_success:
   coveralls
-
-addons:
-  code_climate:
-    repo_token: 64224dc4a53d3701203a0075f9571a3c0b66f4dbea20750891b6f7e779e69e00

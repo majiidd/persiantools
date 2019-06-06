@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
+import pytest
 from unittest import TestCase
-
-from nose import tools
 
 from persiantools import digits
 
@@ -29,6 +28,6 @@ class TestDigits(TestCase):
     def test_fa_to_ar(self):
         self.assertEqual(digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱"), "٠٩٨٧٦٥٤٣٢١")
 
-    @tools.raises(ValueError)
     def test_int_arg(self):
-        digits.en_to_fa(12345)
+        with pytest.raises(TypeError):
+            digits.en_to_fa(12345)

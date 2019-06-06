@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
-
-from nose import tools
+import pytest
 
 from persiantools import characters
 from persiantools import digits
@@ -30,10 +29,10 @@ class TestDigits(TestCase):
     def test_fa_to_ar(self):
         self.assertEqual(characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست"), "اي چرخ فلك خرابي از كينه تست")
 
-    @tools.raises(ValueError)
     def test_int_arg_ar_to_fa(self):
-        characters.ar_to_fa(12345)
+        with pytest.raises(TypeError):
+            characters.ar_to_fa(12345)
 
-    @tools.raises(ValueError)
     def test_int_arg_fa_to_ar(self):
-        characters.ar_to_fa(12345)
+        with pytest.raises(TypeError):
+            characters.ar_to_fa(12345)

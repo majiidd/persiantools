@@ -61,7 +61,6 @@ class JalaliDate(object):
         elif (isinstance(year, bytes) and len(year) == 4
               and 1 <= year[2] <= 12) or (isinstance(year, str)
                                           and year.startswith("[", 0, 1)):
-            import sys
             if sys.version_info < (3,):
                 import ast
                 self.__setstate__(ast.literal_eval(year))
@@ -239,7 +238,7 @@ class JalaliDate(object):
         return cls(date.today())
 
     def timetuple(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def isoformat(self):
         iso = "%04d-%02d-%02d" % (self._year, self._month, self._day)
@@ -257,6 +256,31 @@ class JalaliDate(object):
     @classmethod
     def fromordinal(cls, n):
         return cls(date.fromordinal(n + 226894))
+
+    @classmethod
+    def fromisoformat(cls, date_string):
+        """Construct a date from the output of JalaliDate.isoformat()."""
+        if not isinstance(date_string, str):
+            raise TypeError('fromisoformat: argument must be str')
+
+        return cls(*cls._parse_isoformat_date(digits.fa_to_en(date_string)))
+
+    @classmethod
+    def _parse_isoformat_date(cls, dtstr):
+        # It is assumed that this function will only be called with a
+        # string of length exactly 10, and (though this is not used) ASCII-only
+        year = int(dtstr[0:4])
+        if dtstr[4] != '-':
+            raise ValueError('Invalid date separator: %s' % dtstr[4])
+
+        month = int(dtstr[5:7])
+
+        if dtstr[7] != '-':
+            raise ValueError('Invalid date separator')
+
+        day = int(dtstr[8:10])
+
+        return [year, month, day]
 
     def __hash__(self):
         if self._hashcode == -1:
@@ -308,6 +332,8 @@ class JalaliDate(object):
         return (self.toordinal() + 4) % 7
 
     def __format__(self, fmt):
+        if not isinstance(fmt, str):
+            raise TypeError("must be str, not %s" % type(fmt).__name__)
         if len(fmt) != 0:
             return self.strftime(fmt)
 
@@ -328,7 +354,7 @@ class JalaliDate(object):
         return week_no
 
     def isocalendar(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def ctime(self):
         return self.strftime("%c")
@@ -412,37 +438,37 @@ class JalaliDate(object):
         if isinstance(other, JalaliDate):
             return self._compare(other) == 0
 
-        return NotImplemented
+        return NotImplementedError
 
     def __ne__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) != 0
 
-        return NotImplemented
+        return NotImplementedError
 
     def __le__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) <= 0
 
-        return NotImplemented
+        return NotImplementedError
 
     def __lt__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) < 0
 
-        return NotImplemented
+        return NotImplementedError
 
     def __ge__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) >= 0
 
-        return NotImplemented
+        return NotImplementedError
 
     def __gt__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) > 0
 
-        return NotImplemented
+        return NotImplementedError
 
     def __add__(self, other):
         if isinstance(other, timedelta):
@@ -453,7 +479,7 @@ class JalaliDate(object):
 
             raise OverflowError("result out of range")
 
-        return NotImplemented
+        return NotImplementedError
 
     __radd__ = __add__
 
@@ -473,11 +499,11 @@ class JalaliDate(object):
 
             return timedelta(days1 - days2)
 
-        return NotImplemented
+        return NotImplementedError
 
     @classmethod
     def strptime(cls, data_string, fmt):
-        raise NotImplemented
+        raise NotImplementedError
 
 
 _tzinfo_class = tzinfo
@@ -516,7 +542,6 @@ class JalaliDateTime(JalaliDate):
 
         elif (isinstance(year, bytes) and len(year) == 10) \
                 or (isinstance(year, str) and year.startswith("[", 0, 1)):
-            import sys
             if sys.version_info < (3,):
                 import ast
                 self.__setstate__(ast.literal_eval(year), month)
@@ -679,7 +704,7 @@ class JalaliDateTime(JalaliDate):
             return (gregorian_dt - dt(1970, 1, 1, tzinfo=gregorian_dt.tzinfo)).total_seconds()
 
     def utctimetuple(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def astimezone(self, tz=None):
         return JalaliDateTime(self.to_gregorian().astimezone(tz))
@@ -771,7 +796,7 @@ class JalaliDateTime(JalaliDate):
                              % (name, offset))
 
     def timetuple(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @classmethod
     def to_jalali(cls, year, month=None, day=None, hour=None, minute=None,
@@ -803,7 +828,7 @@ class JalaliDateTime(JalaliDate):
 
     @classmethod
     def strptime(cls, data_string, fmt):
-        raise NotImplemented
+        raise NotImplementedError
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
@@ -891,8 +916,7 @@ class JalaliDateTime(JalaliDate):
         if myoff is None or otoff is None:
             if allow_mixed:
                 return 2  # arbitrary non-zero value
-            else:
-                raise TypeError("cannot compare naive and aware datetimes")
+            raise TypeError("cannot compare naive and aware datetimes")
 
         diff = self - other  # this will take offsets into account
         if diff.days < 0:
@@ -904,7 +928,7 @@ class JalaliDateTime(JalaliDate):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other, allow_mixed=True) == 0
         elif not isinstance(other, date):
-            return NotImplemented
+            return NotImplementedError
         else:
             return False
 
@@ -912,7 +936,7 @@ class JalaliDateTime(JalaliDate):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other, allow_mixed=True) != 0
         elif not isinstance(other, JalaliDate):
-            return NotImplemented
+            return NotImplementedError
         else:
             return True
 
@@ -920,7 +944,7 @@ class JalaliDateTime(JalaliDate):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) <= 0
         elif not isinstance(other, JalaliDate):
-            return NotImplemented
+            return NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
@@ -929,7 +953,7 @@ class JalaliDateTime(JalaliDate):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) < 0
         elif not isinstance(other, JalaliDate):
-            return NotImplemented
+            return NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
@@ -938,7 +962,7 @@ class JalaliDateTime(JalaliDate):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) >= 0
         elif not isinstance(other, JalaliDate):
-            return NotImplemented
+            return NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
@@ -947,14 +971,14 @@ class JalaliDateTime(JalaliDate):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) > 0
         elif not isinstance(other, JalaliDate):
-            return NotImplemented
+            return NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
 
     def __add__(self, other):
         if not isinstance(other, timedelta):
-            return NotImplemented
+            return NotImplementedError
 
         delta = timedelta(self.toordinal(),
                           hours=self._hour,
@@ -979,7 +1003,7 @@ class JalaliDateTime(JalaliDate):
         if not isinstance(other, JalaliDateTime):
             if isinstance(other, timedelta):
                 return self + -other
-            return NotImplemented
+            return NotImplementedError
 
         days1 = self.toordinal()
         days2 = other.toordinal()
@@ -1020,8 +1044,8 @@ class JalaliDateTime(JalaliDate):
                            us1, us2, us3])
         if self._tzinfo is None:
             return basestate,
-        else:
-            return basestate, self._tzinfo
+
+        return basestate, self._tzinfo
 
     def __setstate__(self, string, tzinfo):
         (yhi, ylo, self._month, self._day, self._hour, self._minute,

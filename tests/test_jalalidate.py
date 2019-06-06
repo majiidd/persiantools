@@ -4,6 +4,7 @@ import pickle
 from datetime import date, timedelta
 from time import time
 from unittest import TestCase
+import pytest
 
 from persiantools.jdatetime import JalaliDate
 
@@ -65,12 +66,8 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.fromtimestamp(578707200), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDate.fromtimestamp(1508371200), JalaliDate(1396, 7, 27))
 
-        try:
+        with pytest.raises(ValueError):
             JalaliDate(1400, 1, 1, "us")
-        except ValueError:
-            assert True
-        else:
-            assert False
 
     def test_leap(self):
         self.assertEqual(JalaliDate.is_leap(1358), True)
@@ -130,6 +127,18 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(j.strftime("%c"), "دوشنبه ۲۹ بهمن ۱۳۹۷")
         self.assertEqual(format(j), "۱۳۹۷-۱۱-۲۹")
+
+        self.assertEqual(JalaliDate(1367, 2, 14), JalaliDate.fromisoformat("1367-02-14"))
+        self.assertEqual(JalaliDate(1397, 12, 9), JalaliDate.fromisoformat("۱۳۹۷-۱۲-۰۹"))
+
+        with pytest.raises(TypeError):
+            JalaliDate.fromisoformat(13670214)
+
+        with pytest.raises(ValueError, match="Invalid date separator: /"):
+            JalaliDate.fromisoformat("1367/02/14")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1367-02/14")
 
     def test_week(self):
         self.assertEqual(JalaliDate(1394, 3, 30).week_of_year(), 14)
