@@ -439,40 +439,53 @@ class JalaliDate(object):
     def __eq__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) == 0
+        elif isinstance(other, date):
+            return self._compare(JalaliDate(other)) == 0
 
-        return NotImplementedError
+        raise NotImplementedError
 
     def __ne__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) != 0
+        elif isinstance(other, date):
+            return self._compare(JalaliDate(other)) != 0
 
-        return NotImplementedError
+        raise NotImplementedError
 
     def __le__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) <= 0
+        elif isinstance(other, date):
+            return self._compare(JalaliDate(other)) <= 0
 
-        return NotImplementedError
+        raise NotImplementedError
 
     def __lt__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) < 0
+        elif isinstance(other, date):
+            return self._compare(JalaliDate(other)) < 0
 
-        return NotImplementedError
+        raise NotImplementedError
 
     def __ge__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) >= 0
+        elif isinstance(other, date):
+            return self._compare(JalaliDate(other)) >= 0
 
-        return NotImplementedError
+        raise NotImplementedError
 
     def __gt__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) > 0
+        elif isinstance(other, date):
+            return self._compare(JalaliDate(other)) > 0
 
-        return NotImplementedError
+        raise NotImplementedError
 
     def __add__(self, other):
+        "Add a date to a timedelta."
         if isinstance(other, timedelta):
             o = self.toordinal() + other.days
 
@@ -481,11 +494,12 @@ class JalaliDate(object):
 
             raise OverflowError("result out of range")
 
-        return NotImplementedError
+        raise NotImplementedError
 
     __radd__ = __add__
 
     def __sub__(self, other):
+        """Subtract two JalaliDates/dates, or a JalaliDate/date and a timedelta."""
         if isinstance(other, timedelta):
             return self + timedelta(-other.days)
 
@@ -501,7 +515,7 @@ class JalaliDate(object):
 
             return timedelta(days1 - days2)
 
-        return NotImplementedError
+        raise NotImplementedError
 
     @classmethod
     def strptime(cls, data_string, fmt):
@@ -927,24 +941,30 @@ class JalaliDateTime(JalaliDate):
     def __eq__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other, allow_mixed=True) == 0
-        elif not isinstance(other, date):
-            return NotImplementedError
+        elif isinstance(other, dt):
+            return self._cmp(JalaliDateTime(other), allow_mixed=True) == 0
+        elif not isinstance(other, (JalaliDate, date)):
+            raise NotImplementedError
         else:
             return False
 
     def __ne__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other, allow_mixed=True) != 0
-        elif not isinstance(other, JalaliDate):
-            return NotImplementedError
+        elif isinstance(other, dt):
+            return self._cmp(JalaliDateTime(other), allow_mixed=True) != 0
+        elif not isinstance(other, (JalaliDate, date)):
+            raise NotImplementedError
         else:
             return True
 
     def __le__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) <= 0
-        elif not isinstance(other, JalaliDate):
-            return NotImplementedError
+        elif isinstance(other, dt):
+            return self._cmp(JalaliDateTime(other)) <= 0
+        elif not isinstance(other, (JalaliDate, date)):
+            raise NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
@@ -952,8 +972,10 @@ class JalaliDateTime(JalaliDate):
     def __lt__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) < 0
-        elif not isinstance(other, JalaliDate):
-            return NotImplementedError
+        elif isinstance(other, dt):
+            return self._cmp(JalaliDateTime(other)) < 0
+        elif not isinstance(other, (JalaliDate, date)):
+            raise NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
@@ -961,8 +983,10 @@ class JalaliDateTime(JalaliDate):
     def __ge__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) >= 0
-        elif not isinstance(other, JalaliDate):
-            return NotImplementedError
+        elif isinstance(other, dt):
+            return self._cmp(JalaliDateTime(other)) >= 0
+        elif not isinstance(other, (JalaliDate, date)):
+            raise NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
@@ -970,15 +994,17 @@ class JalaliDateTime(JalaliDate):
     def __gt__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other) > 0
-        elif not isinstance(other, JalaliDate):
-            return NotImplementedError
+        elif isinstance(other, dt):
+            return self._cmp(JalaliDateTime(other)) > 0
+        elif not isinstance(other, (JalaliDate, date)):
+            raise NotImplementedError
         else:
             raise TypeError("can't compare '%s' to '%s'" % (
                 type(self).__name__, type(other).__name__))
 
     def __add__(self, other):
         if not isinstance(other, timedelta):
-            return NotImplementedError
+            raise NotImplementedError
 
         delta = timedelta(self.toordinal(),
                           hours=self._hour,
@@ -1000,10 +1026,13 @@ class JalaliDateTime(JalaliDate):
     __radd__ = __add__
 
     def __sub__(self, other):
+        if isinstance(other, dt):
+            other = JalaliDateTime(other)
+
         if not isinstance(other, JalaliDateTime):
             if isinstance(other, timedelta):
                 return self + -other
-            return NotImplementedError
+            raise NotImplementedError
 
         days1 = self.toordinal()
         days2 = other.toordinal()
