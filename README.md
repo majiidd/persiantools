@@ -1,11 +1,12 @@
 
 # PersianTools
 
-[![image](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
-[![image](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
-[![image](https://img.shields.io/travis/mhajiloo/persiantools/master.svg)](https://travis-ci.org/mhajiloo/persiantools)
-[![imgae](https://coveralls.io/repos/github/mhajiloo/persiantools/badge.svg?branch=master)](https://coveralls.io/github/mhajiloo/persiantools?branch=master)
-[![image](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
+[![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
+[![Travis (.org)](https://img.shields.io/travis/mhajiloo/persiantools/master.svg)](https://travis-ci.org/mhajiloo/persiantools)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/8v49tpadjb3d68pe/branch/master?svg=true)](https://ci.appveyor.com/project/mhajiloo/persiantools/branch/master)
+[![Coveralls](https://coveralls.io/repos/github/mhajiloo/persiantools/badge.svg?branch=master)](https://coveralls.io/github/mhajiloo/persiantools?branch=master)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
+[![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
 - Jalali (Shamsi) date and datetime (based on python datetime's module)  
   - Convert Jalali to Gregorian date/datetime and vice versa  
