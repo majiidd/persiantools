@@ -49,9 +49,9 @@ class TestJalaliDate(TestCase):
             JalaliDateTime(1367, 2, 14, 22, 1, 0, 1000000)
         
     def test_timetuple(self):
-        self.assertEqual(JalaliDateTime(1398, 3, 17, 18, 36, 30, 811090).timetuple(), 
+        self.assertEqual(JalaliDateTime(1398, 3, 17, 18, 36, 30, 811090).timetuple(),
             time.struct_time((2019, 6, 7, 18, 36, 30, 4, 158, -1)))
-        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).utctimetuple(), 
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).utctimetuple(),
             time.struct_time((1988, 5, 4, 14 , 0, 0, 2, 125, 0)))
             
 
@@ -86,7 +86,7 @@ class TestJalaliDate(TestCase):
     def test_operators(self):
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) + timedelta(days=30, seconds=15, milliseconds=1),
             JalaliDateTime(1367, 3, 13, 4, 30, 15, 1000))
-        self.assertEqual(JalaliDateTime(1397, 12, 27, 4, 30, 0, 0) + timedelta(days=4), 
+        self.assertEqual(JalaliDateTime(1397, 12, 27, 4, 30, 0, 0) + timedelta(days=4),
             JalaliDateTime(1398, 1, 2, 4, 30, 0, 0))
         self.assertEqual(JalaliDateTime(1395, 2, 14, 4, 30, 0, 0) - JalaliDateTime(1367, 2, 14, 4, 30, 0, 0),
             timedelta(days=10226))

@@ -11,6 +11,7 @@
   - Convert Jalali to Gregorian date/datetime and vice versa
   - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`
   - Support timezone
+
 - Convert Arabic and Persian characters/digits to each other
 
 ## Install Package
@@ -33,16 +34,16 @@ JalaliDate(1395, 4, 18, Jomeh)
 >>> JalaliDate(1369, 7, 1)
 JalaliDate(1369, 7, 1, Yekshanbeh)
 
->>> JalaliDate(datetime.date(1990, 9, 23))  # Gregorian to Jalali
+>>> JalaliDate(datetime.date(1990, 9, 23))      # Gregorian to Jalali
 JalaliDate(1369, 7, 1, Yekshanbeh)
 
->>> JalaliDate.to_jalali(2013, 9, 16)       # Gregorian to Jalali
+>>> JalaliDate.to_jalali(2013, 9, 16)           # Gregorian to Jalali
 JalaliDate(1392, 6, 25, Doshanbeh)
 
->>> JalaliDate(1392, 6, 25).to_gregorian()  # Jalali to Gregorian
+>>> JalaliDate(1392, 6, 25).to_gregorian()      # Jalali to Gregorian
 datetime.date(2013, 9, 16)
 
->>> JalaliDate.fromtimestamp(578707200)     # Timestamp to Jalali
+>>> JalaliDate.fromtimestamp(578707200)         # Timestamp to Jalali
 JalaliDate(1367, 2, 14, Chaharshanbeh)
 ```
 
