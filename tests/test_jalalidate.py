@@ -2,7 +2,7 @@
 import os
 import pickle
 from datetime import date, timedelta
-from time import time
+from time import time, struct_time
 from unittest import TestCase
 import pytest
 
@@ -50,6 +50,34 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.chack_date(1397, 7, 1), True)
         self.assertEqual(JalaliDate.chack_date(1396, 7, 27), True)
         self.assertEqual(JalaliDate.chack_date(1397, 11, 29), True)
+
+    def test_completeday(self):
+        jdate = JalaliDate(1398, 3, 17)
+        self.assertEqual(jdate.year, 1398)
+        self.assertEqual(jdate.month, 3)
+        self.assertEqual(jdate.day, 17)
+        self.assertEqual(jdate.locale, "en")
+        self.assertEqual(jdate.to_gregorian(), date(2019, 6, 7))
+        self.assertEqual(jdate.isoformat(), "1398-03-17")
+        self.assertEqual(jdate.weekday(), 6)
+        self.assertEqual(jdate.isoweekday(), 7)
+        self.assertEqual(jdate.week_of_year(), 12)
+        self.assertEqual(jdate.isocalendar(), (1398, 12, 7))
+        self.assertEqual(jdate.ctime(), "Jomeh 17 Khordad 1398")
+        self.assertEqual(jdate - JalaliDate(1398, 1, 1) , timedelta(days=78))
+        self.assertEqual(jdate > JalaliDate(1398, 3, 16), True)
+        self.assertEqual(JalaliDate(1398, 3, 16) + timedelta(days=1), jdate)
+        self.assertEqual(jdate.timetuple(), struct_time((2019, 6, 7, 0, 0, 0, 4, 158, -1)))
+
+    def test_timetuple(self):
+        self.assertEqual(JalaliDate(1398, 3, 17).timetuple(), struct_time((2019, 6, 7, 0, 0, 0, 4, 158, -1)))
+        self.assertEqual(JalaliDate(1367, 2, 14).timetuple(), struct_time((1988, 5, 4, 0, 0, 0, 2, 125, -1)))
+
+    def test_isocalendar(self):
+        self.assertEqual(JalaliDate(1364, 1, 31).isocalendar(), (1364, 6, 1))
+        self.assertEqual(JalaliDate(1398, 3, 17).isocalendar(), (1398, 12, 7))
+        self.assertEqual(JalaliDate(1398, 1, 1).isocalendar(), (1398, 1, 6))
+        self.assertEqual(JalaliDate(1399, 1, 2).isocalendar(), (1399, 2, 1))
 
     def test_additions(self):
         self.assertEqual(JalaliDate(JalaliDate(1395, 3, 21)), JalaliDate(1395, 3, 21))
@@ -118,6 +146,9 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(format(j), "۱۳۹۵-۰۳-۰۱")
 
+        with pytest.raises(TypeError):
+            format(j, 1)
+
         j = JalaliDate(1397, 11, 29)
 
         self.assertEqual(j.strftime("%c"), "Doshanbeh 29 Bahman 1397")
@@ -153,6 +184,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1396, 1, 25).week_of_year(), 4)
         self.assertEqual(JalaliDate(1396, 7, 8).week_of_year(), 29)
         self.assertEqual(JalaliDate(1397, 11, 29).week_of_year(), 49)
+        self.assertEqual(JalaliDate(1399, 1, 2).week_of_year(), 2)
 
         self.assertEqual(JalaliDate(1367, 2, 14).weekday(), 4)
         self.assertEqual(JalaliDate(1393, 1, 1).weekday(), 6)
@@ -170,15 +202,21 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1397, 11, 29).isoweekday(), 3)
 
     def test_operators(self):
-        self.assertEqual(JalaliDate(1367, 2, 14) == JalaliDate(date(1988, 5, 4)), True)
-        self.assertEqual(JalaliDate(1396, 7, 27) == JalaliDate(date(2017, 10, 19)), True)
-        self.assertEqual(JalaliDate(1367, 2, 14) != JalaliDate(date(1988, 5, 4)), False)
-        self.assertEqual(JalaliDate(1367, 2, 14) < JalaliDate(1369, 1, 1), True)
-        self.assertEqual(JalaliDate(1395, 12, 30) > JalaliDate(1395, 12, 29), True)
-        self.assertEqual(JalaliDate(1395, 12, 30) >= JalaliDate(1395, 12, 30), True)
-        self.assertEqual(JalaliDate(1367, 2, 14) <= JalaliDate(1369, 1, 1), True)
-        self.assertEqual(JalaliDate(1367, 2, 14) >= JalaliDate(1369, 1, 1), False)
-        self.assertEqual(JalaliDate(1397, 11, 29) >= JalaliDate(1397, 11, 10), True)
+        self.assertTrue(JalaliDate(1367, 2, 14) == JalaliDate(date(1988, 5, 4)))
+        self.assertTrue(JalaliDate(1367, 2, 14) == date(1988, 5, 4), True)
+        self.assertTrue(JalaliDate(1396, 7, 27) == JalaliDate(date(2017, 10, 19)))
+        self.assertFalse(JalaliDate(1367, 2, 14) != JalaliDate(date(1988, 5, 4)))
+        self.assertFalse(JalaliDate(1367, 2, 14) != date(1988, 5, 4))
+        self.assertTrue(JalaliDate(1367, 2, 14) < JalaliDate(1369, 1, 1))
+        self.assertFalse(JalaliDate(1367, 2, 14) < date(1988, 5, 4))
+        self.assertTrue(JalaliDate(1395, 12, 30) > JalaliDate(1395, 12, 29))
+        self.assertTrue(JalaliDate(1395, 12, 30) > date(2000, 11, 15))
+        self.assertTrue(JalaliDate(1395, 12, 30) >= JalaliDate(1395, 12, 30))
+        self.assertFalse(JalaliDate(1367, 2, 13) >= date(1988, 5, 4))
+        self.assertTrue(JalaliDate(1367, 2, 14) <= JalaliDate(1369, 1, 1))
+        self.assertTrue(JalaliDate(1367, 2, 14) <= date(1988, 5, 4))
+        self.assertFalse(JalaliDate(1367, 2, 14) >= JalaliDate(1369, 1, 1))
+        self.assertTrue(JalaliDate(1397, 11, 29) >= JalaliDate(1397, 11, 10))
 
         self.assertEqual(JalaliDate(1395, 3, 21) + timedelta(days=2), JalaliDate(1395, 3, 23))
         self.assertEqual(JalaliDate(1396, 7, 27) + timedelta(days=4), JalaliDate(1396, 8, 1))
@@ -189,6 +227,30 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1397, 12, 1) - JalaliDate(1397, 11, 29), timedelta(hours=48))
         self.assertEqual(JalaliDate(1395, 3, 21) - date(2016, 5, 3), timedelta(days=38))
         self.assertEqual(JalaliDate(1395, 12, 30) - JalaliDate(1395, 1, 1), timedelta(days=365))
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) == (1367, 2, 14)
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) != 5
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) < "string"
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) <= 0.5
+        
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) > True
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) >= [1367, 2, 14]
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) + b"A"
+
+        with pytest.raises(NotImplementedError):
+            JalaliDate(1367, 2, 14) - {1, 2}
 
     def test_pickle(self):
         file = open("save.p", "wb")

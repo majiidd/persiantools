@@ -1,25 +1,25 @@
-
 # PersianTools
 
-[![image](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
-[![image](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
-[![image](https://img.shields.io/travis/mhajiloo/persiantools/master.svg)](https://travis-ci.org/mhajiloo/persiantools)
-[![imgae](https://coveralls.io/repos/github/mhajiloo/persiantools/badge.svg?branch=master)](https://coveralls.io/github/mhajiloo/persiantools?branch=master)
-[![image](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
+[![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
+[![Travis (.org)](https://img.shields.io/travis/mhajiloo/persiantools/master.svg)](https://travis-ci.org/mhajiloo/persiantools)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/8v49tpadjb3d68pe/branch/master?svg=true)](https://ci.appveyor.com/project/mhajiloo/persiantools/branch/master)
+[![Coveralls](https://coveralls.io/repos/github/mhajiloo/persiantools/badge.svg?branch=master)](https://coveralls.io/github/mhajiloo/persiantools?branch=master)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
+[![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
-- Jalali (Shamsi) date and datetime (based on python datetime's module)  
-  - Convert Jalali to Gregorian date/datetime and vice versa  
-  - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`  
-  - Support timezone  
-  
-- Convert Arabic and Persian characters/digits to each other  
+- Jalali (Shamsi) date and datetime (based on python datetime's module)
+  - Convert Jalali to Gregorian date/datetime and vice versa
+  - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`
+  - Support timezone
+
+- Convert Arabic and Persian characters/digits to each other
 
 ## Install Package
-  
-``` {.sourceCode .bash}  
-pip install persiantools  
+
+``` {.sourceCode .bash}
+pip install persiantools
 ```  
-  
+
 ## How to use
 
 ### Date
@@ -34,16 +34,16 @@ JalaliDate(1395, 4, 18, Jomeh)
 >>> JalaliDate(1369, 7, 1)
 JalaliDate(1369, 7, 1, Yekshanbeh)
 
->>> JalaliDate(datetime.date(1990, 9, 23))  # Gregorian to Jalali
+>>> JalaliDate(datetime.date(1990, 9, 23))      # Gregorian to Jalali
 JalaliDate(1369, 7, 1, Yekshanbeh)
 
->>> JalaliDate.to_jalali(2013, 9, 16)       # Gregorian to Jalali
+>>> JalaliDate.to_jalali(2013, 9, 16)           # Gregorian to Jalali
 JalaliDate(1392, 6, 25, Doshanbeh)
 
->>> JalaliDate(1392, 6, 25).to_gregorian()  # Jalali to Gregorian
+>>> JalaliDate(1392, 6, 25).to_gregorian()      # Jalali to Gregorian
 datetime.date(2013, 9, 16)
 
->>> JalaliDate.fromtimestamp(578707200)     # Timestamp to Jalali
+>>> JalaliDate.fromtimestamp(578707200)         # Timestamp to Jalali
 JalaliDate(1367, 2, 14, Chaharshanbeh)
 ```
 
@@ -125,7 +125,10 @@ True
 
 >>> JalaliDateTime(1367, 2, 14, 4, 30) >= JalaliDateTime(1369, 7, 1, 1, 0)
 False
-  
+
+>>> JalaliDate(1367, 2, 14) == datetime.date(1988, 5, 4)
+True
+
 >>> JalaliDate(1395, 2, 14) + datetime.timedelta(days=38)
 JalaliDate(1395, 3, 21, Jomeh)
 

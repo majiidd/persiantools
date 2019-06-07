@@ -11,11 +11,14 @@ from persiantools.jdatetime import JalaliDateTime, JalaliDate
 
 
 class TestJalaliDate(TestCase):
+    def test_shamsi_to_gregorian(self):
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).to_gregorian(), datetime(1988, 5, 4, 14, 0, 0, 0))
+
+    def test_gregorian_to_shamsi(self):
+        self.assertEqual(JalaliDateTime(datetime(1990, 9, 23, 14, 14, 1, 1111)), JalaliDateTime(1369, 7, 1, 14, 14, 1, 1111))
+        self.assertEqual(JalaliDateTime.to_jalali(datetime(1988, 5, 4, 14, 0, 0, 0)), JalaliDateTime(1367, 2, 14, 14, 0, 0, 0))
+
     def test_base(self):
-        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0),
-                         JalaliDateTime.to_jalali(datetime(1988, 5, 4, 14, 0, 0, 0)))
-        self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 14, 1, 1111),
-                         JalaliDateTime(datetime(1990, 9, 23, 14, 14, 1, 1111)))
         self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 14, 1, 9111),
                          JalaliDateTime(JalaliDateTime(1369, 7, 1, 14, 14, 1, 9111)))
 
@@ -45,9 +48,15 @@ class TestJalaliDate(TestCase):
         with pytest.raises(ValueError):
             JalaliDateTime(1367, 2, 14, 22, 1, 0, 1000000)
         
+    def test_timetuple(self):
+        self.assertEqual(JalaliDateTime(1398, 3, 17, 18, 36, 30, 811090).timetuple(),
+            time.struct_time((2019, 6, 7, 18, 36, 30, 4, 158, -1)))
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).utctimetuple(),
+            time.struct_time((1988, 5, 4, 14 , 0, 0, 2, 125, 0)))
+            
 
     def test_others(self):
-        self.assertTrue(JalaliDateTime.fromtimestamp(time.time()) <= JalaliDateTime.now())
+        self.assertTrue(JalaliDateTime.fromtimestamp(time.time() - 10) <= JalaliDateTime.now())
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
         self.assertEqual(JalaliDateTime.fromtimestamp(578723400, pytz.utc),
                          JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc))
@@ -76,16 +85,32 @@ class TestJalaliDate(TestCase):
 
     def test_operators(self):
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) + timedelta(days=30, seconds=15, milliseconds=1),
-                         JalaliDateTime(1367, 3, 13, 4, 30, 15, 1000))
+            JalaliDateTime(1367, 3, 13, 4, 30, 15, 1000))
+        self.assertEqual(JalaliDateTime(1397, 12, 27, 4, 30, 0, 0) + timedelta(days=4),
+            JalaliDateTime(1398, 1, 2, 4, 30, 0, 0))
         self.assertEqual(JalaliDateTime(1395, 2, 14, 4, 30, 0, 0) - JalaliDateTime(1367, 2, 14, 4, 30, 0, 0),
-                         timedelta(days=10226))
+            timedelta(days=10226))
+        self.assertEqual(JalaliDateTime(1395, 2, 14, 4, 30, 0, 0) - datetime(1988, 5, 4, 4, 30, 0, 0),
+            timedelta(days=10226))
         self.assertEqual(JalaliDateTime(1395, 4, 16, 20, 14, 30, 0) - timedelta(days=1, seconds=31),
                          JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
 
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == JalaliDateTime(1367, 2, 14, 4, 30, 0, 0))
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == datetime(1988, 5, 4, 4, 30, 0, 0))
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == date(1988, 5, 4))
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == JalaliDate(1988, 5, 4))
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != JalaliDateTime(1367, 2, 14, 4, 30, 0, 0))
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != datetime(1989, 5, 4, 4, 30, 0, 0))
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != date(1988, 5, 4))
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != JalaliDate(1367, 5, 5))
         self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) < JalaliDateTime(1369, 7, 1, 1, 0, 0, 0))
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) < datetime(1988, 5, 4, 4, 30, 0, 0))
         self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) <= JalaliDateTime(1369, 7, 1, 1, 0, 0, 0))
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) <= datetime(1988, 5, 4, 4, 30, 0, 100))
         self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) > JalaliDateTime(1369, 7, 1, 1, 0, 0, 0))
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) > datetime(2019, 10, 11, 0, 30, 0, 100))
         self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= JalaliDateTime(1369, 7, 1, 1, 0, 0, 0))
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= datetime(1988, 5, 4, 0, 0, 0, 0))
         self.assertTrue(JalaliDateTime(1395, 4, 15, 20, 13, 59, 0) == JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
         self.assertTrue(
             JalaliDateTime(1395, 4, 15, 20, 13, 59, 0, pytz.utc) != JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
@@ -94,6 +119,42 @@ class TestJalaliDate(TestCase):
             JalaliDateTime(1395, 4, 16, 20, 14, 30, 0, pytz.utc) - JalaliDateTime(1395, 4, 16, 20, 14, 30, 0,
                                                                                   pytz.timezone("Asia/Tehran")),
             pytz.timezone("Asia/Tehran")._utcoffset)
+
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == {'year': 1367}
+        
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != "string"
+
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) < 1.55
+
+        with pytest.raises(TypeError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) < date(1988, 4, 5)
+
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) <= 100
+
+        with pytest.raises(TypeError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) <= JalaliDate(1367, 5, 5)
+
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) > timedelta(days=30)
+
+        with pytest.raises(TypeError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) > date(1988, 4, 5)
+        
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= pytz.utc
+
+        with pytest.raises(TypeError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= JalaliDate(1392, 4, 5)
+
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) + JalaliDateTime(1367, 2, 14, 0, 0, 0, 0)
+
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) - []
 
     def test_hash(self):
         j1 = JalaliDateTime.today().replace(tzinfo=pytz.utc)
