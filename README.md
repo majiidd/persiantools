@@ -1,4 +1,3 @@
-
 # PersianTools
 
 [![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
@@ -8,19 +7,18 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
-- Jalali (Shamsi) date and datetime (based on python datetime's module)  
-  - Convert Jalali to Gregorian date/datetime and vice versa  
-  - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`  
-  - Support timezone  
-  
-- Convert Arabic and Persian characters/digits to each other  
+- Jalali (Shamsi) date and datetime (based on python datetime's module)
+  - Convert Jalali to Gregorian date/datetime and vice versa
+  - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`
+  - Support timezone
+- Convert Arabic and Persian characters/digits to each other
 
 ## Install Package
-  
-``` {.sourceCode .bash}  
-pip install persiantools  
+
+``` {.sourceCode .bash}
+pip install persiantools
 ```  
-  
+
 ## How to use
 
 ### Date
@@ -126,7 +124,7 @@ True
 
 >>> JalaliDateTime(1367, 2, 14, 4, 30) >= JalaliDateTime(1369, 7, 1, 1, 0)
 False
-  
+
 >>> JalaliDate(1395, 2, 14) + datetime.timedelta(days=38)
 JalaliDate(1395, 3, 21, Jomeh)
 
