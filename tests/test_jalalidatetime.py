@@ -153,6 +153,9 @@ class TestJalaliDate(TestCase):
         with pytest.raises(NotImplementedError):
             JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) + JalaliDateTime(1367, 2, 14, 0, 0, 0, 0)
 
+        with pytest.raises(NotImplementedError):
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) - []
+
     def test_hash(self):
         j1 = JalaliDateTime.today().replace(tzinfo=pytz.utc)
         j2 = JalaliDateTime(1369, 7, 1, 0, 0, 0, 0)
