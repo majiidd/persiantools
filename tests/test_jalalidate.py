@@ -2,7 +2,7 @@
 import os
 import pickle
 from datetime import date, timedelta
-from time import time
+from time import time, struct_time
 from unittest import TestCase
 import pytest
 
@@ -50,6 +50,34 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.chack_date(1397, 7, 1), True)
         self.assertEqual(JalaliDate.chack_date(1396, 7, 27), True)
         self.assertEqual(JalaliDate.chack_date(1397, 11, 29), True)
+
+    def test_completeday(self):
+        jdate = JalaliDate(1398, 3, 17)
+        self.assertEqual(jdate.year, 1398)
+        self.assertEqual(jdate.month, 3)
+        self.assertEqual(jdate.day, 17)
+        self.assertEqual(jdate.locale, "en")
+        self.assertEqual(jdate.to_gregorian(), date(2019, 6, 7))
+        self.assertEqual(jdate.isoformat(), "1398-03-17")
+        self.assertEqual(jdate.weekday(), 6)
+        self.assertEqual(jdate.isoweekday(), 7)
+        self.assertEqual(jdate.week_of_year(), 12)
+        self.assertEqual(jdate.isocalendar(), (1398, 12, 7))
+        self.assertEqual(jdate.ctime(), "Jomeh 17 Khordad 1398")
+        self.assertEqual(jdate - JalaliDate(1398, 1, 1) , timedelta(days=78))
+        self.assertEqual(jdate > JalaliDate(1398, 3, 16), True)
+        self.assertEqual(JalaliDate(1398, 3, 16) + timedelta(days=1), jdate)
+        self.assertEqual(jdate.timetuple(), struct_time((2019, 6, 7, 0, 0, 0, 4, 158, -1)))
+
+    def test_timetuple(self):
+        self.assertEqual(JalaliDate(1398, 3, 17).timetuple(), struct_time((2019, 6, 7, 0, 0, 0, 4, 158, -1)))
+        self.assertEqual(JalaliDate(1367, 2, 14).timetuple(), struct_time((1988, 5, 4, 0, 0, 0, 2, 125, -1)))
+
+    def test_isocalendar(self):
+        self.assertEqual(JalaliDate(1364, 1, 31).isocalendar(), (1364, 6, 1))
+        self.assertEqual(JalaliDate(1398, 3, 17).isocalendar(), (1398, 12, 7))
+        self.assertEqual(JalaliDate(1398, 1, 1).isocalendar(), (1398, 1, 6))
+        self.assertEqual(JalaliDate(1399, 1, 2).isocalendar(), (1399, 2, 1))
 
     def test_additions(self):
         self.assertEqual(JalaliDate(JalaliDate(1395, 3, 21)), JalaliDate(1395, 3, 21))
@@ -153,6 +181,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1396, 1, 25).week_of_year(), 4)
         self.assertEqual(JalaliDate(1396, 7, 8).week_of_year(), 29)
         self.assertEqual(JalaliDate(1397, 11, 29).week_of_year(), 49)
+        self.assertEqual(JalaliDate(1399, 1, 2).week_of_year(), 2)
 
         self.assertEqual(JalaliDate(1367, 2, 14).weekday(), 4)
         self.assertEqual(JalaliDate(1393, 1, 1).weekday(), 6)

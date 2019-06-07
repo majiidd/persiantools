@@ -11,11 +11,14 @@ from persiantools.jdatetime import JalaliDateTime, JalaliDate
 
 
 class TestJalaliDate(TestCase):
+    def test_shamsi_to_gregorian(self):
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).to_gregorian(), datetime(1988, 5, 4, 14, 0, 0, 0))
+
+    def test_gregorian_to_shamsi(self):
+        self.assertEqual(JalaliDateTime(datetime(1990, 9, 23, 14, 14, 1, 1111)), JalaliDateTime(1369, 7, 1, 14, 14, 1, 1111))
+        self.assertEqual(JalaliDateTime.to_jalali(datetime(1988, 5, 4, 14, 0, 0, 0)), JalaliDateTime(1367, 2, 14, 14, 0, 0, 0))
+
     def test_base(self):
-        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0),
-                         JalaliDateTime.to_jalali(datetime(1988, 5, 4, 14, 0, 0, 0)))
-        self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 14, 1, 1111),
-                         JalaliDateTime(datetime(1990, 9, 23, 14, 14, 1, 1111)))
         self.assertEqual(JalaliDateTime(1369, 7, 1, 14, 14, 1, 9111),
                          JalaliDateTime(JalaliDateTime(1369, 7, 1, 14, 14, 1, 9111)))
 
@@ -45,6 +48,12 @@ class TestJalaliDate(TestCase):
         with pytest.raises(ValueError):
             JalaliDateTime(1367, 2, 14, 22, 1, 0, 1000000)
         
+    def test_timetuple(self):
+        self.assertEqual(JalaliDateTime(1398, 3, 17, 18, 36, 30, 811090).timetuple(), 
+            time.struct_time((2019, 6, 7, 18, 36, 30, 4, 158, -1)))
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).utctimetuple(), 
+            time.struct_time((1988, 5, 4, 14 , 0, 0, 2, 125, 0)))
+            
 
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time() - 10) <= JalaliDateTime.now())
