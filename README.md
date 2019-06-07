@@ -125,6 +125,9 @@ True
 >>> JalaliDateTime(1367, 2, 14, 4, 30) >= JalaliDateTime(1369, 7, 1, 1, 0)
 False
 
+>>> JalaliDate(1367, 2, 14) == datetime.date(1988, 5, 4)
+True
+
 >>> JalaliDate(1395, 2, 14) + datetime.timedelta(days=38)
 JalaliDate(1395, 3, 21, Jomeh)
 
