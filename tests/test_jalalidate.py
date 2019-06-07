@@ -247,7 +247,7 @@ class TestJalaliDate(TestCase):
             JalaliDate(1367, 2, 14) >= [1367, 2, 14]
 
         with pytest.raises(NotImplementedError):
-            JalaliDate(1367, 2, 14) + (1).to_bytes(1, 'big')
+            JalaliDate(1367, 2, 14) + b"A"
 
         with pytest.raises(NotImplementedError):
             JalaliDate(1367, 2, 14) - {1, 2}
