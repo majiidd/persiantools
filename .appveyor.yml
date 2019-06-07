@@ -1,4 +1,4 @@
-clone_depth: 10
+clone_depth: 50
 
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
@@ -7,11 +7,23 @@ environment:
     - PYTHON: C:\Python27
       PYTHON_VERSION: 2.7
       PYTHON_ARCH: 32
+    
+    - PYTHON: C:\Python27
+      PYTHON_VERSION: 2.7
+      PYTHON_ARCH: 64
+
+    - PYTHON: C:\Python34
+      PYTHON_VERSION: 3.4
+      PYTHON_ARCH: 32
 
     - PYTHON: C:\Python35
       PYTHON_VERSION: 3.5
       PYTHON_ARCH: 32
 
+    - PYTHON: C:\Python35
+      PYTHON_VERSION: 3.5
+      PYTHON_ARCH: 64
+
     - PYTHON: C:\Python36
       PYTHON_VERSION: 3.6
       PYTHON_ARCH: 32
@@ -20,17 +32,16 @@ environment:
       PYTHON_VERSION: 3.6
       PYTHON_ARCH: 64
 
-    - PYTHON: C:\Python37-x64
+    - PYTHON: C:\Python37
       PYTHON_VERSION: 3.7
       PYTHON_ARCH: 32
 
-    - PYTHON: C:\Python37-x64
+    - PYTHON: C:\Python37
       PYTHON_VERSION: 3.7
       PYTHON_ARCH: 64
 
 init:
   - ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
-  - ECHO \"%APPVEYOR_SCHEDULED_BUILD%\"
 
 cache:
   - '%LOCALAPPDATA%\pip\Cache\http'
@@ -45,13 +56,9 @@ install:
     print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
 
   - python -m pip install -U pip setuptools wheel
-  - pip install coveralls
   - pip install -U -r requirements.txt
 
 build: off
 
 test_script:
   - py.test --cov=persiantools tests/
-
-after_test:
-  - coveralls
