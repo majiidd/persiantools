@@ -28,8 +28,8 @@ def en_to_fa(string):
     if PY2:
         if isinstance(string, unicode):
             digits_map = {
-                unicode(a, "utf8"): unicode(a, "utf8")
-                for a, f in digits_map.iteritems()
+                unicode(e, "utf8"): unicode(f, "utf8")
+                for e, f in digits_map.iteritems()
             }
 
     return utils.replace(string, digits_map)
@@ -61,7 +61,7 @@ def ar_to_fa(string):
     if PY2:
         if isinstance(string, unicode):
             digits_map = {
-                unicode(a, "utf8"): unicode(a, "utf8")
+                unicode(a, "utf8"): unicode(f, "utf8")
                 for a, f in digits_map.iteritems()
             }
 
@@ -94,8 +94,8 @@ def fa_to_en(string):
     if PY2:
         if isinstance(string, unicode):
             digits_map = {
-                unicode(a, "utf8"): unicode(a, "utf8")
-                for a, f in digits_map.iteritems()
+                unicode(f, "utf8"): unicode(e, "utf8")
+                for f, e in digits_map.iteritems()
             }
 
     return utils.replace(string, digits_map)
@@ -127,8 +127,8 @@ def fa_to_ar(string):
     if PY2:
         if isinstance(string, unicode):
             digits_map = {
-                unicode(a, "utf8"): unicode(a, "utf8")
-                for a, f in digits_map.iteritems()
+                unicode(f, "utf8"): unicode(a, "utf8")
+                for f, a in digits_map.iteritems()
             }
 
     return utils.replace(string, digits_map)
