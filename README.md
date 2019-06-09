@@ -8,6 +8,7 @@
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
 - Jalali (Shamsi) date and datetime (based on python datetime's module)
+
   - Convert Jalali to Gregorian date/datetime and vice versa
   - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`
   - Support timezone
@@ -16,15 +17,15 @@
 
 ## Install Package
 
-``` {.sourceCode .bash}
+```{.sourceCode .bash}
 pip install persiantools
-```  
+```
 
 ## How to use
 
 ### Date
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate
 >>> import datetime
 
@@ -49,7 +50,7 @@ JalaliDate(1367, 2, 14, Chaharshanbeh)
 
 ### Datetime
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDateTime
 >>> import datetime, pytz
 
@@ -67,13 +68,13 @@ JalaliDateTime(1367, 2, 14, 8, 0, tzinfo=<DstTzInfo 'Asia/Tehran' +0330+3:30:00 
 
 >>> JalaliDateTime.now(pytz.utc)
 JalaliDateTime(1395, 4, 17, 21, 23, 53, 474618, tzinfo=<UTC>)
-```  
+```
 
 ### Format
 
 Based on python `strftime()` behavior
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import pytz
 
@@ -92,7 +93,7 @@ Based on python `strftime()` behavior
 
 ### Digit/Character converter
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools import characters, digits
 
 >>> digits.en_to_fa("0987654321")
@@ -101,22 +102,22 @@ Based on python `strftime()` behavior
 >>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")   # digits.ar_to_fa(u"٠٩٨٧٦٥٤٣٢١") (Python 2 unicode type)
 '۰۹۸۷۶۵۴۳۲۱'
 
->>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")   # digits.fa_to_en(u"۰۹۸۷۶۵۴۳۲۱")
+>>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
 '0987654321'
 
->>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")   # digits.fa_to_ar(u"۰۹۸۷۶۵۴۳۲۱")
+>>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
 '٠٩٨٧٦٥٤٣٢١'
 
->>> characters.ar_to_fa("كبِك")      # characters.ar_to_fa(u"كبِك")
+>>> characters.ar_to_fa("كبِك")
 'کبِک'
 
->>> characters.fa_to_ar("کبِک")      # characters.fa_to_ar(u"کبِک")
+>>> characters.fa_to_ar("کبِک")
 'كبِك'
 ```
 
 ### Operators
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import datetime
 
@@ -138,7 +139,7 @@ datetime.timedelta(365)
 
 ### Serializing and de-serializing
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate
 >>> import pickle
 
@@ -153,3 +154,4 @@ datetime.timedelta(365)
 >>> file.close()
 >>> jalali
 JalaliDate(1369, 7, 1, Yekshanbeh)
+```
