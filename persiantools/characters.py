@@ -13,20 +13,23 @@ def ar_to_fa(string):
         :rtype: str
         """
     characters_map = {
-            'دِ': 'د',
-            'بِ': 'ب',
-            'زِ': 'ز',
-            'ذِ': 'ذ',
-            'شِ': 'ش',
-            'سِ': 'س',
-            'ى': 'ی',
-            'ي': 'ی',
-            'ك': 'ک'
-        }
+        "دِ": "د",
+        "بِ": "ب",
+        "زِ": "ز",
+        "ذِ": "ذ",
+        "شِ": "ش",
+        "سِ": "س",
+        "ى": "ی",
+        "ي": "ی",
+        "ك": "ک",
+    }
 
     if PY2:
         if isinstance(string, unicode):
-            characters_map = {unicode(a, 'utf8'): unicode(a, 'utf8') for a, f in characters_map.iteritems()}
+            characters_map = {
+                unicode(a, "utf8"): unicode(f, "utf8")
+                for a, f in characters_map.iteritems()
+            }
 
     return utils.replace(string, characters_map)
 
@@ -41,13 +44,13 @@ def fa_to_ar(string):
         :param string: A string, will be converted
         :rtype: str
         """
-    characters_map = {
-        'ی': 'ي',
-        'ک': 'ك'
-    }
+    characters_map = {"ی": "ي", "ک": "ك"}
 
     if PY2:
         if isinstance(string, unicode):
-            characters_map = {unicode(a, 'utf8'): unicode(a, 'utf8') for a, f in characters_map.iteritems()}
+            characters_map = {
+                unicode(f, "utf8"): unicode(a, "utf8")
+                for f, a in characters_map.iteritems()
+            }
 
     return utils.replace(string, characters_map)

@@ -98,20 +98,20 @@ Based on python `strftime()` behavior
 >>> digits.en_to_fa("0987654321")
 '۰۹۸۷۶۵۴۳۲۱'
 
->>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")
+>>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")   # digits.ar_to_fa(u"٠٩٨٧٦٥٤٣٢١") (Python 2 unicode type)
 '۰۹۸۷۶۵۴۳۲۱'
 
->>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
+>>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")   # digits.fa_to_en(u"۰۹۸۷۶۵۴۳۲۱")
 '0987654321'
 
->>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
+>>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")   # digits.fa_to_ar(u"۰۹۸۷۶۵۴۳۲۱")
 '٠٩٨٧٦٥٤٣٢١'
 
->>> characters.ar_to_fa("راك")
-'راک'
+>>> characters.ar_to_fa("كبِك")      # characters.ar_to_fa(u"كبِك")
+'کبِک'
 
->>> characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست")
-'اي چرخ فلك خرابي از كينه تست'
+>>> characters.fa_to_ar("کبِک")      # characters.fa_to_ar(u"کبِک")
+'كبِك'
 ```
 
 ### Operators
