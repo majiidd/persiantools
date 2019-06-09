@@ -2,7 +2,7 @@
 import sys
 from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 
-from persiantools import digits, utils
+from persiantools import digits, utils, PY2
 
 MINYEAR = 1
 MAXYEAR = 9377
@@ -61,7 +61,7 @@ class JalaliDate(object):
         elif (isinstance(year, bytes) and len(year) == 4
               and 1 <= year[2] <= 12) or (isinstance(year, str)
                                           and year.startswith("[", 0, 1)):
-            if sys.version_info < (3,):
+            if PY2:
                 import ast
                 self.__setstate__(ast.literal_eval(year))
             else:
@@ -558,7 +558,7 @@ class JalaliDateTime(JalaliDate):
 
         elif (isinstance(year, bytes) and len(year) == 10) \
                 or (isinstance(year, str) and year.startswith("[", 0, 1)):
-            if sys.version_info < (3,):
+            if PY2:
                 import ast
                 self.__setstate__(ast.literal_eval(year), month)
             else:

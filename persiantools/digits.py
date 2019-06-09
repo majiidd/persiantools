@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from persiantools import utils
+from persiantools import utils, PY2
 
 
 def en_to_fa(string):
@@ -12,7 +12,7 @@ def en_to_fa(string):
         :param string:  A string, will be converted
         :rtype: str
     """
-    dic = {
+    digits_map = {
         '0': '۰',
         '1': '۱',
         '2': '۲',
@@ -25,7 +25,11 @@ def en_to_fa(string):
         '9': '۹'
     }
 
-    return utils.replace(string, dic)
+    if PY2:
+        if isinstance(string, unicode):
+            digits_map = {unicode(a, 'utf8'): unicode(a, 'utf8') for a, f in digits_map.iteritems()}
+
+    return utils.replace(string, digits_map)
 
 
 def ar_to_fa(string):
@@ -38,7 +42,7 @@ def ar_to_fa(string):
         :param string: A string, will be converted
         :rtype: str
         """
-    dic = {
+    digits_map = {
         '٠': '۰',
         '١': '۱',
         '٢': '۲',
@@ -51,7 +55,11 @@ def ar_to_fa(string):
         '٩': '۹'
     }
 
-    return utils.replace(string, dic)
+    if PY2:
+        if isinstance(string, unicode):
+            digits_map = {unicode(a, 'utf8'): unicode(a, 'utf8') for a, f in digits_map.iteritems()}
+
+    return utils.replace(string, digits_map)
 
 
 def fa_to_en(string):
@@ -64,7 +72,7 @@ def fa_to_en(string):
         :param string: A string, will be converted
         :rtype: str
         """
-    dic = {
+    digits_map = {
         '۰': '0',
         '۱': '1',
         '۲': '2',
@@ -77,7 +85,11 @@ def fa_to_en(string):
         '۹': '9'
     }
 
-    return utils.replace(string, dic)
+    if PY2:
+        if isinstance(string, unicode):
+            digits_map = {unicode(a, 'utf8'): unicode(a, 'utf8') for a, f in digits_map.iteritems()}
+
+    return utils.replace(string, digits_map)
 
 
 def fa_to_ar(string):
@@ -90,7 +102,7 @@ def fa_to_ar(string):
         :param string: A string, will be converted
         :rtype: str
         """
-    dic = {
+    digits_map = {
         '۰': '٠',
         '۱': '١',
         '۲': '٢',
@@ -103,4 +115,8 @@ def fa_to_ar(string):
         '۹': '٩'
     }
 
-    return utils.replace(string, dic)
+    if PY2:
+        if isinstance(string, unicode):
+            digits_map = {unicode(a, 'utf8'): unicode(a, 'utf8') for a, f in digits_map.iteritems()}
+
+    return utils.replace(string, digits_map)

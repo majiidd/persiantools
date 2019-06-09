@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 #                           _             __              __    
 #     ____  ___  __________(_)___ _____  / /_____  ____  / /____
@@ -15,3 +16,5 @@ __author__ = 'Majid Hajiloo'
 __author_email__ = 'majid.hajiloo@gmail.com'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2019 Majid Hajiloo'
+
+PY2 = True if sys.version_info[0] < 3 else False
