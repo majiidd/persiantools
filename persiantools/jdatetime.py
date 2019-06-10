@@ -79,15 +79,7 @@ WEEKDAY_NAMES_EN = [
     "Panjshanbeh",
     "Jomeh",
 ]
-WEEKDAY_NAMES_FA = [
-    "شنبه",
-    "یکشنبه",
-    "دوشنبه",
-    "سه‌شنبه",
-    "چهارشنبه",
-    "پنجشنبه",
-    "جمعه",
-]
+WEEKDAY_NAMES_FA = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
 
 WEEKDAY_NAMES_ABBR_EN = ["Sha", "Yek", "Dos", "Ses", "Cha", "Pan", "Jom"]
 WEEKDAY_NAMES_ABBR_FA = ["ش", "ی", "د", "س", "چ", "پ", "ج"]
@@ -446,13 +438,9 @@ class JalaliDate(object):
             locale = self._locale
 
         month_names = MONTH_NAMES_EN if locale == "en" else MONTH_NAMES_FA
-        month_names_abbr = (
-            MONTH_NAMES_ABBR_EN if locale == "en" else MONTH_NAMES_ABBR_FA
-        )
+        month_names_abbr = MONTH_NAMES_ABBR_EN if locale == "en" else MONTH_NAMES_ABBR_FA
         day_names = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
-        day_names_abbr = (
-            WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
-        )
+        day_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
         am = "AM" if locale == "en" else "ق.ظ"
 
         format_time = {
@@ -591,13 +579,7 @@ _tzinfo_class = tzinfo
 
 
 class JalaliDateTime(JalaliDate):
-    __slots__ = JalaliDate.__slots__ + (
-        "_hour",
-        "_minute",
-        "_second",
-        "_microsecond",
-        "_tzinfo",
-    )
+    __slots__ = JalaliDate.__slots__ + ("_hour", "_minute", "_second", "_microsecond", "_tzinfo")
 
     def __init__(
         self,
@@ -769,9 +751,7 @@ class JalaliDateTime(JalaliDate):
         self._check_time_fields(hour, minute, second, microsecond)
         self._check_tzinfo_arg(tzinfo)
 
-        return JalaliDateTime(
-            year, month, day, hour, minute, second, microsecond, tzinfo, locale
-        )
+        return JalaliDateTime(year, month, day, hour, minute, second, microsecond, tzinfo, locale)
 
     @classmethod
     def now(cls, tz=None):
@@ -814,9 +794,7 @@ class JalaliDateTime(JalaliDate):
             return self.to_gregorian().timestamp()
         else:
             gregorian_dt = self.to_gregorian()
-            return (
-                gregorian_dt - dt(1970, 1, 1, tzinfo=gregorian_dt.tzinfo)
-            ).total_seconds()
+            return (gregorian_dt - dt(1970, 1, 1, tzinfo=gregorian_dt.tzinfo)).total_seconds()
 
     def utctimetuple(self):
         "Return UTC time tuple compatible with time.gmtime()."
@@ -886,9 +864,7 @@ class JalaliDateTime(JalaliDate):
         name = getattr(self._tzinfo, "tzname")(self.to_gregorian())
 
         if name is not None and not isinstance(name, str):
-            raise TypeError(
-                "tzinfo.tzname() must return None or string, " "not '%s'" % type(name)
-            )
+            raise TypeError("tzinfo.tzname() must return None or string, " "not '%s'" % type(name))
 
         return name
 
@@ -910,14 +886,12 @@ class JalaliDateTime(JalaliDate):
 
         if not isinstance(offset, timedelta):
             raise TypeError(
-                "tzinfo.%s() must return None "
-                "or timedelta, not '%s'" % (name, type(offset))
+                "tzinfo.%s() must return None " "or timedelta, not '%s'" % (name, type(offset))
             )
 
         if offset % timedelta(minutes=1) or offset.microseconds:
             raise ValueError(
-                "tzinfo.%s() must return a whole number "
-                "of minutes, got %s" % (name, offset)
+                "tzinfo.%s() must return a whole number " "of minutes, got %s" % (name, offset)
             )
 
         if not -timedelta(1) < offset < timedelta(1):
@@ -952,13 +926,7 @@ class JalaliDateTime(JalaliDate):
 
         return cls.combine(
             j_date,
-            _time(
-                hour=hour,
-                minute=minute,
-                second=second,
-                microsecond=microsecond,
-                tzinfo=tzinfo,
-            ),
+            _time(hour=hour, minute=minute, second=second, microsecond=microsecond, tzinfo=tzinfo),
         )
 
     def to_gregorian(self):
@@ -1120,8 +1088,7 @@ class JalaliDateTime(JalaliDate):
             raise NotImplementedError
         else:
             raise TypeError(
-                "can't compare '%s' to '%s'"
-                % (type(self).__name__, type(other).__name__)
+                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
             )
 
     def __lt__(self, other):
@@ -1133,8 +1100,7 @@ class JalaliDateTime(JalaliDate):
             raise NotImplementedError
         else:
             raise TypeError(
-                "can't compare '%s' to '%s'"
-                % (type(self).__name__, type(other).__name__)
+                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
             )
 
     def __ge__(self, other):
@@ -1146,8 +1112,7 @@ class JalaliDateTime(JalaliDate):
             raise NotImplementedError
         else:
             raise TypeError(
-                "can't compare '%s' to '%s'"
-                % (type(self).__name__, type(other).__name__)
+                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
             )
 
     def __gt__(self, other):
@@ -1159,8 +1124,7 @@ class JalaliDateTime(JalaliDate):
             raise NotImplementedError
         else:
             raise TypeError(
-                "can't compare '%s' to '%s'"
-                % (type(self).__name__, type(other).__name__)
+                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
             )
 
     def __add__(self, other):
@@ -1201,9 +1165,7 @@ class JalaliDateTime(JalaliDate):
         days2 = other.toordinal()
         secs1 = self._second + self._minute * 60 + self._hour * 3600
         secs2 = other.second + other.minute * 60 + other.hour * 3600
-        base = timedelta(
-            days1 - days2, secs1 - secs2, self._microsecond - other.microsecond
-        )
+        base = timedelta(days1 - days2, secs1 - secs2, self._microsecond - other.microsecond)
 
         if self._tzinfo is other.tzinfo:
             return base

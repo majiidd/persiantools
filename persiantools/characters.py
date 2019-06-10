@@ -27,8 +27,7 @@ def ar_to_fa(string):
     if PY2:
         if isinstance(string, unicode):
             characters_map = {
-                unicode(a, "utf8"): unicode(f, "utf8")
-                for a, f in characters_map.iteritems()
+                unicode(a, "utf8"): unicode(f, "utf8") for a, f in characters_map.iteritems()
             }
 
     return utils.replace(string, characters_map)
@@ -49,8 +48,7 @@ def fa_to_ar(string):
     if PY2:
         if isinstance(string, unicode):
             characters_map = {
-                unicode(f, "utf8"): unicode(a, "utf8")
-                for f, a in characters_map.iteritems()
+                unicode(f, "utf8"): unicode(a, "utf8") for f, a in characters_map.iteritems()
             }
 
     return utils.replace(string, characters_map)
