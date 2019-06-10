@@ -99,7 +99,7 @@ Based on python `strftime()` behavior
 >>> digits.en_to_fa("0987654321")
 '۰۹۸۷۶۵۴۳۲۱'
 
->>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")   # digits.ar_to_fa(u"٠٩٨٧٦٥٤٣٢١") (Python 2 unicode type)
+>>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")   # or digits.ar_to_fa(u"٠٩٨٧٦٥٤٣٢١")
 '۰۹۸۷۶۵۴۳۲۱'
 
 >>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
@@ -108,11 +108,11 @@ Based on python `strftime()` behavior
 >>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
 '٠٩٨٧٦٥٤٣٢١'
 
->>> characters.ar_to_fa("كبِك")
-'کبِک'
+>>> characters.ar_to_fa("كيك")
+'کیک'
 
->>> characters.fa_to_ar("کبِک")
-'كبِك'
+>>> characters.fa_to_ar("کیک")
+'كيك'
 ```
 
 ### Operators
