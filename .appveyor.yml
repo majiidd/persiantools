@@ -56,4 +56,5 @@ install:
 build: off
 
 test_script:
-  - py.test --cov=persiantools tests/
+  - py.test --cov=persiantools tests/ -v
+  - black persiantools/ setup.py --check -l 100

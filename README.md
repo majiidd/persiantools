@@ -110,9 +110,6 @@ Based on python `strftime()` behavior
 
 >>> characters.ar_to_fa("كيك")
 'کیک'
-
->>> characters.fa_to_ar("کیک")
-'كيك'
 ```
 
 ### Operators
@@ -145,7 +142,7 @@ datetime.timedelta(365)
 
 >>> # Serializing
 >>> file = open("save.p", "wb")
->>> pickle.dump(JalaliDate(1369, 7, 1), file)
+>>> pickle.dump(JalaliDate(1367, 2, 14), file)
 >>> file.close()
 
 >>> # de-serializing
@@ -153,5 +150,5 @@ datetime.timedelta(365)
 >>> jalali = pickle.load(file)
 >>> file.close()
 >>> jalali
-JalaliDate(1369, 7, 1, Yekshanbeh)
+JalaliDate(1367, 2, 14, Chaharshanbeh)
 ```
