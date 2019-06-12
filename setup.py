@@ -4,7 +4,7 @@
 from io import open
 from setuptools import setup
 
-version = "1.4.0"
+import persiantools
 
 
 def readme():
@@ -14,7 +14,7 @@ def readme():
 
 setup(
     name="persiantools",
-    version=version,
+    version=persiantools.__version__,
     description="Jalali date and datetime with other tools",
     long_description=readme(),
     long_description_content_type="text/markdown",
