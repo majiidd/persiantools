@@ -1,6 +1,4 @@
-version: '1.4.0.{build}'
-
-clone_depth: 50
+version: '1.4.1.{build}'
 
 environment:
   matrix:
@@ -56,4 +54,4 @@ install:
 build: off
 
 test_script:
-  - py.test --cov=persiantools tests/
+  - py.test --cov=persiantools tests/ -v

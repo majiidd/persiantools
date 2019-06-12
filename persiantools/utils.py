@@ -11,7 +11,7 @@ def replace(string, dictionary):
     if not isinstance(string, basestring):
         raise TypeError("accept string type")
 
-    pattern = re.compile('|'.join(dictionary.keys()))
+    pattern = re.compile("|".join(dictionary.keys()))
     return pattern.sub(lambda x: dictionary[x.group()], string)
 
 
@@ -28,10 +28,8 @@ def check_int_field(value):
             if isinstance(value, int):
                 return value
 
-            raise TypeError(
-                '__int__ returned non-int (type %s)' % type(value).__name__)
+            raise TypeError("__int__ returned non-int (type %s)" % type(value).__name__)
 
-        raise TypeError(
-            'an integer is required (got type %s)' % type(value).__name__)
+        raise TypeError("an integer is required (got type %s)" % type(value).__name__)
 
-    raise TypeError('integer argument expected, got float')
+    raise TypeError("integer argument expected, got float")

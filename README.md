@@ -8,6 +8,7 @@
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
 - Jalali (Shamsi) date and datetime (based on python datetime's module)
+
   - Convert Jalali to Gregorian date/datetime and vice versa
   - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`
   - Support timezone
@@ -16,15 +17,15 @@
 
 ## Install Package
 
-``` {.sourceCode .bash}
+```{.sourceCode .bash}
 pip install persiantools
-```  
+```
 
 ## How to use
 
 ### Date
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate
 >>> import datetime
 
@@ -49,7 +50,7 @@ JalaliDate(1367, 2, 14, Chaharshanbeh)
 
 ### Datetime
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDateTime
 >>> import datetime, pytz
 
@@ -67,13 +68,13 @@ JalaliDateTime(1367, 2, 14, 8, 0, tzinfo=<DstTzInfo 'Asia/Tehran' +0330+3:30:00 
 
 >>> JalaliDateTime.now(pytz.utc)
 JalaliDateTime(1395, 4, 17, 21, 23, 53, 474618, tzinfo=<UTC>)
-```  
+```
 
 ### Format
 
 Based on python `strftime()` behavior
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import pytz
 
@@ -92,13 +93,13 @@ Based on python `strftime()` behavior
 
 ### Digit/Character converter
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools import characters, digits
 
 >>> digits.en_to_fa("0987654321")
 '۰۹۸۷۶۵۴۳۲۱'
 
->>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")
+>>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")   # or digits.ar_to_fa(u"٠٩٨٧٦٥٤٣٢١")
 '۰۹۸۷۶۵۴۳۲۱'
 
 >>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
@@ -107,16 +108,13 @@ Based on python `strftime()` behavior
 >>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
 '٠٩٨٧٦٥٤٣٢١'
 
->>> characters.ar_to_fa("راك")
-'راک'
-
->>> characters.fa_to_ar("ای چرخ فلک خرابی از کینه تست")
-'اي چرخ فلك خرابي از كينه تست'
+>>> characters.ar_to_fa("كيك")
+'کیک'
 ```
 
 ### Operators
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import datetime
 
@@ -138,13 +136,13 @@ datetime.timedelta(365)
 
 ### Serializing and de-serializing
 
-``` {.sourceCode .python}
+```{.sourceCode .python}
 >>> from persiantools.jdatetime import JalaliDate
 >>> import pickle
 
 >>> # Serializing
 >>> file = open("save.p", "wb")
->>> pickle.dump(JalaliDate(1369, 7, 1), file)
+>>> pickle.dump(JalaliDate(1367, 2, 14), file)
 >>> file.close()
 
 >>> # de-serializing
@@ -152,4 +150,5 @@ datetime.timedelta(365)
 >>> jalali = pickle.load(file)
 >>> file.close()
 >>> jalali
-JalaliDate(1369, 7, 1, Yekshanbeh)
+JalaliDate(1367, 2, 14, Chaharshanbeh)
+```

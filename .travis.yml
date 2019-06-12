@@ -6,18 +6,20 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-  - "3.7-dev"
   - "3.8-dev"
   - "pypy"
   - "pypy3"
   - "pypy3.5"
 
 install:
+  - python -c "import sys, platform, struct;
+    print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
+  - pip install -U pip setuptools
   - pip install coveralls
   - pip install -r requirements.txt
 
 script:
-  py.test --cov=persiantools tests/
+  py.test --cov=persiantools tests/ -v
 
 after_success:
   coveralls
