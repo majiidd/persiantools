@@ -14,12 +14,12 @@ python:
 install:
   - python -c "import sys, platform, struct;
     print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
+  - pip install -U pip setuptools
   - pip install coveralls
   - pip install -r requirements.txt
 
 script:
-  - py.test --cov=persiantools tests/ -v
-  - black persiantools/ setup.py --check -l 100
+  py.test --cov=persiantools tests/ -v
 
 after_success:
   coveralls
