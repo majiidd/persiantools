@@ -1,9 +1,9 @@
 # PersianTools
 
 [![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
-[![Travis (.org)](https://img.shields.io/travis/mhajiloo/persiantools/master.svg)](https://travis-ci.org/mhajiloo/persiantools)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/8v49tpadjb3d68pe/branch/master?svg=true)](https://ci.appveyor.com/project/mhajiloo/persiantools/branch/master)
-[![Coveralls](https://coveralls.io/repos/github/mhajiloo/persiantools/badge.svg?branch=master)](https://coveralls.io/github/mhajiloo/persiantools?branch=master)
+[![Travis (.org)](https://img.shields.io/travis/majiidd/persiantools/master.svg)](https://travis-ci.com/github/majiidd/persiantools)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/kau1fi7gp8em94nf/branch/master?svg=true)](https://ci.appveyor.com/project/majiidd/persiantools/branch/master)
+[![Coveralls](https://coveralls.io/repos/github/majiidd/persiantools/badge.svg?branch=master)](https://coveralls.io/github/majiidd/persiantools?branch=master)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
