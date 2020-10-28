@@ -18,8 +18,9 @@
 ## Install Package
 
 ```{.sourceCode .bash}
-pip install persiantools
+python -m pip install persiantools
 ```
+Persiantools supports Python 2.7 & 3.5+.
 
 ## How to use
 

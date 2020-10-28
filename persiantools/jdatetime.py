@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
+import operator
 
 from persiantools import digits, utils, PY2
 
@@ -160,9 +161,9 @@ class JalaliDate(object):
 
     @classmethod
     def _check_date_fields(cls, year, month, day, locale):
-        year = utils.check_int_field(year)
-        month = utils.check_int_field(month)
-        day = utils.check_int_field(day)
+        year = operator.index(year)
+        month = operator.index(month)
+        day = operator.index(day)
 
         if not MINYEAR <= year <= MAXYEAR:
             raise ValueError("year must be in %d..%d" % (MINYEAR, MAXYEAR), year)

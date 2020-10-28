@@ -9,7 +9,7 @@
 
 __title__ = "persiantools"
 __url__ = "https://github.com/majiidd/persiantools"
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 __build__ = __version__
 __author__ = "Majid Hajiloo"
 __author_email__ = "majid.hajiloo@gmail.com"
