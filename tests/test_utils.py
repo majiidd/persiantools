@@ -22,12 +22,3 @@ class TestUtils(TestCase):
             ),
             u"اایی بس که نباشیم و جهان خخووااههدد بود",
         )
-
-    def test_int(self):
-        self.assertEqual(utils.check_int_field(100010001), 100010001)
-
-        with pytest.raises(TypeError):
-            utils.check_int_field(1111.9999)
-
-        with pytest.raises(TypeError):
-            utils.check_int_field("1000")
