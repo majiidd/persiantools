@@ -7,7 +7,6 @@ python:
   - "3.8"
   - "3.9"
   - "3.10-dev"
-  - "pypy2"
   - "pypy3"
 
 install:
@@ -17,7 +16,6 @@ install:
   - pip install coveralls
   - pip install pipenv
   - pipenv install --dev
-  - pre-commit run --all-files
 
 script:
   py.test --cov=persiantools tests/ -v

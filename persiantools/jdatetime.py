@@ -104,7 +104,7 @@ _MONTH_COUNT = [
 ]
 
 
-class JalaliDate(object):
+class JalaliDate:
     __slots__ = "_year", "_month", "_day", "_locale", "_hashcode"
 
     def __init__(self, year, month=None, day=None, locale="en"):
@@ -628,7 +628,7 @@ class JalaliDateTime(JalaliDate):
             microsecond = self._microsecond
             tzinfo = self._tzinfo
 
-        super(JalaliDateTime, self).__init__(year, month, day, locale)
+        super().__init__(year, month, day, locale)
         self._check_tzinfo_arg(tzinfo)
         self._check_time_fields(hour, minute, second, microsecond)
 
@@ -917,7 +917,7 @@ class JalaliDateTime(JalaliDate):
         )
 
     def to_gregorian(self):
-        g_date = super(JalaliDateTime, self).to_gregorian()
+        g_date = super().to_gregorian()
 
         return dt.combine(
             g_date,
@@ -953,7 +953,7 @@ class JalaliDateTime(JalaliDate):
             del d_datetime[-1]
 
         s = ", ".join(map(str, d_datetime))
-        s = "%s(%s)" % ("JalaliDateTime", s)
+        s = "{}({})".format("JalaliDateTime", s)
 
         if self._tzinfo is not None:
             assert s[-1:] == ")"
@@ -984,7 +984,7 @@ class JalaliDateTime(JalaliDate):
 
         result = utils.replace(fmt, format_time)
 
-        result = super(JalaliDateTime, self).strftime(result, "en")
+        result = super().strftime(result, "en")
 
         return result
 
@@ -1074,7 +1074,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __lt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1084,7 +1084,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __ge__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1094,7 +1094,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __gt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1104,7 +1104,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __add__(self, other):
         if not isinstance(other, timedelta):

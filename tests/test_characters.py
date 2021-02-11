@@ -10,7 +10,7 @@ class TestDigits(TestCase):
         self.assertEqual(characters.ar_to_fa("السلام عليكم"), "السلام علیکم")
         self.assertEqual(characters.ar_to_fa("HI ي"), "HI ی")
         self.assertEqual(characters.ar_to_fa("دِ بِ زِ ذِ شِ سِ ى ي ك"), "د ب ز ذ ش س ی ی ک")
-        self.assertEqual(characters.ar_to_fa(u"دِ بِ زِ ذِ شِ سِ ى ي ك"), u"د ب ز ذ ش س ی ی ک")
+        self.assertEqual(characters.ar_to_fa("دِ بِ زِ ذِ شِ سِ ى ي ك"), "د ب ز ذ ش س ی ی ک")
         self.assertEqual(
             characters.ar_to_fa("ظ ط ذ د ز ر و ، . ش س ي ب ل ا ت ن م ك ض ص ث ق ف غ ع ه خ ح ؟"),
             "ظ ط ذ د ز ر و ، . ش س ی ب ل ا ت ن م ک ض ص ث ق ف غ ع ه خ ح ؟",
@@ -26,7 +26,7 @@ class TestDigits(TestCase):
 
     def test_fa_to_fa(self):
         self.assertEqual(characters.ar_to_fa("السلام علیکم"), "السلام علیکم")
-        self.assertEqual(characters.ar_to_fa(u"السلام علیکم"), u"السلام علیکم")
+        self.assertEqual(characters.ar_to_fa("السلام علیکم"), "السلام علیکم")
 
     def test_fa_to_ar(self):
         self.assertEqual(characters.fa_to_ar("کیک"), "كيك")
