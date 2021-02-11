@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-import sys
-from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 import operator
+import sys
+from datetime import date
+from datetime import datetime as dt
+from datetime import time as _time
+from datetime import timedelta, tzinfo
 
-from persiantools import digits, utils, PY2
+from persiantools import PY2, digits, utils
 
 MINYEAR = 1
 MAXYEAR = 9377
@@ -619,9 +622,7 @@ class JalaliDateTime(JalaliDate):
 
             year = j.year
 
-        elif (isinstance(year, bytes) and len(year) == 10) or (
-            isinstance(year, str) and year.startswith("[", 0, 1)
-        ):
+        elif (isinstance(year, bytes) and len(year) == 10) or (isinstance(year, str) and year.startswith("[", 0, 1)):
             if PY2:
                 import ast
 
@@ -886,14 +887,10 @@ class JalaliDateTime(JalaliDate):
             return
 
         if not isinstance(offset, timedelta):
-            raise TypeError(
-                "tzinfo.%s() must return None " "or timedelta, not '%s'" % (name, type(offset))
-            )
+            raise TypeError("tzinfo.%s() must return None " "or timedelta, not '%s'" % (name, type(offset)))
 
         if offset % timedelta(minutes=1) or offset.microseconds:
-            raise ValueError(
-                "tzinfo.%s() must return a whole number " "of minutes, got %s" % (name, offset)
-            )
+            raise ValueError("tzinfo.%s() must return a whole number " "of minutes, got %s" % (name, offset))
 
         if not -timedelta(1) < offset < timedelta(1):
             raise ValueError(
@@ -1088,9 +1085,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
 
     def __lt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1100,9 +1095,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
 
     def __ge__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1112,9 +1105,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
 
     def __gt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1124,9 +1115,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__))
 
     def __add__(self, other):
         if not isinstance(other, timedelta):

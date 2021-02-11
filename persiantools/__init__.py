@@ -9,12 +9,12 @@
 
 __title__ = "persiantools"
 __url__ = "https://github.com/majiidd/persiantools"
-__version__ = "1.5.1"
+__version__ = "1.6.0"
 __build__ = __version__
 __author__ = "Majid Hajiloo"
 __author_email__ = "majid.hajiloo@gmail.com"
 __license__ = "MIT"
-__copyright__ = "Copyright (c) 2016-2020 Majid Hajiloo"
+__copyright__ = "Copyright (c) 2016-2021 Majid Hajiloo"
 
 
 import sys

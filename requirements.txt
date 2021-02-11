@@ -1,4 +1,0 @@
-coverage==5.3
-pytest==4.6.11
-pytest-cov==2.10.1
-pytz==2020.1

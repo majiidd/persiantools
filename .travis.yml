@@ -17,7 +17,8 @@ install:
     print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
   - pip install -U pip setuptools
   - pip install coveralls
-  - pip install -r requirements.txt
+  - pip install pipenv
+  - pipenv install --dev
 
 script:
   py.test --cov=persiantools tests/ -v

@@ -5,7 +5,7 @@ environment:
     - PYTHON: C:\Python27
       PYTHON_VERSION: 2.7
       PYTHON_ARCH: 32
-    
+
     - PYTHON: C:\Python27-x64
       PYTHON_VERSION: 2.7
       PYTHON_ARCH: 64
@@ -61,9 +61,10 @@ install:
     print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
 
   - python -m pip install -U pip setuptools wheel
-  - pip install -U -r requirements.txt
+  - pip install pipenv
+  - pipenv install --dev
 
 build: off
 
 test_script:
-  - py.test --cov=persiantools tests/ -v
+  - pipenv run py.test --cov=persiantools tests/ -v

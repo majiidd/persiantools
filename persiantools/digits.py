@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from persiantools import utils, PY2
+from persiantools import PY2, utils
 
 
 def en_to_fa(string):
     """Convert EN digits to Persian
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.en_to_fa("0123456789")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.en_to_fa("0123456789")
 
-        :param string:  A string, will be converted
-        :rtype: str
+    :param string:  A string, will be converted
+    :rtype: str
     """
     digits_map = {
         "0": "۰",
@@ -35,13 +35,13 @@ def en_to_fa(string):
 def ar_to_fa(string):
     """Convert Arabic digits to Persian
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
 
-        :param string: A string, will be converted
-        :rtype: str
-        """
+    :param string: A string, will be converted
+    :rtype: str
+    """
     digits_map = {
         "٠": "۰",
         "١": "۱",
@@ -65,13 +65,13 @@ def ar_to_fa(string):
 def fa_to_en(string):
     """Convert Persian digits to EN
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.fa_to_en("۰۱۲۳۴۵۶۷۸۹")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.fa_to_en("۰۱۲۳۴۵۶۷۸۹")
 
-        :param string: A string, will be converted
-        :rtype: str
-        """
+    :param string: A string, will be converted
+    :rtype: str
+    """
     digits_map = {
         "۰": "0",
         "۱": "1",
@@ -95,13 +95,13 @@ def fa_to_en(string):
 def fa_to_ar(string):
     """Convert Persian digits to Arabic
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.fa_to_ar("۰۱۲۳۴۵۶۷۸۹")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.fa_to_ar("۰۱۲۳۴۵۶۷۸۹")
 
-        :param string: A string, will be converted
-        :rtype: str
-        """
+    :param string: A string, will be converted
+    :rtype: str
+    """
     digits_map = {
         "۰": "٠",
         "۱": "١",
