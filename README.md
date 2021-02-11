@@ -20,7 +20,7 @@
 ```{.sourceCode .bash}
 python -m pip install persiantools
 ```
-Persiantools supports Python 2.7 & 3.5+.
+Persiantools supports Python 3.6+. (_for python 2.7 and 3.5 use [1.5.x](https://github.com/majiidd/persiantools/tree/1.5.x) version_)
 
 ## How to use
 

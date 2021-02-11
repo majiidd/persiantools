@@ -47,7 +47,6 @@ install:
   - python -m pip install -U pip setuptools wheel
   - pip install pipenv
   - pipenv install --dev
-  - pipenv run pre-commit run --all-files
 
 build: off
 
