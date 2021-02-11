@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import operator
 import sys
 from datetime import date
@@ -6,7 +5,7 @@ from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, tzinfo
 
-from persiantools import PY2, digits, utils
+from persiantools import digits, utils
 
 MINYEAR = 1
 MAXYEAR = 9377
@@ -122,12 +121,7 @@ class JalaliDate(object):
         elif (isinstance(year, bytes) and len(year) == 4 and 1 <= year[2] <= 12) or (
             isinstance(year, str) and year.startswith("[", 0, 1)
         ):
-            if PY2:
-                import ast
-
-                self.__setstate__(ast.literal_eval(year))
-            else:
-                self.__setstate__(year)
+            self.__setstate__(year)
 
             year = self._year
             month = self._month
@@ -297,14 +291,14 @@ class JalaliDate(object):
             30,
             31,
         ]
-        gm = 0
 
-        for gm, g in enumerate(g_d_m):
+        _gm = 0
+        for _gm, g in enumerate(g_d_m):
             if gd <= g:
                 break
             gd -= g
 
-        return date(gy, gm, gd)
+        return date(gy, _gm, gd)
 
     @classmethod
     def today(cls):
@@ -623,12 +617,7 @@ class JalaliDateTime(JalaliDate):
             year = j.year
 
         elif (isinstance(year, bytes) and len(year) == 10) or (isinstance(year, str) and year.startswith("[", 0, 1)):
-            if PY2:
-                import ast
-
-                self.__setstate__(ast.literal_eval(year), month)
-            else:
-                self.__setstate__(year, month)
+            self.__setstate__(year, month)
 
             year = self._year
             month = self._month
@@ -863,7 +852,7 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        name = getattr(self._tzinfo, "tzname")(self.to_gregorian())
+        name = self._tzinfo.tzname(self.to_gregorian())
 
         if name is not None and not isinstance(name, str):
             raise TypeError("tzinfo.tzname() must return None or string, " "not '%s'" % type(name))
@@ -947,7 +936,7 @@ class JalaliDateTime(JalaliDate):
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
-        l = [
+        d_datetime = [
             self._year,
             self._month,
             self._day,  # These are never zero
@@ -957,13 +946,13 @@ class JalaliDateTime(JalaliDate):
             self._microsecond,
         ]
 
-        if l[-1] == 0:
-            del l[-1]
+        if d_datetime[-1] == 0:
+            del d_datetime[-1]
 
-        if l[-1] == 0:
-            del l[-1]
+        if d_datetime[-1] == 0:
+            del d_datetime[-1]
 
-        s = ", ".join(map(str, l))
+        s = ", ".join(map(str, d_datetime))
         s = "%s(%s)" % ("JalaliDateTime", s)
 
         if self._tzinfo is not None:

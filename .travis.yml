@@ -2,8 +2,6 @@ os: linux
 dist: bionic
 language: python
 python:
-  - "2.7"
-  - "3.5"
   - "3.6"
   - "3.7"
   - "3.8"
@@ -19,6 +17,7 @@ install:
   - pip install coveralls
   - pip install pipenv
   - pipenv install --dev
+  - pre-commit run --all-files
 
 script:
   py.test --cov=persiantools tests/ -v

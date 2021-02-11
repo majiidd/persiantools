@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 120
+extend-ignore =
+    E501,  # line too long
+max-complexity = 10
+select = B,C,E,F,W
