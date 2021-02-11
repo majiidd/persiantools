@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 from unittest import TestCase
-import pytest
 
 from persiantools import utils
 
@@ -17,8 +15,8 @@ class TestUtils(TestCase):
         )
         self.assertEqual(
             utils.replace(
-                u"ای بس که نباشیم و جهان خواهد بود",
-                {u"ای": u"اایی", u"خواهد": u"خخووااههدد"},
+                "ای بس که نباشیم و جهان خواهد بود",
+                {"ای": "اایی", "خواهد": "خخووااههدد"},
             ),
-            u"اایی بس که نباشیم و جهان خخووااههدد بود",
+            "اایی بس که نباشیم و جهان خخووااههدد بود",
         )

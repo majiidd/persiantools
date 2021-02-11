@@ -1,14 +1,9 @@
-# -*- coding: utf-8 -*-
 import re
-
-try:
-    basestring
-except NameError:
-    basestring = str
+from typing import Dict
 
 
-def replace(string, dictionary):
-    if not isinstance(string, basestring):
+def replace(string: str, dictionary: Dict[str, str]) -> str:
+    if not isinstance(string, str):
         raise TypeError("accept string type")
 
     pattern = re.compile("|".join(dictionary.keys()))

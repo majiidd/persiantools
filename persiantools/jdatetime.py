@@ -1,9 +1,11 @@
-# -*- coding: utf-8 -*-
-import sys
-from datetime import date, timedelta, tzinfo, time as _time, datetime as dt
 import operator
+import sys
+from datetime import date
+from datetime import datetime as dt
+from datetime import time as _time
+from datetime import timedelta, tzinfo
 
-from persiantools import digits, utils, PY2
+from persiantools import digits, utils
 
 MINYEAR = 1
 MAXYEAR = 9377
@@ -102,7 +104,7 @@ _MONTH_COUNT = [
 ]
 
 
-class JalaliDate(object):
+class JalaliDate:
     __slots__ = "_year", "_month", "_day", "_locale", "_hashcode"
 
     def __init__(self, year, month=None, day=None, locale="en"):
@@ -119,12 +121,7 @@ class JalaliDate(object):
         elif (isinstance(year, bytes) and len(year) == 4 and 1 <= year[2] <= 12) or (
             isinstance(year, str) and year.startswith("[", 0, 1)
         ):
-            if PY2:
-                import ast
-
-                self.__setstate__(ast.literal_eval(year))
-            else:
-                self.__setstate__(year)
+            self.__setstate__(year)
 
             year = self._year
             month = self._month
@@ -294,14 +291,14 @@ class JalaliDate(object):
             30,
             31,
         ]
-        gm = 0
 
-        for gm, g in enumerate(g_d_m):
+        _gm = 0
+        for _gm, g in enumerate(g_d_m):
             if gd <= g:
                 break
             gd -= g
 
-        return date(gy, gm, gd)
+        return date(gy, _gm, gd)
 
     @classmethod
     def today(cls):
@@ -619,15 +616,8 @@ class JalaliDateTime(JalaliDate):
 
             year = j.year
 
-        elif (isinstance(year, bytes) and len(year) == 10) or (
-            isinstance(year, str) and year.startswith("[", 0, 1)
-        ):
-            if PY2:
-                import ast
-
-                self.__setstate__(ast.literal_eval(year), month)
-            else:
-                self.__setstate__(year, month)
+        elif (isinstance(year, bytes) and len(year) == 10) or (isinstance(year, str) and year.startswith("[", 0, 1)):
+            self.__setstate__(year, month)
 
             year = self._year
             month = self._month
@@ -638,7 +628,7 @@ class JalaliDateTime(JalaliDate):
             microsecond = self._microsecond
             tzinfo = self._tzinfo
 
-        super(JalaliDateTime, self).__init__(year, month, day, locale)
+        super().__init__(year, month, day, locale)
         self._check_tzinfo_arg(tzinfo)
         self._check_time_fields(hour, minute, second, microsecond)
 
@@ -862,7 +852,7 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        name = getattr(self._tzinfo, "tzname")(self.to_gregorian())
+        name = self._tzinfo.tzname(self.to_gregorian())
 
         if name is not None and not isinstance(name, str):
             raise TypeError("tzinfo.tzname() must return None or string, " "not '%s'" % type(name))
@@ -886,14 +876,10 @@ class JalaliDateTime(JalaliDate):
             return
 
         if not isinstance(offset, timedelta):
-            raise TypeError(
-                "tzinfo.%s() must return None " "or timedelta, not '%s'" % (name, type(offset))
-            )
+            raise TypeError("tzinfo.%s() must return None " "or timedelta, not '%s'" % (name, type(offset)))
 
         if offset % timedelta(minutes=1) or offset.microseconds:
-            raise ValueError(
-                "tzinfo.%s() must return a whole number " "of minutes, got %s" % (name, offset)
-            )
+            raise ValueError("tzinfo.%s() must return a whole number " "of minutes, got %s" % (name, offset))
 
         if not -timedelta(1) < offset < timedelta(1):
             raise ValueError(
@@ -931,7 +917,7 @@ class JalaliDateTime(JalaliDate):
         )
 
     def to_gregorian(self):
-        g_date = super(JalaliDateTime, self).to_gregorian()
+        g_date = super().to_gregorian()
 
         return dt.combine(
             g_date,
@@ -950,7 +936,7 @@ class JalaliDateTime(JalaliDate):
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
-        l = [
+        d_datetime = [
             self._year,
             self._month,
             self._day,  # These are never zero
@@ -960,14 +946,14 @@ class JalaliDateTime(JalaliDate):
             self._microsecond,
         ]
 
-        if l[-1] == 0:
-            del l[-1]
+        if d_datetime[-1] == 0:
+            del d_datetime[-1]
 
-        if l[-1] == 0:
-            del l[-1]
+        if d_datetime[-1] == 0:
+            del d_datetime[-1]
 
-        s = ", ".join(map(str, l))
-        s = "%s(%s)" % ("JalaliDateTime", s)
+        s = ", ".join(map(str, d_datetime))
+        s = "{}({})".format("JalaliDateTime", s)
 
         if self._tzinfo is not None:
             assert s[-1:] == ")"
@@ -998,7 +984,7 @@ class JalaliDateTime(JalaliDate):
 
         result = utils.replace(fmt, format_time)
 
-        result = super(JalaliDateTime, self).strftime(result, "en")
+        result = super().strftime(result, "en")
 
         return result
 
@@ -1088,9 +1074,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __lt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1100,9 +1084,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __ge__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1112,9 +1094,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __gt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1124,9 +1104,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError(
-                "can't compare '%s' to '%s'" % (type(self).__name__, type(other).__name__)
-            )
+            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
 
     def __add__(self, other):
         if not isinstance(other, timedelta):

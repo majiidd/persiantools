@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
-from persiantools import utils, PY2
+from persiantools import utils
 
 
-def en_to_fa(string):
+def en_to_fa(string: str) -> str:
     """Convert EN digits to Persian
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.en_to_fa("0123456789")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.en_to_fa("0123456789")
 
-        :param string:  A string, will be converted
-        :rtype: str
+    :param string:  A string, will be converted
+    :rtype: str
     """
     digits_map = {
         "0": "۰",
@@ -25,23 +24,19 @@ def en_to_fa(string):
         "9": "۹",
     }
 
-    if PY2:
-        if isinstance(string, unicode):
-            digits_map = {unicode(e, "utf8"): unicode(f, "utf8") for e, f in digits_map.iteritems()}
-
     return utils.replace(string, digits_map)
 
 
-def ar_to_fa(string):
+def ar_to_fa(string: str) -> str:
     """Convert Arabic digits to Persian
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
 
-        :param string: A string, will be converted
-        :rtype: str
-        """
+    :param string: A string, will be converted
+    :rtype: str
+    """
     digits_map = {
         "٠": "۰",
         "١": "۱",
@@ -55,23 +50,19 @@ def ar_to_fa(string):
         "٩": "۹",
     }
 
-    if PY2:
-        if isinstance(string, unicode):
-            digits_map = {unicode(a, "utf8"): unicode(f, "utf8") for a, f in digits_map.iteritems()}
-
     return utils.replace(string, digits_map)
 
 
-def fa_to_en(string):
+def fa_to_en(string: str) -> str:
     """Convert Persian digits to EN
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.fa_to_en("۰۱۲۳۴۵۶۷۸۹")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.fa_to_en("۰۱۲۳۴۵۶۷۸۹")
 
-        :param string: A string, will be converted
-        :rtype: str
-        """
+    :param string: A string, will be converted
+    :rtype: str
+    """
     digits_map = {
         "۰": "0",
         "۱": "1",
@@ -85,23 +76,19 @@ def fa_to_en(string):
         "۹": "9",
     }
 
-    if PY2:
-        if isinstance(string, unicode):
-            digits_map = {unicode(f, "utf8"): unicode(e, "utf8") for f, e in digits_map.iteritems()}
-
     return utils.replace(string, digits_map)
 
 
-def fa_to_ar(string):
+def fa_to_ar(string: str) -> str:
     """Convert Persian digits to Arabic
 
-        Usage::
-        >>> from persiantools import digits
-        >>> converted = digits.fa_to_ar("۰۱۲۳۴۵۶۷۸۹")
+    Usage::
+    >>> from persiantools import digits
+    >>> converted = digits.fa_to_ar("۰۱۲۳۴۵۶۷۸۹")
 
-        :param string: A string, will be converted
-        :rtype: str
-        """
+    :param string: A string, will be converted
+    :rtype: str
+    """
     digits_map = {
         "۰": "٠",
         "۱": "١",
@@ -114,9 +101,5 @@ def fa_to_ar(string):
         "۸": "٨",
         "۹": "٩",
     }
-
-    if PY2:
-        if isinstance(string, unicode):
-            digits_map = {unicode(f, "utf8"): unicode(a, "utf8") for f, a in digits_map.iteritems()}
 
     return utils.replace(string, digits_map)
