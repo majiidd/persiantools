@@ -14,6 +14,7 @@
   - Support timezone
 
 - Convert Arabic and Persian characters/digits to each other
+- Convert numbers to words
 
 ## Install Package
 
@@ -100,14 +101,14 @@ Based on python `strftime()` behavior
 >>> digits.en_to_fa("0987654321")
 '۰۹۸۷۶۵۴۳۲۱'
 
->>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")   # or digits.ar_to_fa(u"٠٩٨٧٦٥٤٣٢١")
+>>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")
 '۰۹۸۷۶۵۴۳۲۱'
 
 >>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
 '0987654321'
 
->>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
-'٠٩٨٧٦٥٤٣٢١'
+>>> digits.to_word(9512026)
+'نه میلیون و پانصد و دوازده هزار و بیست و شش'
 
 >>> characters.ar_to_fa("كيك")
 'کیک'
@@ -153,3 +154,14 @@ datetime.timedelta(365)
 >>> jalali
 JalaliDate(1367, 2, 14, Chaharshanbeh)
 ```
+
+
+### Converting numbers to letters
+```{.sourceCode .python}
+>>> from persiantools.numbers import number_to_leter
+
+>>> number_to_leter('121274564538922')
+'صد و بیست و یک تریلیون و دویست و هفتاد و چهار میلیارد و پانصد و شصت و چهار میلیون و پانصد و سی و هشت هزار و نهصد و بیست و دو '
+
+>>> number_to_leter('12۳')
+'صد و بیست و سه'
