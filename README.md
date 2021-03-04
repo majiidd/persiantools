@@ -93,7 +93,7 @@ Based on python `strftime()` behavior
 '01:49:22.518523 PM +0000 UTC'
 ```
 
-### Digit/Character converter
+### Digits/Characters Tools
 
 ```{.sourceCode .python}
 >>> from persiantools import characters, digits
@@ -154,14 +154,3 @@ datetime.timedelta(365)
 >>> jalali
 JalaliDate(1367, 2, 14, Chaharshanbeh)
 ```
-
-
-### Converting numbers to letters
-```{.sourceCode .python}
->>> from persiantools.numbers import number_to_leter
-
->>> number_to_leter('121274564538922')
-'صد و بیست و یک تریلیون و دویست و هفتاد و چهار میلیارد و پانصد و شصت و چهار میلیون و پانصد و سی و هشت هزار و نهصد و بیست و دو '
-
->>> number_to_leter('12۳')
-'صد و بیست و سه'
