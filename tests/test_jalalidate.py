@@ -21,6 +21,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1396, 7, 27).to_gregorian(), date(2017, 10, 19))
         self.assertEqual(JalaliDate(1397, 11, 29).to_gregorian(), date(2019, 2, 18))
         self.assertEqual(JalaliDate(1399, 11, 23).to_gregorian(), date(2021, 2, 11))
+        self.assertEqual(JalaliDate(1400, 4, 25).to_gregorian(), date(2021, 7, 16))
 
         self.assertEqual(JalaliDate.today().to_gregorian(), date.today())
 
@@ -31,14 +32,14 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(date(2000, 1, 1)), JalaliDate(1378, 10, 11))
         self.assertEqual(JalaliDate(date(2017, 10, 19)), JalaliDate(1396, 7, 27))
         self.assertEqual(JalaliDate(date(2019, 2, 18)), JalaliDate(1397, 11, 29))
-
-        self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
-
         self.assertEqual(JalaliDate.to_jalali(1990, 9, 23), JalaliDate(1369, 7, 1))
         self.assertEqual(JalaliDate.to_jalali(1990, 9, 23), JalaliDate(1369, 7, 1))
         self.assertEqual(JalaliDate.to_jalali(2013, 9, 16), JalaliDate(1392, 6, 25))
         self.assertEqual(JalaliDate.to_jalali(2018, 3, 20), JalaliDate(1396, 12, 29))
         self.assertEqual(JalaliDate.to_jalali(2021, 2, 11), JalaliDate(1399, 11, 23))
+        self.assertEqual(JalaliDate.to_jalali(2021, 7, 16), JalaliDate(1400, 4, 25))
+
+        self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
 
     def test_chackdate(self):
         self.assertEqual(JalaliDate.chack_date(1367, 2, 14), True)
@@ -53,6 +54,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.chack_date(1396, 7, 27), True)
         self.assertEqual(JalaliDate.chack_date(1397, 11, 29), True)
         self.assertEqual(JalaliDate.chack_date(1399, 11, 31), False)
+        self.assertEqual(JalaliDate.chack_date(1400, 4, 25), True)
 
     def test_completeday(self):
         jdate = JalaliDate(1398, 3, 17)
@@ -176,6 +178,9 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(j.strftime("%c"), "دوشنبه ۲۹ بهمن ۱۳۹۷")
         self.assertEqual(format(j), "۱۳۹۷-۱۱-۲۹")
+
+        j = JalaliDate(1400, 4, 25)
+        self.assertEqual(j.strftime("%c", "fa"), "جمعه ۲۵ تیر ۱۴۰۰")
 
         self.assertEqual(JalaliDate(1367, 2, 14), JalaliDate.fromisoformat("1367-02-14"))
         self.assertEqual(JalaliDate(1397, 12, 9), JalaliDate.fromisoformat("۱۳۹۷-۱۲-۰۹"))
