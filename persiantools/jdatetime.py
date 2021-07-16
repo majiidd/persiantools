@@ -467,10 +467,10 @@ class JalaliDate:
         }
 
         if "%c" in fmt:
-            fmt = utils.replace(fmt, {"%c": self.strftime("%A %d %B %Y")})
+            fmt = utils.replace(fmt, {"%c": "%A %d %B %Y"})
 
         if "%x" in fmt:
-            fmt = utils.replace(fmt, {"%x": self.strftime("%y/%m/%d")})
+            fmt = utils.replace(fmt, {"%x": "%y/%m/%d"})
 
         result = utils.replace(fmt, format_time)
 
@@ -964,7 +964,10 @@ class JalaliDateTime(JalaliDate):
     def __str__(self):
         return self.isoformat(sep=" ")
 
-    def strftime(self, fmt):
+    def strftime(self, fmt, locale=None):
+        if locale is None or locale not in ["fa", "en"]:
+            locale = self._locale
+
         datetime = self.to_gregorian()
 
         format_time = {
@@ -980,11 +983,11 @@ class JalaliDateTime(JalaliDate):
         }
 
         if "%c" in fmt:
-            fmt = utils.replace(fmt, {"%c": self.strftime("%A %d %B %Y %X")})
+            fmt = utils.replace(fmt, {"%c": "%A %d %B %Y %X"})
 
         result = utils.replace(fmt, format_time)
 
-        result = super().strftime(result, "en")
+        result = super().strftime(result, locale)
 
         return result
 
