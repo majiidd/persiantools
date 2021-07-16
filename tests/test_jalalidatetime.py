@@ -12,7 +12,7 @@ import pytz
 from persiantools.jdatetime import JalaliDate, JalaliDateTime
 
 
-class TestJalaliDate(TestCase):
+class TestJalaliDateTime(TestCase):
     def test_shamsi_to_gregorian(self):
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 14, 0, 0, 0).to_gregorian(),
@@ -262,19 +262,37 @@ class TestJalaliDate(TestCase):
             JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%X %p %z %Z"),
             "14:00:10 PM +0000 UTC",
         )
+
         self.assertEqual(
-            JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%c"),
-            "Yekshanbeh 01 Mehr 1369 14:00:10",
+            JalaliDateTime(1367, 2, 14, 14, 0, 10, 0, pytz.utc).strftime("%c"),
+            "Chaharshanbeh 14 Ordibehesht 1367 14:00:10",
         )
+
         self.assertEqual(
             JalaliDateTime(1397, 11, 30, 14, 0, 10, 0, pytz.utc).strftime("%c"),
             "Seshanbeh 30 Bahman 1397 14:00:10",
         )
+
         self.assertEqual(
-            JalaliDateTime(1369, 7, 1, 11, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"),
+            JalaliDateTime(1367, 2, 14, 11, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"),
             "11:00:10.000553 AM",
         )
+
         self.assertEqual(
-            JalaliDateTime(1369, 7, 1, 14, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"),
+            JalaliDateTime(1367, 2, 14, 14, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"),
             "02:00:10.000553 PM",
         )
+
+        jdt = JalaliDateTime(1367, 2, 14, 10, 10, 10, 10, locale="fa")
+        self.assertEqual(jdt.strftime("%c"), "چهارشنبه ۱۴ اردیبهشت ۱۳۶۷ ۱۰:۱۰:۱۰")
+
+        jdt = JalaliDateTime(1367, 2, 14, 10, 10, 10, 10)
+        self.assertEqual(jdt.strftime("%c", "fa"), "چهارشنبه ۱۴ اردیبهشت ۱۳۶۷ ۱۰:۱۰:۱۰")
+
+        jdt = JalaliDateTime(1400, 4, 25, 21, 45, 0, 0, locale="fa")
+        self.assertEqual(jdt.strftime("%c"), "جمعه ۲۵ تیر ۱۴۰۰ ۲۱:۴۵:۰۰")
+
+
+
+
+
