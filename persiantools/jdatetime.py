@@ -1,5 +1,5 @@
 import operator
-import sys
+import sys, re
 from datetime import date
 from datetime import datetime as dt
 from datetime import time as _time
@@ -931,8 +931,94 @@ class JalaliDateTime(JalaliDate):
         )
 
     @classmethod
-    def strptime(cls, data_string, fmt):
-        raise NotImplementedError
+    def strptime(cls, data_string, fmt, locale='en'):
+        if locale not in ["en", "fa"]:
+            raise ValueError("locale must be 'en' or 'fa'")
+
+        if locale == 'fa':
+            data_string = digits.fa_to_en(data_string)
+
+        month_names        = MONTH_NAMES_EN[1:] if locale == "en" else MONTH_NAMES_FA[1:]
+        month_names_abbr   = MONTH_NAMES_ABBR_EN[1:] if locale == "en" else MONTH_NAMES_ABBR_FA[1:]
+        weekday_names      = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
+        weekday_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
+        periods            = ["AM", 'PM'] if locale == "en" else ["ق.ظ", "ب.ظ"]
+
+        """
+        these patterns are derived from python official documentation on strftime and strptime behavior:
+        link: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+        look for the table under "strftime() and strptime() Format Codes" section.
+        """
+        directives_regex_pattern = {
+            "%Y": "(\d{4})",
+            "%m": "(0?[1-9]|1[0-2])",
+            "%d": "(0?[1-9]|[12][0-9]|3[0-1])",
+            "%a": "(" + "|".join(weekday_names_abbr) + ")" ,
+            "%A": "(" + "|".join(weekday_names) + ")" ,
+            # "%w": "([0-6])",
+            # "%W": "(0[1-9]|[1-4][0-9]|5[0-3])",
+            "%b": "(" + "|".join(month_names_abbr) + ")" ,
+            "%B": "(" + "|".join(month_names) + ")" ,
+            "%H": "([0-1]?[0-9]|2[0-3])",
+            "%I": "(0?[0-9]|1[0-2])",
+            "%p": "(?i)(" + "|".join(periods) + ")" ,
+            "%M": "([0-5]?[0-9])",
+            "%S": "([0-5]?[0-9])",
+            "%f": "(\d{1,6})",
+            "%Z": "(^$|(?i)\w{3})",
+            # "%j": "([0-2]\d{2}|3[0-5]\d|36[0-6])",
+            # "%U": "(0[1-9]|[1-4][0-9]|5[0-3])",
+            # "%%": "(%)",
+        }
+
+        fmt = utils.replace( fmt, {
+            "%c": "%A %d %B %Y %H:%M:%S",
+            "%x": "%Y/%m/%d",
+            "%X": "%H:%M:%S",
+            "%z": "[-+]%H%M%S?\.?%f?"
+        })
+
+        directives = re.findall("%[a-zA-Z]", fmt)
+
+        for directive in directives:
+            if directive not in directives_regex_pattern.keys():
+                raise ValueError( "'%s' is not a valid formatter element" % directive )
+
+        data_string_regex = utils.replace(fmt, directives_regex_pattern)
+
+        if re.match(data_string_regex, data_string):
+            extracted = re.findall(data_string_regex, data_string)[0]
+            values = { d: int(extracted[i]) if extracted[i].isdigit() else extracted[i]
+             for i, d in enumerate(directives) }
+
+            print(values)
+
+            if "%p" in directives:
+                if "%I" in directives:
+                    values['%H'] = values.pop('%I') if values['%p'].upper() == periods[0] else values.pop('%I') + 12
+                else:
+                    raise ValueError("using %p requires to use %I (12 hour format) as well")
+
+            if ('%b' in directives or '%B' in directives) and '%m' not in directives:
+                name = values.get('%B')
+                abbr = values.get('%b')
+                values['%m'] = ( month_names_abbr.index(abbr) if name is None else month_names.index(name) ) + 1
+
+            cls_attrs = {
+                'year': values.get('%Y', 1400),
+                'month': values.get('%m', 1),
+                'day': values.get('%d', 1),
+                'hour': values.get('%H', 0),
+                'minute': values.get('%M', 0),
+                'second': values.get('%S', 0),
+                'microsecond': values.get('%f', 0),
+                'locale': locale
+            }
+
+            return cls(**cls_attrs)
+        else:
+            # print(data_string_regex)
+            raise ValueError("data string and format are not matched")
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
