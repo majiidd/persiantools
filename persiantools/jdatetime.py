@@ -975,7 +975,7 @@ class JalaliDateTime(JalaliDate):
             "%c": "%A %d %B %Y %H:%M:%S",
             "%x": "%Y/%m/%d",
             "%X": "%H:%M:%S",
-            "%z": "[-+]%H%M%S?\.?%f?"
+            "%z": "[-+]%H%M%S?(?:\.%f)?"
         })
 
         directives = re.findall("%[a-zA-Z]", fmt)
@@ -989,7 +989,7 @@ class JalaliDateTime(JalaliDate):
         if re.match(data_string_regex, data_string):
             extracted = re.findall(data_string_regex, data_string)[0]
             values = { d: int(extracted[i]) if extracted[i].isdigit() else extracted[i]
-             for i, d in enumerate(directives) }
+             for i, d in enumerate(directives) if extracted[i] }
 
             print(values)
 
