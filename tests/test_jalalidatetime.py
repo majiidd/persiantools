@@ -292,10 +292,6 @@ class TestJalaliDateTime(TestCase):
         jdt = JalaliDateTime(1400, 4, 25, 21, 45, 0, 0, locale="fa")
         self.assertEqual(jdt.strftime("%c"), "جمعه ۲۵ تیر ۱۴۰۰ ۲۱:۴۵:۰۰")
 
-    # @classmethod
-    # def setUpClass(cls):
-    #     cls.warning
-
     def test_strptime(self):
         self.assertEqual(
             JalaliDateTime(1374, 4, 8, 13, 45, 10),
@@ -324,11 +320,11 @@ class TestJalaliDateTime(TestCase):
             JalaliDateTime.strptime("02:00:10.000553 PM", "%I:%M:%S.%f %p"),
         )
 
-        # jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, pytz.utc)
-        # self.assertEqual(
-        #     jdt,
-        #     JalaliDateTime.strptime( jdt.strftime("%x %z %Z"), "%x %z %Z")
-        # )
+        jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, pytz.utc)
+        self.assertEqual(
+            jdt,
+            JalaliDateTime.strptime( jdt.strftime("%c %f %z %Z"), "%c %f %z %Z")
+        )
 
 
 

@@ -1,11 +1,9 @@
 import operator
-import sys, re
-from datetime import date
+import sys, re, pytz
+from datetime import date, timezone
 from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, tzinfo
-
-import pytz
 
 from persiantools import digits, utils
 
@@ -952,79 +950,79 @@ class JalaliDateTime(JalaliDate):
         look for the table under "strftime() and strptime() Format Codes" section.
         """
         directives_regex_pattern = {
-            "%Y": "(\d{,4})",
-            "%m": "(0?[1-9]|1[0-2])",
-            "%d": "(0?[1-9]|[12][0-9]|3[0-1])",
-            "%a": "(" + "|".join(weekday_names_abbr) + ")" ,
-            "%A": "(" + "|".join(weekday_names) + ")" ,
-            # "%w": "([0-6])",
-            # "%W": "(0[1-9]|[1-4][0-9]|5[0-3])",
-            "%b": "(" + "|".join(month_names_abbr) + ")" ,
-            "%B": "(" + "|".join(month_names) + ")" ,
-            "%H": "([0-1]?[0-9]|2[0-3])",
-            "%I": "(0?[0-9]|1[0-2])",
-            "%p": "(?i)(" + "|".join(periods) + ")" ,
-            "%M": "([0-5]?[0-9])",
-            "%S": "([0-5]?[0-9])",
-            "%f": "(\d{1,6})",
-            "%Z": "(" + "|".join(pytz.all_timezones) + ")",
-            " " : "\s"
-            # "%j": "([0-2]\d{2}|3[0-5]\d|36[0-6])",
-            # "%U": "(0[1-9]|[1-4][0-9]|5[0-3])",
-            # "%%": "(%)",
+            "%Y": "(?P<Y>\d{,4})",
+            "%m": "(?P<m>0?[1-9]|1[0-2])",
+            "%d": "(?P<d>0?[1-9]|[12][0-9]|3[0-1])",
+            "%a": "(?P<a>" + "|".join(weekday_names_abbr) + ")" ,
+            "%A": "(?P<A>" + "|".join(weekday_names) + ")" ,
+            "%b": "(?P<b>" + "|".join(month_names_abbr) + ")" ,
+            "%B": "(?P<B>" + "|".join(month_names) + ")" ,
+            "%H": "(?P<H>[0-1]?[0-9]|2[0-3])",
+            "%I": "(?P<I>0?[0-9]|1[0-2])",
+            "%p": "(?i)(?P<p>" + "|".join(periods) + ")" ,
+            "%M": "(?P<M>[0-5]?[0-9])",
+            "%S": "(?P<S>[0-5]?[0-9])",
+            "%f": "(?P<f>\d{1,6})",
+            "%z": "(?P<z>[-+](?P<zH>[0-1]?[0-9]|2[0-3])(?P<zM>[0-5]?[0-9])(?P<zS>[0-5]?[0-9])?(\.(?P<zf>(\d{,6})))?)",
+            "%Z": "(?P<Z>"+ "|".join(pytz.all_timezones) +")",
         }
-
-        if "%z" in fmt and "%Z" not in fmt:
-            raise ValueError("%z requires usage of %Z")
 
         fmt = utils.replace( fmt, {
             "%c": "%A %d %B %Y %H:%M:%S",
             "%x": "%Y/%m/%d",
             "%X": "%H:%M:%S",
-            "%z": "[-+]%H%M%S?(?:\.%f)?"
         })
-
-        directives = re.findall("%[a-zA-Z]", fmt)
-
-        for directive in directives:
-            if directive not in directives_regex_pattern.keys():
-                raise ValueError( "'%s' is not a valid formatter element" % directive )
 
         data_string_regex = utils.replace(fmt, directives_regex_pattern)
 
         if re.match(data_string_regex, data_string):
-            extracted = re.findall(data_string_regex, data_string)[0]
-            values = { d: int(extracted[i]) if extracted[i].isdigit() else extracted[i]
-             for i, d in enumerate(directives) if extracted[i] }
+            directives = re.search(data_string_regex, data_string).groupdict()
 
-            if "%p" in directives:
-                if "%I" in directives:
-                    values['%H'] = values.pop('%I') + (0 if values['%p'].upper() == periods[0] else 12)
+            if 'Y' in directives.keys() and len(directives.get('Y')) < 4:
+                raise ValueError("Year element must contain exactly 4 digits")
+
+            directives = { k: int(v) if v.isdigit() else v for k, v in directives.items() if v }
+
+            # extraction of month number from %b|%B format
+            if ('b' in directives.keys() or 'B' in directives.keys()) and 'm' not in directives.keys():
+                name, is_abbr = (directives.pop('b'), True) if 'b' in directives.keys() else (directives.pop('B'), False)
+                directives['m'] = ( month_names_abbr.index(name) if is_abbr else month_names.index(name) ) + 1
+
+            # extraction of hour from periodic time format
+            if "p" in directives.keys():
+                if "I" in directives.keys():
+                    directives['H'] = directives.pop('I') + (0 if directives['p'].upper() == periods[0] else 12)
                 else:
                     raise ValueError("using %p requires to use %I (12 hour format) as well")
 
-            if ('%b' in directives or '%B' in directives) and '%m' not in directives:
-                name = values.get('%B')
-                abbr = values.get('%b')
-                values['%m'] = ( month_names_abbr.index(abbr) if name is None else month_names.index(name) ) + 1
-
-            assert values['%Y'] > 999, "year must be a 4 digit argument"
+            # extraction of timezone information if provided
+            tz = None
+            if 'z' in directives.keys():
+                sign = 1 if directives['z'][0] == '+' else -1
+                delta = timedelta(
+                    hours=sign*directives['zH'],
+                    minutes=sign*directives['zM'],
+                    seconds=sign*directives.get('zS', 0),
+                    microseconds=sign*directives.get('zf', 0)
+                )
+                tz = timezone(delta)
+            elif 'Z' in directives.keys():
+                tz = pytz.timezone(directives.get('Z'))
 
             cls_attrs = {
-                'year': values.get('%Y', 1400),
-                'month': values.get('%m', 1),
-                'day': values.get('%d', 1),
-                'hour': values.get('%H', 0),
-                'minute': values.get('%M', 0),
-                'second': values.get('%S', 0),
-                'microsecond': values.get('%f', 0),
-                'tzinfo': pytz.timezone( values['%Z'] ) if values.get('%Z') else None ,
+                'year': directives.get('Y', 1400),
+                'month': directives.get('m', 1),
+                'day': directives.get('d', 1),
+                'hour': directives.get('H', 0),
+                'minute': directives.get('M', 0),
+                'second': directives.get('S', 0),
+                'microsecond': directives.get('f', 0),
+                'tzinfo': tz,
                 'locale': locale
             }
 
             return cls(**cls_attrs)
         else:
-            print(data_string_regex)
             raise ValueError("data string and format are not matched")
 
     def __repr__(self):
