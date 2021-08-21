@@ -5,6 +5,8 @@ from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, tzinfo
 
+import pytz
+
 from persiantools import digits, utils
 
 MINYEAR = 1
@@ -950,7 +952,7 @@ class JalaliDateTime(JalaliDate):
         look for the table under "strftime() and strptime() Format Codes" section.
         """
         directives_regex_pattern = {
-            "%Y": "(\d{4})",
+            "%Y": "(\d{,4})",
             "%m": "(0?[1-9]|1[0-2])",
             "%d": "(0?[1-9]|[12][0-9]|3[0-1])",
             "%a": "(" + "|".join(weekday_names_abbr) + ")" ,
@@ -965,11 +967,15 @@ class JalaliDateTime(JalaliDate):
             "%M": "([0-5]?[0-9])",
             "%S": "([0-5]?[0-9])",
             "%f": "(\d{1,6})",
-            "%Z": "(^$|(?i)\w{3})",
+            "%Z": "(" + "|".join(pytz.all_timezones) + ")",
+            " " : "\s"
             # "%j": "([0-2]\d{2}|3[0-5]\d|36[0-6])",
             # "%U": "(0[1-9]|[1-4][0-9]|5[0-3])",
             # "%%": "(%)",
         }
+
+        if "%z" in fmt and "%Z" not in fmt:
+            raise ValueError("%z requires usage of %Z")
 
         fmt = utils.replace( fmt, {
             "%c": "%A %d %B %Y %H:%M:%S",
@@ -991,11 +997,9 @@ class JalaliDateTime(JalaliDate):
             values = { d: int(extracted[i]) if extracted[i].isdigit() else extracted[i]
              for i, d in enumerate(directives) if extracted[i] }
 
-            print(values)
-
             if "%p" in directives:
                 if "%I" in directives:
-                    values['%H'] = values.pop('%I') if values['%p'].upper() == periods[0] else values.pop('%I') + 12
+                    values['%H'] = values.pop('%I') + (0 if values['%p'].upper() == periods[0] else 12)
                 else:
                     raise ValueError("using %p requires to use %I (12 hour format) as well")
 
@@ -1003,6 +1007,8 @@ class JalaliDateTime(JalaliDate):
                 name = values.get('%B')
                 abbr = values.get('%b')
                 values['%m'] = ( month_names_abbr.index(abbr) if name is None else month_names.index(name) ) + 1
+
+            assert values['%Y'] > 999, "year must be a 4 digit argument"
 
             cls_attrs = {
                 'year': values.get('%Y', 1400),
@@ -1012,12 +1018,13 @@ class JalaliDateTime(JalaliDate):
                 'minute': values.get('%M', 0),
                 'second': values.get('%S', 0),
                 'microsecond': values.get('%f', 0),
+                'tzinfo': pytz.timezone( values['%Z'] ) if values.get('%Z') else None ,
                 'locale': locale
             }
 
             return cls(**cls_attrs)
         else:
-            # print(data_string_regex)
+            print(data_string_regex)
             raise ValueError("data string and format are not matched")
 
     def __repr__(self):
