@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pytz = "==2021.1"
 
 [dev-packages]
 coverage = "==5.5"
 pytest = "==6.2.2"
 pytest-cov = "==2.11.1"
-pytz = "==2021.1"
 pre-commit = "==2.10.1"
 
 [requires]
