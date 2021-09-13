@@ -1,9 +1,12 @@
 import operator
-import sys, re, pytz
-from datetime import date, timezone
+import re
+import sys
+from datetime import date
 from datetime import datetime as dt
 from datetime import time as _time
-from datetime import timedelta, tzinfo
+from datetime import timedelta, timezone, tzinfo
+
+import pytz
 
 from persiantools import digits, utils
 
