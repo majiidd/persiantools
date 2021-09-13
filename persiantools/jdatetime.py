@@ -1018,7 +1018,7 @@ class JalaliDateTime(JalaliDate):
                 tz = pytz.timezone(directives.get("Z"))
 
             cls_attrs = {
-                "year": directives.get("Y", 1400),
+                "year": directives.get("Y", 1),
                 "month": directives.get("m", 1),
                 "day": directives.get("d", 1),
                 "hour": directives.get("H", 0),
