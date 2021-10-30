@@ -3,6 +3,9 @@ from typing import Dict
 
 
 def replace(string: str, dictionary: Dict[str, str]) -> str:
+    if not string:
+        return ''
+    
     if not isinstance(string, str):
         raise TypeError("accept string type")
 
