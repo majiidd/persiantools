@@ -1,5 +1,7 @@
 import operator
 import re
+from re import escape as re_escape
+from re import IGNORECASE
 import sys
 from datetime import date
 from datetime import datetime as dt
@@ -953,21 +955,21 @@ class JalaliDateTime(JalaliDate):
         look for the table under "strftime() and strptime() Format Codes" section.
         """
         directives_regex_pattern = {
-            "%Y": r"(?P<Y>\d{,4})",
-            "%m": r"(?P<m>0?[1-9]|1[0-2])",
-            "%d": r"(?P<d>0?[1-9]|[12][0-9]|3[0-1])",
-            "%a": "(?P<a>" + "|".join(weekday_names_abbr) + ")",
-            "%A": "(?P<A>" + "|".join(weekday_names) + ")",
-            "%b": "(?P<b>" + "|".join(month_names_abbr) + ")",
-            "%B": "(?P<B>" + "|".join(month_names) + ")",
-            "%H": r"(?P<H>[0-1]?[0-9]|2[0-3])",
-            "%I": r"(?P<I>0?[0-9]|1[0-2])",
-            "%p": "(?i)(?P<p>" + "|".join(periods) + ")",
-            "%M": r"(?P<M>[0-5]?[0-9])",
-            "%S": r"(?P<S>[0-5]?[0-9])",
+            "%Y": "(?P<Y>\d\d\d\d)",
+            "%m": r"(?P<m>1[0-2]|0[1-9]|[1-9])",
+            "%d": r"(?P<d>3[0-1]|[1-2]\d|0[1-9]|[1-9]| [1-9])",
+            "%a": cls.__seqToRE(cls, weekday_names_abbr, "a"),
+            "%A": cls.__seqToRE(cls, weekday_names, "A"),
+            "%b": cls.__seqToRE(cls, month_names_abbr, "b"),
+            "%B": cls.__seqToRE(cls, month_names, "B"),
+            "%H": r"(?P<H>2[0-3]|[0-1]\d|\d)",
+            "%I": r"(?P<I>1[0-2]|0[1-9]|[1-9])",
+            "%p": "(?i)" + cls.__seqToRE(cls, periods, "p"),
+            "%M": r"(?P<M>[0-5]\d|\d)",
+            "%S": r"(?P<S>6[0-1]|[0-5]\d|\d)",
             "%f": r"(?P<f>\d{1,6})",
             "%z": r"(?P<z>[-+](?P<zH>[0-1]?[0-9]|2[0-3])(?P<zM>[0-5]?[0-9])(?P<zS>[0-5]?[0-9])?(\.(?P<zf>(\d{,6})))?)",
-            "%Z": "(?P<Z>" + "|".join(pytz.all_timezones) + ")",
+            "%Z": cls.__seqToRE(cls, pytz.all_timezones, "Z"),
         }
 
         fmt = utils.replace(
@@ -1032,6 +1034,17 @@ class JalaliDateTime(JalaliDate):
             return cls(**cls_attrs)
         else:
             raise ValueError("data string and format are not matched")
+
+    def __seqToRE(self, to_convert, directive):
+        to_convert = sorted(to_convert, key=len, reverse=True)
+        for value in to_convert:
+            if value != '':
+                break
+        else:
+            return ''
+        regex = '|'.join(re_escape(stuff) for stuff in to_convert)
+        regex = '(?P<%s>%s' % (directive, regex)
+        return '%s)' % regex
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
