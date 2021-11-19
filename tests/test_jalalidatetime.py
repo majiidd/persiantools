@@ -292,7 +292,36 @@ class TestJalaliDateTime(TestCase):
         jdt = JalaliDateTime(1400, 4, 25, 21, 45, 0, 0, locale="fa")
         self.assertEqual(jdt.strftime("%c"), "جمعه ۲۵ تیر ۱۴۰۰ ۲۱:۴۵:۰۰")
 
+    def test_strptime(self):
+        self.assertEqual(
+            JalaliDateTime(1400, 6, 23, 1, 4, 1),
+            JalaliDateTime.strptime("1400-06-23 01:04:01 am", "%Y-%m-%d %I:%M:%S %p"),
+        )
+        self.assertEqual(JalaliDateTime(1374, 4, 8, 13, 45, 10), JalaliDateTime.strptime("1374/4/8 13:45:10", "%x %X"))
+        self.assertEqual(
+            JalaliDateTime(1400, 1, 11, 23, 16, 7), JalaliDateTime.strptime("1400-01-11 23:16:07", "%Y-%m-%d %X")
+        )
+        self.assertEqual(
+            JalaliDateTime(1367, 2, 14, 1, 1, 1), JalaliDateTime.strptime("1367/02/14 01:01:01", "%Y/%m/%d %X")
+        )
 
+        persian_month = "اسفند"
+        persian_period = "ب.ظ"
+        self.assertEqual(
+            JalaliDateTime(1379, 12, 1, 23, 16, 37),
+            JalaliDateTime.strptime(
+                f"1 {persian_month} 1379 11:16 {persian_period} 37", "%d %B %Y %I:%M %p %S", locale="fa"
+            ),
+        )
 
+        self.assertEqual(
+            JalaliDateTime(1367, 2, 14, 10, 10, 10),
+            JalaliDateTime.strptime("چهارشنبه ۱۴ اردیبهشت ۱۳۶۷ ۱۰:۱۰:۱۰", "%c", locale="fa"),
+        )
+        self.assertEqual(
+            JalaliDateTime(1400, 1, 1, 14, 0, 10, 553),
+            JalaliDateTime.strptime("1400-01-01 02:00:10.000553 PM", "%Y-%m-%d %I:%M:%S.%f %p"),
+        )
 
-
+        jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, pytz.utc)
+        self.assertEqual(jdt, JalaliDateTime.strptime(jdt.strftime("%c %f %z %Z"), "%c %f %z %Z"))

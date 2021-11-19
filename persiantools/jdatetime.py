@@ -1,9 +1,14 @@
 import operator
+import re
+from re import escape as re_escape
+from re import IGNORECASE
 import sys
 from datetime import date
 from datetime import datetime as dt
 from datetime import time as _time
-from datetime import timedelta, tzinfo
+from datetime import timedelta, timezone, tzinfo
+
+import pytz
 
 from persiantools import digits, utils
 
@@ -931,8 +936,115 @@ class JalaliDateTime(JalaliDate):
         )
 
     @classmethod
-    def strptime(cls, data_string, fmt):
-        raise NotImplementedError
+    def strptime(cls, data_string, fmt, locale="en"):
+        if locale not in ["en", "fa"]:
+            raise ValueError("locale must be 'en' or 'fa'")
+
+        if locale == "fa":
+            data_string = digits.fa_to_en(data_string)
+
+        month_names = MONTH_NAMES_EN[1:] if locale == "en" else MONTH_NAMES_FA[1:]
+        month_names_abbr = MONTH_NAMES_ABBR_EN[1:] if locale == "en" else MONTH_NAMES_ABBR_FA[1:]
+        weekday_names = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
+        weekday_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
+        periods = ["AM", "PM"] if locale == "en" else ["ق.ظ", "ب.ظ"]
+
+        """
+        these patterns are derived from python official documentation on strftime and strptime behavior:
+        link: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+        look for the table under "strftime() and strptime() Format Codes" section.
+        """
+        directives_regex_pattern = {
+            "%Y": "(?P<Y>\d\d\d\d)",
+            "%m": r"(?P<m>1[0-2]|0[1-9]|[1-9])",
+            "%d": r"(?P<d>3[0-1]|[1-2]\d|0[1-9]|[1-9]| [1-9])",
+            "%a": cls.__seqToRE(cls, weekday_names_abbr, "a"),
+            "%A": cls.__seqToRE(cls, weekday_names, "A"),
+            "%b": cls.__seqToRE(cls, month_names_abbr, "b"),
+            "%B": cls.__seqToRE(cls, month_names, "B"),
+            "%H": r"(?P<H>2[0-3]|[0-1]\d|\d)",
+            "%I": r"(?P<I>1[0-2]|0[1-9]|[1-9])",
+            "%p": "(?i)" + cls.__seqToRE(cls, periods, "p"),
+            "%M": r"(?P<M>[0-5]\d|\d)",
+            "%S": r"(?P<S>6[0-1]|[0-5]\d|\d)",
+            "%f": r"(?P<f>\d{1,6})",
+            "%z": r"(?P<z>[-+](?P<zH>[0-1]?[0-9]|2[0-3])(?P<zM>[0-5]?[0-9])(?P<zS>[0-5]?[0-9])?(\.(?P<zf>(\d{,6})))?)",
+            "%Z": cls.__seqToRE(cls, pytz.all_timezones, "Z"),
+        }
+
+        fmt = utils.replace(
+            fmt,
+            {
+                "%c": "%A %d %B %Y %H:%M:%S",
+                "%x": "%Y/%m/%d",
+                "%X": "%H:%M:%S",
+            },
+        )
+
+        data_string_regex = utils.replace(fmt, directives_regex_pattern)
+
+        if re.match(data_string_regex, data_string):
+            directives = re.search(data_string_regex, data_string).groupdict()
+
+            if "Y" in directives.keys() and len(directives.get("Y")) < 4:
+                raise ValueError("Year element must contain exactly 4 digits")
+
+            directives = {k: int(v) if v.isdigit() else v for k, v in directives.items() if v}
+
+            # extraction of month number from %b|%B format
+            if ("b" in directives.keys() or "B" in directives.keys()) and "m" not in directives.keys():
+                name, is_abbr = (
+                    (directives.pop("b"), True) if "b" in directives.keys() else (directives.pop("B"), False)
+                )
+                directives["m"] = (month_names_abbr.index(name) if is_abbr else month_names.index(name)) + 1
+
+            # extraction of hour from periodic time format
+            if "p" in directives.keys():
+                if "I" in directives.keys():
+                    directives["H"] = directives.pop("I") + (0 if directives["p"].upper() == periods[0] else 12)
+                else:
+                    raise ValueError("using %p requires to use %I (12 hour format) as well")
+
+            # extraction of timezone information if provided
+            tz = None
+            if "z" in directives.keys():
+                sign = 1 if directives["z"][0] == "+" else -1
+                delta = timedelta(
+                    hours=sign * directives["zH"],
+                    minutes=sign * directives["zM"],
+                    seconds=sign * directives.get("zS", 0),
+                    microseconds=sign * directives.get("zf", 0),
+                )
+                tz = timezone(delta)
+            elif "Z" in directives.keys():
+                tz = pytz.timezone(directives.get("Z"))
+
+            cls_attrs = {
+                "year": directives.get("Y", 1),
+                "month": directives.get("m", 1),
+                "day": directives.get("d", 1),
+                "hour": directives.get("H", 0),
+                "minute": directives.get("M", 0),
+                "second": directives.get("S", 0),
+                "microsecond": directives.get("f", 0),
+                "tzinfo": tz,
+                "locale": locale,
+            }
+
+            return cls(**cls_attrs)
+        else:
+            raise ValueError("data string and format are not matched")
+
+    def __seqToRE(self, to_convert, directive):
+        to_convert = sorted(to_convert, key=len, reverse=True)
+        for value in to_convert:
+            if value != "":
+                break
+        else:
+            return ""
+        regex = "|".join(re_escape(stuff) for stuff in to_convert)
+        regex = "(?P<%s>%s" % (directive, regex)
+        return "%s)" % regex
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
