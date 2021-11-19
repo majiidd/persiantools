@@ -1038,13 +1038,13 @@ class JalaliDateTime(JalaliDate):
     def __seqToRE(self, to_convert, directive):
         to_convert = sorted(to_convert, key=len, reverse=True)
         for value in to_convert:
-            if value != '':
+            if value != "":
                 break
         else:
-            return ''
-        regex = '|'.join(re_escape(stuff) for stuff in to_convert)
-        regex = '(?P<%s>%s' % (directive, regex)
-        return '%s)' % regex
+            return ""
+        regex = "|".join(re_escape(stuff) for stuff in to_convert)
+        regex = "(?P<%s>%s" % (directive, regex)
+        return "%s)" % regex
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
