@@ -498,7 +498,7 @@ class JalaliDate:
         elif isinstance(other, date):
             return self._compare(JalaliDate(other)) == 0
 
-        raise NotImplementedError
+        return False
 
     def __ne__(self, other):
         if isinstance(other, JalaliDate):
@@ -506,7 +506,7 @@ class JalaliDate:
         elif isinstance(other, date):
             return self._compare(JalaliDate(other)) != 0
 
-        raise NotImplementedError
+        return True
 
     def __le__(self, other):
         if isinstance(other, JalaliDate):
@@ -1166,20 +1166,16 @@ class JalaliDateTime(JalaliDate):
             return self._cmp(other, allow_mixed=True) == 0
         elif isinstance(other, dt):
             return self._cmp(JalaliDateTime(other), allow_mixed=True) == 0
-        elif not isinstance(other, (JalaliDate, date)):
-            raise NotImplementedError
-        else:
-            return False
+
+        return False
 
     def __ne__(self, other):
         if isinstance(other, JalaliDateTime):
             return self._cmp(other, allow_mixed=True) != 0
         elif isinstance(other, dt):
             return self._cmp(JalaliDateTime(other), allow_mixed=True) != 0
-        elif not isinstance(other, (JalaliDate, date)):
-            raise NotImplementedError
-        else:
-            return True
+
+        return True
 
     def __le__(self, other):
         if isinstance(other, JalaliDateTime):

@@ -185,11 +185,9 @@ class TestJalaliDateTime(TestCase):
             pytz.timezone("Asia/Tehran")._utcoffset,
         )
 
-        with pytest.raises(NotImplementedError):
-            assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == {"year": 1367}
-
-        with pytest.raises(NotImplementedError):
-            assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != "string"
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == {"year": 1367})
+        self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == "")
+        self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) != "string")
 
         with pytest.raises(NotImplementedError):
             assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) < 1.55
