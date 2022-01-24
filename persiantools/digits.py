@@ -53,6 +53,7 @@ TENS = ("بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "ه�
 HUNDREDS = ("یکصد", "دویست", "سیصد", "چهارصد", "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد")
 RANGE = ("ده", "یازده", "دوازده", "سیزده", "چهارده", "پانزده", "شانزده", "هفده", "هجده", "نوزده")
 BIG_RANGE = (" هزار", " میلیون", " میلیارد", " تریلیون")
+MANTISSA = ('دهم', 'صدم', 'هزارم', 'ده هزارم', 'صدهزارم', 'یک میلیونیم', 'ده میلیونیم', 'صد میلیونیم', 'یک میلیاردم')
 ZERO = "صفر"
 DELI = " و "
 NEGATIVE = "منفی "
@@ -146,8 +147,20 @@ def _to_word(number: int, depth: bool) -> str:
     raise OutOfRangeException("number must be lower than 1000000000000000")
 
 
-def to_word(number: int) -> str:
-    if not isinstance(number, int):
-        raise TypeError("number must be integer")
+def to_word(number: (float, int)) -> str:
 
-    return _to_word(number, False)
+    if isinstance(number, int):
+       return _to_word(number, False)
+    elif isinstance(number, float):
+        left, right = str(number).split('.')
+        if len(str(right).strip("0")) > 0:
+            return(u'%s%s%s %s' % (
+                _to_word(int(left), False),
+                DELI,
+                _to_word(int(right), False),
+                MANTISSA[len(str(right).rstrip("0"))-1]
+            ))
+        else:
+            return (_to_word(int(left), False))
+
+    raise TypeError("number must be digit")
