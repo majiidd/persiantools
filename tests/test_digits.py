@@ -59,5 +59,9 @@ class TestDigits(TestCase):
                          "یکصد و بیست و سه و پنج دهم"
                          )
 
+        self.assertEqual(digits.to_word(-0.1554845),
+                         "منفی یک میلیون و پانصد و پنجاه و چهار هزار و هشتصد و چهل و پنج ده میلیونیم"
+                         )
+
         with pytest.raises(digits.OutOfRangeException):
             digits.to_word(1000000000000001)
