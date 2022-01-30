@@ -165,6 +165,8 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
             return NEGATIVE + result
         return result
     else:
+        if number < 0:
+            return NEGATIVE + (_to_word(int(left), False))
         return (_to_word(int(left), False))
 
 
