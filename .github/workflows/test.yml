@@ -12,7 +12,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10', pypy3]
         include:
           - python-version: 3.6
-            os: ubuntu-18.04
+            os: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -39,6 +39,11 @@ jobs:
           GIT_ASK_YESNO: "false"
         run: |
           pipenv install --dev --python=${{ steps.python-path.outputs.path }}
+
+      - name: Install extra dependency
+        if: ${{ matrix.python-version == '3.6' || matrix.python-version == '3.7' }}
+        run: |
+          pipenv install --dev importlib_metadata
 
       - name: Run tests
         env:
