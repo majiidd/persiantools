@@ -1,0 +1,46 @@
+name: Test
+
+on: [push]
+
+jobs:
+  tests:
+    name: ${{matrix.os}} / ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu, macos, windows]
+        python-version: [3.7, 3.8, 3.9, 3.10, pypy3]
+        include:
+          - python-version: 3.6
+            os: ubuntu
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Display Python version
+        run: python --version
+
+      - name: Get python path
+        id: python-path
+        run: |
+          echo ::set-output name=path::$(python -c "import sys; print(sys.executable)")
+
+      - name: Install dependencies
+        env:
+          PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+          PYTHONIOENCODING: "utf-8"
+          GIT_ASK_YESNO: "false"
+        run: |
+          pipenv install --dev --python=${{ steps.python-path.outputs.path }}
+
+      - name: Run tests
+        env:
+          PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+          PIPENV_NOSPIN: "1"
+          GIT_ASK_YESNO: "false"
+          PYTHONIOENCODING: "utf-8"
+        run: |
+          pipenv run pytest -ra --full-trace --cov=persiantools tests/
