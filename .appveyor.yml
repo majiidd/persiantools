@@ -28,13 +28,11 @@ init:
 install:
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
-  - python --version
-  - python -c "import sys, platform, struct;
-    print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
-  - pip install pipenv
-  - pipenv install --dev
+  - '%PYTHON%\python.exe --version'
+  - '%PYTHON%\python.exe -m pip install pipenv'
+  - '%PYTHON%\python.exe -m pipenv install --dev'
 
 build: off
 
 test_script:
-  - pipenv run py.test --cov=persiantools tests/ -v
+  - '%PYTHON%\python.exe -m pipenv run py.test --cov=persiantools tests/ -v'
