@@ -52,16 +52,12 @@ class TestDigits(TestCase):
         self.assertEqual(digits.to_word(-305), "منفی سیصد و پنج")
         self.assertEqual(digits.to_word(10.02), "ده و دو صدم")
         self.assertEqual(digits.to_word(15.007), "پانزده و هفت هزارم")
-        self.assertEqual(digits.to_word(12519.85),
-                         "دوازده هزار و پانصد و نوزده و هشتاد و پنج صدم"
-                         )
-        self.assertEqual(digits.to_word(123.50),
-                         "یکصد و بیست و سه و پنج دهم"
-                         )
+        self.assertEqual(digits.to_word(12519.85), "دوازده هزار و پانصد و نوزده و هشتاد و پنج صدم")
+        self.assertEqual(digits.to_word(123.50), "یکصد و بیست و سه و پنج دهم")
 
-        self.assertEqual(digits.to_word(-0.1554845),
-                         "منفی یک میلیون و پانصد و پنجاه و چهار هزار و هشتصد و چهل و پنج ده میلیونیم"
-                         )
+        self.assertEqual(
+            digits.to_word(-0.1554845), "منفی یک میلیون و پانصد و پنجاه و چهار هزار و هشتصد و چهل و پنج ده میلیونیم"
+        )
 
         with pytest.raises(digits.OutOfRangeException):
             digits.to_word(1000000000000001)

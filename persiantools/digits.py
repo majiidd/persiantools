@@ -1,5 +1,6 @@
-from persiantools import utils
 from decimal import Decimal
+
+from persiantools import utils
 
 EN_TO_FA_MAP = {
     "0": "۰",
@@ -54,8 +55,22 @@ TENS = ("بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "ه�
 HUNDREDS = ("یکصد", "دویست", "سیصد", "چهارصد", "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد")
 RANGE = ("ده", "یازده", "دوازده", "سیزده", "چهارده", "پانزده", "شانزده", "هفده", "هجده", "نوزده")
 BIG_RANGE = (" هزار", " میلیون", " میلیارد", " تریلیون")
-MANTISSA = ('دهم', 'صدم', 'هزارم', 'ده هزارم', 'صد هزارم', 'یک میلیونیم', 'ده میلیونیم', 'صد میلیونیم',
-            'یک میلیاردم', 'ده میلیاردم', 'صد میلیاردم', 'تریلیونیم', 'ده تریلیونیم', 'صد تریلیونیم')
+MANTISSA = (
+    "دهم",
+    "صدم",
+    "هزارم",
+    "ده هزارم",
+    "صد هزارم",
+    "یک میلیونیم",
+    "ده میلیونیم",
+    "صد میلیونیم",
+    "یک میلیاردم",
+    "ده میلیاردم",
+    "صد میلیاردم",
+    "تریلیونیم",
+    "ده تریلیونیم",
+    "صد تریلیونیم",
+)
 ZERO = "صفر"
 DELI = " و "
 NEGATIVE = "منفی "
@@ -68,9 +83,9 @@ DECISION = {
     1000000: lambda n, depth: _to_word(n // 1000, depth) + BIG_RANGE[0] + _to_word(n % 1000, True),
     1000000000: lambda n, depth: _to_word(n // 1000000, depth) + BIG_RANGE[1] + _to_word(n % 1000000, True),
     1000000000000: lambda n, depth: _to_word(n // n, depth) + BIG_RANGE[2] + _to_word(n % 1000000000, True),
-    1000000000000000: lambda n, depth: _to_word(n // 1000000000000, depth) +
-    BIG_RANGE[3] +
-    _to_word(n % 1000000000000, True),
+    1000000000000000: lambda n, depth: _to_word(n // 1000000000000, depth)
+    + BIG_RANGE[3]
+    + _to_word(n % 1000000000000, True),
 }
 
 
@@ -150,24 +165,24 @@ def _to_word(number: int, depth: bool) -> str:
 
 
 def _floating_number_to_word(number: float, depth: bool) -> str:
-    left, right = str(abs(number)).split('.')
+    left, right = str(abs(number)).split(".")
     if len(right) > 14:
         raise OutOfRangeException("You are allowed to use 14 digits for a floating point")
 
     if len(str(right).strip("0")) > 0:
         left_word = _to_word(int(left), False)
-        result = (u'%s%s %s' % (
-            left_word + DELI if left_word != ZERO else '',
+        result = "{}{} {}".format(
+            left_word + DELI if left_word != ZERO else "",
             _to_word(int(right), False),
-            MANTISSA[len(str(right).rstrip("0")) - 1]
-        ))
+            MANTISSA[len(str(right).rstrip("0")) - 1],
+        )
         if number < 0:
             return NEGATIVE + result
         return result
     else:
         if number < 0:
             return NEGATIVE + (_to_word(int(left), False))
-        return (_to_word(int(left), False))
+        return _to_word(int(left), False)
 
 
 def to_word(number: (float, int)) -> str:
