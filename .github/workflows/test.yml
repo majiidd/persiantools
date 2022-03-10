@@ -40,10 +40,15 @@ jobs:
         run: |
           pipenv install --dev --python=${{ steps.python-path.outputs.path }}
 
-      - name: Install extra dependency
+      - name: Install extra dependency (pytest on python <= 3.7)
         if: ${{ matrix.python-version == '3.6' || matrix.python-version == '3.7' }}
         run: |
           pipenv install --dev importlib_metadata
+
+      - name: Install extra dependency (pytest on windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          pipenv install --dev atomicwrites
 
       - name: Run tests
         env:
