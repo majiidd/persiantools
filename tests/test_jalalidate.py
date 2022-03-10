@@ -251,11 +251,9 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1395, 3, 21) - date(2016, 5, 3), timedelta(days=38))
         self.assertEqual(JalaliDate(1395, 12, 30) - JalaliDate(1395, 1, 1), timedelta(days=365))
 
-        with pytest.raises(NotImplementedError):
-            assert JalaliDate(1367, 2, 14) == (1367, 2, 14)
-
-        with pytest.raises(NotImplementedError):
-            assert JalaliDate(1367, 2, 14) != 5
+        self.assertFalse(JalaliDate(1367, 2, 14) == (1367, 2, 14))
+        self.assertFalse(JalaliDate(1367, 2, 14) == "")
+        self.assertTrue(JalaliDate(1367, 2, 14) != 5)
 
         with pytest.raises(NotImplementedError):
             assert JalaliDate(1367, 2, 14) < "string"
