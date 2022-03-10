@@ -110,6 +110,9 @@ Based on python `strftime()` behavior
 >>> digits.to_word(9512026)
 'نه میلیون و پانصد و دوازده هزار و بیست و شش'
 
+>>> digits.to_word(15.007)
+'پانزده و هفت هزارم'
+
 >>> characters.ar_to_fa("كيك")
 'کیک'
 ```
