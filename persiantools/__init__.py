@@ -7,9 +7,9 @@
 
 __title__ = "persiantools"
 __url__ = "https://github.com/majiidd/persiantools"
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 __build__ = __version__
 __author__ = "Majid Hajiloo"
 __author_email__ = "majid.hajiloo@gmail.com"
 __license__ = "MIT"
-__copyright__ = "Copyright (c) 2016-2021 Majid Hajiloo"
+__copyright__ = "Copyright (c) 2016-2022 Majid Hajiloo"

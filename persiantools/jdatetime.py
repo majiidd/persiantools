@@ -1,12 +1,10 @@
 import operator
 import re
-from re import escape as re_escape
-from re import IGNORECASE
-import sys
 from datetime import date
 from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, timezone, tzinfo
+from re import escape as re_escape
 
 import pytz
 
@@ -786,11 +784,7 @@ class JalaliDateTime(JalaliDate):
         )
 
     def timestamp(self):
-        if sys.version_info >= (3, 3):
-            return self.to_gregorian().timestamp()
-        else:
-            gregorian_dt = self.to_gregorian()
-            return (gregorian_dt - dt(1970, 1, 1, tzinfo=gregorian_dt.tzinfo)).total_seconds()
+        return self.to_gregorian().timestamp()
 
     def utctimetuple(self):
         "Return UTC time tuple compatible with time.gmtime()."
@@ -955,7 +949,7 @@ class JalaliDateTime(JalaliDate):
         look for the table under "strftime() and strptime() Format Codes" section.
         """
         directives_regex_pattern = {
-            "%Y": "(?P<Y>\d\d\d\d)",
+            "%Y": r"(?P<Y>\d\d\d\d)",
             "%m": r"(?P<m>1[0-2]|0[1-9]|[1-9])",
             "%d": r"(?P<d>3[0-1]|[1-2]\d|0[1-9]|[1-9]| [1-9])",
             "%a": cls.__seqToRE(cls, weekday_names_abbr, "a"),
@@ -1043,7 +1037,7 @@ class JalaliDateTime(JalaliDate):
         else:
             return ""
         regex = "|".join(re_escape(stuff) for stuff in to_convert)
-        regex = "(?P<%s>%s" % (directive, regex)
+        regex = f"(?P<{directive}>{regex}"
         return "%s)" % regex
 
     def __repr__(self):
@@ -1189,7 +1183,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
+            raise TypeError(f"can't compare '{type(self).__name__}' to '{type(other).__name__}'")
 
     def __lt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1199,7 +1193,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
+            raise TypeError(f"can't compare '{type(self).__name__}' to '{type(other).__name__}'")
 
     def __ge__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1209,7 +1203,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
+            raise TypeError(f"can't compare '{type(self).__name__}' to '{type(other).__name__}'")
 
     def __gt__(self, other):
         if isinstance(other, JalaliDateTime):
@@ -1219,7 +1213,7 @@ class JalaliDateTime(JalaliDate):
         elif not isinstance(other, (JalaliDate, date)):
             raise NotImplementedError
         else:
-            raise TypeError("can't compare '{}' to '{}'".format(type(self).__name__, type(other).__name__))
+            raise TypeError(f"can't compare '{type(self).__name__}' to '{type(other).__name__}'")
 
     def __add__(self, other):
         if not isinstance(other, timedelta):
