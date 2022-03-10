@@ -5,14 +5,14 @@ on: [push]
 jobs:
   tests:
     name: ${{matrix.os}} / ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10', pypy3]
         include:
           - python-version: 3.6
-            os: ubuntu
+            os: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
