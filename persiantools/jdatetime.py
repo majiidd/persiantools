@@ -1,12 +1,10 @@
 import operator
 import re
-from re import escape as re_escape
-from re import IGNORECASE
-import sys
 from datetime import date
 from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, timezone, tzinfo
+from re import escape as re_escape
 
 import pytz
 
