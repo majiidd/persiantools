@@ -20,6 +20,9 @@ jobs:
         
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -62,21 +65,12 @@ jobs:
           GIT_ASK_YESNO: "false"
           PYTHONIOENCODING: "utf-8"
         run: |
-          pipenv run pytest -ra --full-trace --cov=persiantools tests/
+          pipenv run pytest -ra --full-trace --cov=persiantools --cov-report xml:coverage.xml tests/
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: run-${{matrix.os}}-${{ matrix.python-version }}
-          parallel: true
+          fail_ci_if_error: true
+          files: coverage.xml
+          verbose: true
 
-  finish-test:
-    needs: tests
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.github_token }}
-        parallel-finished: true
