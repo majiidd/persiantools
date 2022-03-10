@@ -48,6 +48,7 @@ jobs:
       - name: Install extra dependency (pytest on python <= 3.7)
         if: ${{ matrix.python-version == '3.6' || matrix.python-version == '3.7' ||  matrix.python-version == 'pypy-3.7' }}
         run: |
+          pipenv run python -m pip install -U setuptools
           pipenv install --dev importlib_metadata
 
       - name: Install extra dependency (pytest on windows)
