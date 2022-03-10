@@ -63,3 +63,20 @@ jobs:
           PYTHONIOENCODING: "utf-8"
         run: |
           pipenv run pytest -ra --full-trace --cov=persiantools tests/
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: run-${{matrix.os}}-${{ matrix.python-version }}
+          parallel: true
+
+  finish-test:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
