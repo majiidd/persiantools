@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from persiantools import utils
 
 EN_TO_FA_MAP = {
