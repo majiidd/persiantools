@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
 ![test workflow](https://github.com/majiidd/persiantools/actions/workflows/ci.yml/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/majiidd/persiantools/master.svg)](https://results.pre-commit.ci/latest/github/majiidd/persiantools/master)
-[![Coveralls](https://coveralls.io/repos/github/majiidd/persiantools/badge.svg?branch=master)](https://coveralls.io/github/majiidd/persiantools?branch=master)
+[![codecov](https://codecov.io/gh/majiidd/persiantools/branch/master/graph/badge.svg?token=Q990VL6FGW)](https://codecov.io/gh/majiidd/persiantools)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
