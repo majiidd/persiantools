@@ -46,7 +46,7 @@ jobs:
           pipenv install --dev --python=${{ steps.python-path.outputs.path }}
 
       - name: Install extra dependency (pytest on python <= 3.7)
-        if: ${{ matrix.python-version == '3.6' || matrix.python-version == '3.7' }}
+        if: ${{ matrix.python-version == '3.6' || matrix.python-version == '3.7' ||  matrix.python-version == 'pypy-3.7' }}
         run: |
           pipenv install --dev importlib_metadata
 
