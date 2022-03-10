@@ -2,36 +2,24 @@ version: '2.0.0.{build}'
 
 environment:
   matrix:
-    - PYTHON: C:\Python36
-      PYTHON_VERSION: 3.6
-      PYTHON_ARCH: 32
-
     - PYTHON: C:\Python36-x64
       PYTHON_VERSION: 3.6
       PYTHON_ARCH: 64
-
-    - PYTHON: C:\Python37
-      PYTHON_VERSION: 3.7
-      PYTHON_ARCH: 32
 
     - PYTHON: C:\Python37-x64
       PYTHON_VERSION: 3.7
       PYTHON_ARCH: 64
 
-    - PYTHON: C:\Python38
-      PYTHON_VERSION: 3.8
-      PYTHON_ARCH: 32
-
     - PYTHON: C:\Python38-x64
       PYTHON_VERSION: 3.8
       PYTHON_ARCH: 64
 
-    - PYTHON: C:\Python39
-      PYTHON_VERSION: 3.9
-      PYTHON_ARCH: 32
-
     - PYTHON: C:\Python39-x64
       PYTHON_VERSION: 3.9
+      PYTHON_ARCH: 64
+    
+    - PYTHON: C:\Python310-x64
+      PYTHON_VERSION: 3.10
       PYTHON_ARCH: 64
 
 init:
@@ -43,8 +31,6 @@ install:
   - python --version
   - python -c "import sys, platform, struct;
     print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
-
-  - python -m pip install -U pip setuptools wheel
   - pip install pipenv
   - pipenv install --dev
 
