@@ -3,6 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![Travis (.com) branch](https://img.shields.io/travis/com/majiidd/persiantools/master)](https://travis-ci.com/github/majiidd/persiantools)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/kau1fi7gp8em94nf/branch/master?svg=true)](https://ci.appveyor.com/project/majiidd/persiantools/branch/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/majiidd/persiantools/master.svg)](https://results.pre-commit.ci/latest/github/majiidd/persiantools/master)
 [![Coveralls](https://coveralls.io/repos/github/majiidd/persiantools/badge.svg?branch=master)](https://coveralls.io/github/majiidd/persiantools?branch=master)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
