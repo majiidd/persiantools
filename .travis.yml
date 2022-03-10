@@ -10,8 +10,7 @@ python:
   - "pypy3"
 
 install:
-  - python -c "import sys, platform, struct;
-    print(sys.platform, platform.machine(), struct.calcsize('P')*8)"
+  - python -m pip install -U pip setuptools
   - python -m pip install pipenv
   - python -m pip install coveralls
   - pipenv install --dev
