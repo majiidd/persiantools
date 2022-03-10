@@ -22,6 +22,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1397, 11, 29).to_gregorian(), date(2019, 2, 18))
         self.assertEqual(JalaliDate(1399, 11, 23).to_gregorian(), date(2021, 2, 11))
         self.assertEqual(JalaliDate(1400, 4, 25).to_gregorian(), date(2021, 7, 16))
+        self.assertEqual(JalaliDate(1400, 12, 20).to_gregorian(), date(2022, 3, 11))
 
         self.assertEqual(JalaliDate.today().to_gregorian(), date.today())
 
@@ -55,6 +56,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.chack_date(1397, 11, 29), True)
         self.assertEqual(JalaliDate.chack_date(1399, 11, 31), False)
         self.assertEqual(JalaliDate.chack_date(1400, 4, 25), True)
+        self.assertEqual(JalaliDate.chack_date(1400, 12, 30), False)
 
     def test_completeday(self):
         jdate = JalaliDate(1398, 3, 17)
