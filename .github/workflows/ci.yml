@@ -75,8 +75,7 @@ jobs:
           verbose: true
 
   build-n-publish:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -92,14 +91,14 @@ jobs:
       run: |
         python -m build --sdist --wheel --outdir dist/ .
 
-    - name: Publish distribution 📦 to Test PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
-        
-    - name: Publish distribution 📦 to PyPI
-      if: startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+    # - name: Publish to Test PyPI
+    #   uses: pypa/gh-action-pypi-publish@master
+    #   with:
+    #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+    #     repository_url: https://test.pypi.org/legacy/
+
+    # - name: Publish to PyPI
+    #   if: startsWith(github.ref, 'refs/tags')
+    #   uses: pypa/gh-action-pypi-publish@master
+    #   with:
+    #     password: ${{ secrets.PYPI_API_TOKEN }}
