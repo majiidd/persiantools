@@ -9,10 +9,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', pypy-3.8]
+        python-version: ['3.7', '3.8', '3.9', '3.10', pypy-3.7, pypy-3.8]
         include:
-          - python-version: 3.6
+          - python-version: '3.6'
             os: ubuntu-latest
+          - python-version: pypy-3.9
+            os: ubuntu-latest
+          - python-version: pypy-3.9
+            os: windows-latest
+        
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
