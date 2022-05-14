@@ -18,7 +18,7 @@
 
 ## Install Package
 
-```{.sourceCode .bash}
+```bash
 python -m pip install persiantools
 ```
 Persiantools supports Python 3.6+. (_for python 2.7 and 3.5 use [1.5.x](https://github.com/majiidd/persiantools/tree/1.5.x) version_)
@@ -27,7 +27,7 @@ Persiantools supports Python 3.6+. (_for python 2.7 and 3.5 use [1.5.x](https://
 
 ### Date
 
-```{.sourceCode .python}
+```python
 >>> from persiantools.jdatetime import JalaliDate
 >>> import datetime
 
@@ -52,7 +52,7 @@ JalaliDate(1367, 2, 14, Chaharshanbeh)
 
 ### Datetime
 
-```{.sourceCode .python}
+```python
 >>> from persiantools.jdatetime import JalaliDateTime
 >>> import datetime, pytz
 
@@ -76,7 +76,7 @@ JalaliDateTime(1395, 4, 17, 21, 23, 53, 474618, tzinfo=<UTC>)
 
 Based on python `strftime()` behavior
 
-```{.sourceCode .python}
+```python
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import pytz
 
@@ -95,7 +95,7 @@ Based on python `strftime()` behavior
 
 ### Digits/Characters Tools
 
-```{.sourceCode .python}
+```python
 >>> from persiantools import characters, digits
 
 >>> digits.en_to_fa("0987654321")
@@ -119,7 +119,7 @@ Based on python `strftime()` behavior
 
 ### Operators
 
-```{.sourceCode .python}
+```python
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import datetime
 
@@ -141,7 +141,7 @@ datetime.timedelta(365)
 
 ### Serializing and de-serializing
 
-```{.sourceCode .python}
+```python
 >>> from persiantools.jdatetime import JalaliDate
 >>> import pickle
 
