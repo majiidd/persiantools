@@ -1,4 +1,5 @@
 from persiantools import utils
+from typing import Union
 
 EN_TO_FA_MAP = {
     "0": "۰",
@@ -183,7 +184,7 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
         return _to_word(int(left), False)
 
 
-def to_word(number: (float, int)) -> str:
+def to_word(number: Union[float, int]) -> str:
     if isinstance(number, int):
         return _to_word(number, False)
     elif isinstance(number, float):
