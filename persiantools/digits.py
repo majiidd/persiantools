@@ -1,5 +1,6 @@
-from persiantools import utils
 from typing import Union
+
+from persiantools import utils
 
 EN_TO_FA_MAP = {
     "0": "۰",
