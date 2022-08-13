@@ -181,7 +181,7 @@ class JalaliDate:
         return year, month, day, locale
 
     @classmethod
-    def chack_date(cls, year, month, day):
+    def check_date(cls, year, month, day):
         try:
             cls._check_date_fields(year, month, day, "en")
         except (ValueError, TypeError):
