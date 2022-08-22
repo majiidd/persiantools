@@ -1100,7 +1100,7 @@ class JalaliDateTime(JalaliDate):
     def __base_compare(self, other):
         assert isinstance(other, JalaliDateTime)
 
-        y, m, d, h, m, s, ms = [
+        y, mo, d, h, m, s, ms = [
             self._year,
             self._month,
             self._day,
@@ -1109,7 +1109,7 @@ class JalaliDateTime(JalaliDate):
             self._second,
             self._microsecond,
         ]
-        y2, m2, d2, h2, m2, s2, ms2 = [
+        y2, mo2, d2, h2, m2, s2, ms2 = [
             other.year,
             other.month,
             other.day,
@@ -1121,9 +1121,9 @@ class JalaliDateTime(JalaliDate):
 
         return (
             0
-            if (y, m, d, h, m, s, ms) == (y2, m2, d2, h2, m2, s2, ms2)
+            if (y, mo, d, h, m, s, ms) == (y2, mo2, d2, h2, m2, s2, ms2)
             else 1
-            if (y, m, d, h, m, s, ms) > (y2, m2, d2, h2, m2, s2, ms2)
+            if (y, mo, d, h, m, s, ms) > (y2, mo2, d2, h2, m2, s2, ms2)
             else -1
         )
 
