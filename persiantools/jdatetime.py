@@ -1122,9 +1122,7 @@ class JalaliDateTime(JalaliDate):
         return (
             0
             if (y, m, d, h, m, s, ms) == (y2, m2, d2, h2, m2, s2, ms2)
-            else 1
-            if (y, m, d, h, m, s, ms) > (y2, m2, d2, h2, m2, s2, ms2)
-            else -1
+            else 1 if (y, m, d, h, m, s, ms) > (y2, m2, d2, h2, m2, s2, ms2) else -1
         )
 
     def _cmp(self, other, allow_mixed=False):
