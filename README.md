@@ -124,7 +124,7 @@ The package supports various operators for date and time manipulations. Here are
 >>> JalaliDate(1367, 2, 14) == JalaliDate(datetime.date(1988, 5, 4))
 True
 
->>> JalaliDateTime(1367, 2, 14, 4, 30) >= JalaliDateTime(1369, 7, 1, 1, 0)
+>>> JalaliDateTime(1367, 2, 14, 4, 30) >= JalaliDateTime(1368, 2, 14, 1, 0)
 False
 
 >>> JalaliDate(1367, 2, 14) == datetime.date(1988, 5, 4)
