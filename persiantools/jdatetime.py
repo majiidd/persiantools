@@ -228,31 +228,40 @@ class JalaliDate:
             day = year.day
             year = year.year
 
-        g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+        # Days in each month of the Gregorian calendar
+        gregorian_days_in_month = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
 
-        jy = 0 if year <= 1600 else 979
+        # Determine the Jalali year
+        jalali_year = 0 if year <= 1600 else 979
         year -= 621 if year <= 1600 else 1600
-        year2 = year + 1 if month > 2 else year
-        days = (365 * year) + int((year2 + 3) / 4) - int((year2 + 99) / 100)
-        days += int((year2 + 399) / 400) - 80 + day + g_d_m[month - 1]
-        jy += 33 * int(days / 12053)
+
+        # Determine if the year is a leap year
+        leap_year = year + 1 if month > 2 else year
+
+        # Calculate the number of days
+        days = (365 * year) + (leap_year + 3) // 4 - (leap_year + 99) // 100
+        days += (leap_year + 399) // 400 - 80 + day + gregorian_days_in_month[month - 1]
+
+        # Update the Jalali year
+        jalali_year += 33 * (days // 12053)
         days %= 12053
-        jy += 4 * int(days / 1461)
+        jalali_year += 4 * (days // 1461)
         days %= 1461
-        jy += int((days - 1) / 365)
+        jalali_year += (days - 1) // 365
 
         if days > 365:
             days = (days - 1) % 365
 
+        # Determine the Jalali month and day
         if days < 186:
-            jm = 1 + int(days / 31)
-            jd = 1 + (days % 31)
+            jalali_month = 1 + days // 31
+            jalali_day = 1 + (days % 31)
         else:
-            arit = days - 186
-            jm = 7 + int(arit / 30)
-            jd = 1 + (arit % 30)
+            days -= 186
+            jalali_month = 7 + days // 30
+            jalali_day = 1 + (days % 30)
 
-        return cls(jy, jm, jd)
+        return cls(jalali_year, jalali_month, jalali_day)
 
     def to_gregorian(self):
         """based on jdf.scr.ir"""
@@ -260,37 +269,40 @@ class JalaliDate:
         day = self.day
         year = self.year
 
-        gy = 621 if year <= 979 else 1600
+        # Determine the Gregorian year
+        gregorian_year = 621 if year <= 979 else 1600
         year -= 0 if year <= 979 else 979
 
-        d = (month - 1) * 31 if month < 7 else ((month - 7) * 30) + 186
-        days = (365 * year) + (int(year / 33) * 8) + int(((year % 33) + 3) / 4)
-        days += 78 + day + d
+        # Calculate the number of days
+        days_in_month = (month - 1) * 31 if month < 7 else ((month - 7) * 30) + 186
+        days = (365 * year) + (year // 33) * 8 + ((year % 33) + 3) // 4
+        days += 78 + day + days_in_month
 
-        gy += 400 * int(days / 146097)
+        gregorian_year += 400 * (days // 146097)
         days %= 146097
 
         if days > 36524:
             days -= 1
-            gy += 100 * int(days / 36524)
+            gregorian_year += 100 * (days // 36524)
             days %= 36524
 
             if days >= 365:
                 days += 1
 
-        gy += 4 * int(days / 1461)
+        gregorian_year += 4 * (days // 1461)
         days %= 1461
-        gy += int((days - 1) / 365)
+        gregorian_year += (days - 1) // 365
 
         if days > 365:
             days = (days - 1) % 365
 
-        gd = days + 1
+        gregorian_day = days + 1
 
-        g_d_m = [
+        # Days in each month of the Gregorian calendar
+        gregorian_days_in_month = [
             0,
             31,
-            29 if (gy % 4 == 0 and gy % 100 != 0) or gy % 400 == 0 else 28,
+            29 if (gregorian_year % 4 == 0 and gregorian_year % 100 != 0) or gregorian_year % 400 == 0 else 28,
             31,
             30,
             31,
@@ -303,13 +315,13 @@ class JalaliDate:
             31,
         ]
 
-        _gm = 0
-        for _gm, g in enumerate(g_d_m):
-            if gd <= g:
+        # Determine the Gregorian month
+        for _gregorian_month, g in enumerate(gregorian_days_in_month):
+            if gregorian_day <= g:
                 break
-            gd -= g
+            gregorian_day -= g
 
-        return date(gy, _gm, gd)
+        return date(gregorian_year, _gregorian_month, gregorian_day)
 
     @classmethod
     def today(cls):

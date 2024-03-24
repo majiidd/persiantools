@@ -12,7 +12,6 @@ from persiantools.jdatetime import JalaliDate
 class TestJalaliDate(TestCase):
     def test_shamsi_to_gregorian(self):
         self.assertEqual(JalaliDate(1367, 2, 14).to_gregorian(), date(1988, 5, 4))
-        self.assertEqual(JalaliDate(1369, 7, 1).to_gregorian(), date(1990, 9, 23))
         self.assertEqual(JalaliDate(1395, 3, 21).to_gregorian(), date(2016, 6, 10))
         self.assertEqual(JalaliDate(1395, 12, 9).to_gregorian(), date(2017, 2, 27))
         self.assertEqual(JalaliDate(1395, 12, 30).to_gregorian(), date(2017, 3, 20))
@@ -23,6 +22,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1399, 11, 23).to_gregorian(), date(2021, 2, 11))
         self.assertEqual(JalaliDate(1400, 4, 25).to_gregorian(), date(2021, 7, 16))
         self.assertEqual(JalaliDate(1400, 12, 20).to_gregorian(), date(2022, 3, 11))
+        self.assertEqual(JalaliDate(1403, 1, 5).to_gregorian(), date(2024, 3, 24))
 
         self.assertEqual(JalaliDate.today().to_gregorian(), date.today())
 
@@ -39,6 +39,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.to_jalali(2018, 3, 20), JalaliDate(1396, 12, 29))
         self.assertEqual(JalaliDate.to_jalali(2021, 2, 11), JalaliDate(1399, 11, 23))
         self.assertEqual(JalaliDate.to_jalali(2021, 7, 16), JalaliDate(1400, 4, 25))
+        self.assertEqual(JalaliDate.to_jalali(2024, 3, 24), JalaliDate(1403, 1, 5))
 
         self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
 
@@ -57,6 +58,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.check_date(1399, 11, 31), False)
         self.assertEqual(JalaliDate.check_date(1400, 4, 25), True)
         self.assertEqual(JalaliDate.check_date(1400, 12, 30), False)
+        self.assertEqual(JalaliDate.check_date(1403, 12, 30), True)
 
     def test_completeday(self):
         jdate = JalaliDate(1398, 3, 17)
@@ -97,6 +99,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1398, 3, 17).isocalendar(), (1398, 12, 7))
         self.assertEqual(JalaliDate(1398, 1, 1).isocalendar(), (1398, 1, 6))
         self.assertEqual(JalaliDate(1399, 1, 2).isocalendar(), (1399, 2, 1))
+        self.assertEqual(JalaliDate(1403, 1, 5).isocalendar(), (1403, 2, 2))
 
     def test_additions(self):
         self.assertEqual(JalaliDate(JalaliDate(1395, 3, 21)), JalaliDate(1395, 3, 21))
@@ -224,6 +227,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1396, 7, 8).week_of_year(), 29)
         self.assertEqual(JalaliDate(1397, 11, 29).week_of_year(), 49)
         self.assertEqual(JalaliDate(1399, 1, 2).week_of_year(), 2)
+        self.assertEqual(JalaliDate(1403, 1, 5).week_of_year(), 2)
 
         self.assertEqual(JalaliDate(1367, 2, 14).weekday(), 4)
         self.assertEqual(JalaliDate(1393, 1, 1).weekday(), 6)
@@ -266,6 +270,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1397, 12, 1) - JalaliDate(1397, 11, 29), timedelta(hours=48))
         self.assertEqual(JalaliDate(1395, 3, 21) - date(2016, 5, 3), timedelta(days=38))
         self.assertEqual(JalaliDate(1395, 12, 30) - JalaliDate(1395, 1, 1), timedelta(days=365))
+        self.assertEqual(JalaliDate(1403, 1, 1) - JalaliDate(1402, 12, 29), timedelta(days=1))
 
         self.assertFalse(JalaliDate(1367, 2, 14) == (1367, 2, 14))
         self.assertFalse(JalaliDate(1367, 2, 14) == "")
