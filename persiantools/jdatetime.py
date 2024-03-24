@@ -958,7 +958,7 @@ class JalaliDateTime(JalaliDate):
             "%B": cls.__seqToRE(cls, month_names, "B"),
             "%H": r"(?P<H>2[0-3]|[0-1]\d|\d)",
             "%I": r"(?P<I>1[0-2]|0[1-9]|[1-9])",
-            "%p": cls.__seqToRE(cls, periods, "p", "(?i)"),
+            "%p": cls.__seqToRE(cls, periods, "p"),
             "%M": r"(?P<M>[0-5]\d|\d)",
             "%S": r"(?P<S>6[0-1]|[0-5]\d|\d)",
             "%f": r"(?P<f>\d{1,6})",
@@ -977,8 +977,8 @@ class JalaliDateTime(JalaliDate):
 
         data_string_regex = utils.replace(fmt, directives_regex_pattern)
 
-        if re.match(data_string_regex, data_string):
-            directives = re.search(data_string_regex, data_string).groupdict()
+        if re.match(data_string_regex, data_string, re.IGNORECASE):
+            directives = re.search(data_string_regex, data_string, re.IGNORECASE).groupdict()
 
             if "Y" in directives.keys() and len(directives.get("Y")) < 4:
                 raise ValueError("Year element must contain exactly 4 digits")
@@ -1029,7 +1029,7 @@ class JalaliDateTime(JalaliDate):
         else:
             raise ValueError("data string and format are not matched")
 
-    def __seqToRE(self, to_convert, directive, flags=""):
+    def __seqToRE(self, to_convert, directive):
         to_convert = sorted(to_convert, key=len, reverse=True)
         for value in to_convert:
             if value != "":
@@ -1037,7 +1037,7 @@ class JalaliDateTime(JalaliDate):
         else:
             return ""
         regex = "|".join(re_escape(stuff) for stuff in to_convert)
-        regex = f"{flags}(?P<{directive}>{regex}"
+        regex = '(?P<%s>%s' % (directive, regex)
         return "%s)" % regex
 
     def __repr__(self):
