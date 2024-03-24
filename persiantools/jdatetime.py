@@ -191,11 +191,19 @@ class JalaliDate:
 
     @staticmethod
     def is_leap(year):
-        assert MINYEAR <= year <= MAXYEAR
+        """
+        This function calculates whether a given year in the Persian calendar is a leap year.
 
-        c = 0.24219858156028368  # 683 / 2820
-        # return ((year + 2346) * 683) % 2820 < 683
-        return ((year + 2346) * c) % 1 < c
+        It calculates `((year + 2346) * 683) % 2820`. This expression does a few things:
+        - It offsets the input year by 2346. This is done to align the Persian calendar with the astronomical solar year.
+        - It multiplies the result by 683, which is the number of leap years in a 2820-year cycle.
+        - It then takes the result modulo 2820 to get the position of the year within the current 2820-year cycle.
+
+        If the result of this calculation is less than 683, the year is a leap year in the Persian calendar.
+        This is because there are 683 leap years in each 2820-year cycle of the Persian calendar.
+        """
+        assert MINYEAR <= year <= MAXYEAR
+        return ((year + 2346) * 683) % 2820 < 683
 
     @classmethod
     def days_in_month(cls, month, year):
@@ -1037,7 +1045,7 @@ class JalaliDateTime(JalaliDate):
         else:
             return ""
         regex = "|".join(re_escape(stuff) for stuff in to_convert)
-        regex = '(?P<%s>%s' % (directive, regex)
+        regex = f"(?P<{directive}>{regex}"
         return "%s)" % regex
 
     def __repr__(self):

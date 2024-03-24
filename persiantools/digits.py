@@ -1,4 +1,4 @@
-from persiantools import utils
+import re
 
 EN_TO_FA_MAP = {
     "0": "۰",
@@ -48,6 +48,12 @@ FA_TO_AR_MAP = {
     "۸": "٨",
     "۹": "٩",
 }
+
+EN_TO_FA_REGEX = re.compile("|".join(EN_TO_FA_MAP.keys()))
+AR_TO_FA_REGEX = re.compile("|".join(AR_TO_FA_MAP.keys()))
+FA_TO_EN_REGEX = re.compile("|".join(FA_TO_EN_MAP.keys()))
+FA_TO_AR_REGEX = re.compile("|".join(FA_TO_AR_MAP.keys()))
+
 ONES = ("یک", "دو", "سه", "چهار", "پنج", "شش", "هفت", "هشت", "نه")
 TENS = ("بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "هشتاد", "نود")
 HUNDREDS = ("یکصد", "دویست", "سیصد", "چهارصد", "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد")
@@ -101,7 +107,7 @@ def en_to_fa(string: str) -> str:
     :param string:  A string, will be converted
     :rtype: str
     """
-    return utils.replace(string, EN_TO_FA_MAP)
+    return EN_TO_FA_REGEX.sub(lambda x: EN_TO_FA_MAP[x.group()], string)
 
 
 def ar_to_fa(string: str) -> str:
@@ -114,7 +120,7 @@ def ar_to_fa(string: str) -> str:
     :param string: A string, will be converted
     :rtype: str
     """
-    return utils.replace(string, AR_TO_FA_MAP)
+    return AR_TO_FA_REGEX.sub(lambda x: AR_TO_FA_MAP[x.group()], string)
 
 
 def fa_to_en(string: str) -> str:
@@ -127,7 +133,7 @@ def fa_to_en(string: str) -> str:
     :param string: A string, will be converted
     :rtype: str
     """
-    return utils.replace(string, FA_TO_EN_MAP)
+    return FA_TO_EN_REGEX.sub(lambda x: FA_TO_EN_MAP[x.group()], string)
 
 
 def fa_to_ar(string: str) -> str:
@@ -140,7 +146,7 @@ def fa_to_ar(string: str) -> str:
     :param string: A string, will be converted
     :rtype: str
     """
-    return utils.replace(string, FA_TO_AR_MAP)
+    return FA_TO_AR_REGEX.sub(lambda x: FA_TO_AR_MAP[x.group()], string)
 
 
 def _to_word(number: int, depth: bool) -> str:

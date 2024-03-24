@@ -42,7 +42,7 @@ setup(
     author="Majid Hajiloo",
     author_email="majid.hajiloo@gmail.com",
     license="MIT",
-    license_files = ("LICENSE",),
+    license_files=("LICENSE",),
     packages=["persiantools"],
     python_requires=">=3.8",
     tests_require=["pytest", "pytest-cov"],

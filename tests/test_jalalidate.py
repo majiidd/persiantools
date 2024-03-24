@@ -120,6 +120,14 @@ class TestJalaliDate(TestCase):
             JalaliDate(1400, 1, 1, "us")
 
     def test_leap(self):
+        self.assertEqual(JalaliDate.is_leap(1214), True)
+        self.assertEqual(JalaliDate.is_leap(1216), False)
+        self.assertEqual(JalaliDate.is_leap(1218), True)
+        self.assertEqual(JalaliDate.is_leap(1309), True)
+        self.assertEqual(JalaliDate.is_leap(1313), True)
+        self.assertEqual(JalaliDate.is_leap(1321), True)
+        self.assertEqual(JalaliDate.is_leap(1342), True)
+        self.assertEqual(JalaliDate.is_leap(1346), True)
         self.assertEqual(JalaliDate.is_leap(1358), True)
         self.assertEqual(JalaliDate.is_leap(1366), True)
         self.assertEqual(JalaliDate.is_leap(1367), False)
@@ -131,7 +139,13 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.is_leap(1398), False)
         self.assertEqual(JalaliDate.is_leap(1399), True)
         self.assertEqual(JalaliDate.is_leap(1400), False)
+        self.assertEqual(JalaliDate.is_leap(1402), False)
         self.assertEqual(JalaliDate.is_leap(1403), True)
+        self.assertEqual(JalaliDate.is_leap(1407), False)
+        self.assertEqual(JalaliDate.is_leap(1408), True)
+        self.assertEqual(JalaliDate.is_leap(1424), True)
+        self.assertEqual(JalaliDate.is_leap(1474), True)
+        self.assertEqual(JalaliDate.is_leap(1498), True)
 
     def test_format(self):
         j = JalaliDate(date(1988, 5, 4))
