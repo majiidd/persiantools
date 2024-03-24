@@ -13,6 +13,7 @@ pytest-cov = "==4.1.0"
 pre-commit = "==3.5.0"
 tomli = "==2.0.1"
 exceptiongroup = {version = "1.2.0", python_versions = "<3.11"}
+atomicwrites = {version = "1.4.1", sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3"

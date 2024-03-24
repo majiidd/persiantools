@@ -7,21 +7,19 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
-- Jalali (Shamsi) date and datetime (based on python datetime's module)
-
-  - Convert Jalali to Gregorian date/datetime and vice versa
-  - Support comparison and arithmetic operators such as `+`, `-`, `==`, `>=`
-  - Support timezone
-
-- Convert Arabic and Persian characters/digits to each other
-- Convert numbers to words
+Provides Jalali (also known as Shamsi or Persian) dates and datetimes functionalities, among other tools.
+- It converts between Jalali and Gregorian dates and datetimes (based on python datetime's module).
+- It supports operators like +, -, ==, and >=.
+- It includes timezone support.
+- It converts between Arabic and Persian characters/digits.
+- It turns numbers into Persian words.
 
 ## Install Package
-
+You can install the package using pip with the following command:
 ```bash
 python -m pip install persiantools
 ```
-Persiantools supports Python 3.6+. (_for python 2.7 and 3.5 use [1.5.x](https://github.com/majiidd/persiantools/tree/1.5.x) version_)
+Persiantools supports Python 3.8+. (_for python 2.7 and 3.5 use [1.5.x](https://github.com/majiidd/persiantools/tree/1.5.x) version_)
 
 ## How to use
 
@@ -118,7 +116,7 @@ Based on python `strftime()` behavior
 ```
 
 ### Operators
-
+The package supports various operators for date and time manipulations. Here are some examples:
 ```python
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import datetime
