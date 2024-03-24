@@ -27,7 +27,7 @@ jobs:
       - name: Get python path
         id: python-path
         run: |
-          echo "path=$(python -c 'import sys; print(sys.executable)')" >> $GITHUB_ENV
+          echo "P_PATH=$(python -c 'import sys; print(sys.executable)')" >> $GITHUB_ENV
 
       - name: Install pipenv
         run: |
@@ -39,7 +39,7 @@ jobs:
           PYTHONIOENCODING: "utf-8"
           GIT_ASK_YESNO: "false"
         run: |
-          pipenv install --dev --python=${{ steps.python-path.outputs.path }}
+          pipenv install --dev --python=${{ env.P_PATH }}
 
       - name: Install extra dependency (pytest on windows)
         if: ${{ matrix.os == 'windows-latest' }}
