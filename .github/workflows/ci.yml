@@ -61,6 +61,7 @@ jobs:
           fail_ci_if_error: true
           files: coverage.xml
           verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-and-publish:
     if: github.repository == 'majiidd/persiantools' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
