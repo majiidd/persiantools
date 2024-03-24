@@ -27,7 +27,7 @@ jobs:
       - name: Get python path
         id: python-path
         run: |
-          echo ::set-output name=path::$(python -c "import sys; print(sys.executable)")
+          echo "path=$(python -c 'import sys; print(sys.executable)')" >> $GITHUB_ENV
 
       - name: Install pipenv
         run: |
@@ -40,11 +40,6 @@ jobs:
           GIT_ASK_YESNO: "false"
         run: |
           pipenv install --dev --python=${{ steps.python-path.outputs.path }}
-
-      - name: Install extra dependency (pytest on python <= 3.7)
-        if: ${{ matrix.python-version == '3.6' || matrix.python-version == '3.7' }}
-        run: |
-          pipenv install --dev importlib_metadata
 
       - name: Install extra dependency (pytest on windows)
         if: ${{ matrix.os == 'windows-latest' }}
