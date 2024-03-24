@@ -42,21 +42,21 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
 
-    def test_chackdate(self):
-        self.assertEqual(JalaliDate.chack_date(1367, 2, 14), True)
-        self.assertEqual(JalaliDate.chack_date(1395, 12, 30), True)
-        self.assertEqual(JalaliDate.chack_date(1394, 12, 30), False)
-        self.assertEqual(JalaliDate.chack_date(13, 13, 30), False)
-        self.assertEqual(JalaliDate.chack_date(0, 0, 0), False)
-        self.assertEqual(JalaliDate.chack_date(9378, 0, 0), False)
-        self.assertEqual(JalaliDate.chack_date("1300", "1", "1"), False)
-        self.assertEqual(JalaliDate.chack_date(1396, 12, 30), False)
-        self.assertEqual(JalaliDate.chack_date(1397, 7, 1), True)
-        self.assertEqual(JalaliDate.chack_date(1396, 7, 27), True)
-        self.assertEqual(JalaliDate.chack_date(1397, 11, 29), True)
-        self.assertEqual(JalaliDate.chack_date(1399, 11, 31), False)
-        self.assertEqual(JalaliDate.chack_date(1400, 4, 25), True)
-        self.assertEqual(JalaliDate.chack_date(1400, 12, 30), False)
+    def test_checkdate(self):
+        self.assertEqual(JalaliDate.check_date(1367, 2, 14), True)
+        self.assertEqual(JalaliDate.check_date(1395, 12, 30), True)
+        self.assertEqual(JalaliDate.check_date(1394, 12, 30), False)
+        self.assertEqual(JalaliDate.check_date(13, 13, 30), False)
+        self.assertEqual(JalaliDate.check_date(0, 0, 0), False)
+        self.assertEqual(JalaliDate.check_date(9378, 0, 0), False)
+        self.assertEqual(JalaliDate.check_date("1300", "1", "1"), False)
+        self.assertEqual(JalaliDate.check_date(1396, 12, 30), False)
+        self.assertEqual(JalaliDate.check_date(1397, 7, 1), True)
+        self.assertEqual(JalaliDate.check_date(1396, 7, 27), True)
+        self.assertEqual(JalaliDate.check_date(1397, 11, 29), True)
+        self.assertEqual(JalaliDate.check_date(1399, 11, 31), False)
+        self.assertEqual(JalaliDate.check_date(1400, 4, 25), True)
+        self.assertEqual(JalaliDate.check_date(1400, 12, 30), False)
 
     def test_completeday(self):
         jdate = JalaliDate(1398, 3, 17)
