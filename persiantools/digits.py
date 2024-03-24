@@ -86,7 +86,7 @@ DECISION = {
     1000: lambda n, depth: HUNDREDS[n // 100 - 1] + _to_word(n % 100, True),
     1000000: lambda n, depth: _to_word(n // 1000, depth) + BIG_RANGE[0] + _to_word(n % 1000, True),
     1000000000: lambda n, depth: _to_word(n // 1000000, depth) + BIG_RANGE[1] + _to_word(n % 1000000, True),
-    1000000000000: lambda n, depth: _to_word(n // n, depth) + BIG_RANGE[2] + _to_word(n % 1000000000, True),
+    1000000000000: lambda n, depth: _to_word(n // 1000000000, depth) + BIG_RANGE[2] + _to_word(n % 1000000000, True),
     1000000000000000: lambda n, depth: _to_word(n // 1000000000000, depth)
     + BIG_RANGE[3]
     + _to_word(n % 1000000000000, True),

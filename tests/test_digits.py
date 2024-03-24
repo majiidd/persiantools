@@ -47,7 +47,8 @@ class TestDigits(TestCase):
         self.assertEqual(digits.to_word(500253), "پانصد هزار و دویست و پنجاه و سه")
         self.assertEqual(digits.to_word(6000123), "شش میلیون و یکصد و بیست و سه")
         self.assertEqual(digits.to_word(1000000985), "یک میلیارد و نهصد و هشتاد و پنج")
-        self.assertEqual(digits.to_word(100000000000004), "یکصد تریلیون و چهار")
+        self.assertEqual(digits.to_word(100_000_000_000_004), "یکصد تریلیون و چهار")
+        self.assertEqual(digits.to_word(9_512_026_000_000), "نه تریلیون و پانصد و دوازده میلیارد و بیست و شش میلیون")
 
         self.assertEqual(digits.to_word(-305), "منفی سیصد و پنج")
         self.assertEqual(digits.to_word(10.02), "ده و دو صدم")

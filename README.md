@@ -9,7 +9,7 @@
 
 Provides Jalali (also known as Shamsi or Persian) dates and datetimes functionalities, among other tools.
 - It converts between Jalali and Gregorian dates and datetimes (based on python datetime's module).
-- It supports operators like +, -, ==, and >=.
+- It supports operators like `+`, `-`, `==`, and `>=`.
 - It includes timezone support.
 - It converts between Arabic and Persian characters/digits.
 - It turns numbers into Persian words.
