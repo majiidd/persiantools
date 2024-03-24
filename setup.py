@@ -43,7 +43,7 @@ setup(
     author_email="majid.hajiloo@gmail.com",
     license="MIT",
     packages=["persiantools"],
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     tests_require=["pytest", "pytest-cov"],
     install_requires=[],
     include_package_data=True,
