@@ -265,63 +265,54 @@ class JalaliDate:
 
     def to_gregorian(self):
         """based on jdf.scr.ir"""
+        year = self.year + 1595
         month = self.month
         day = self.day
-        year = self.year
+
+        # Calculate the total number of days
+        days = -355668 + (365 * year) + ((year // 33) * 8) + (((year % 33) + 3) // 4) + day
+        if month < 7:
+            days += (month - 1) * 31
+        else:
+            days += ((month - 7) * 30) + 186
 
         # Determine the Gregorian year
-        gregorian_year = 621 if year <= 979 else 1600
-        year -= 0 if year <= 979 else 979
-
-        # Calculate the number of days
-        days_in_month = (month - 1) * 31 if month < 7 else ((month - 7) * 30) + 186
-        days = (365 * year) + (year // 33) * 8 + ((year % 33) + 3) // 4
-        days += 78 + day + days_in_month
-
-        gregorian_year += 400 * (days // 146097)
+        gregorian_year = 400 * (days // 146097)
         days %= 146097
 
         if days > 36524:
             days -= 1
             gregorian_year += 100 * (days // 36524)
             days %= 36524
-
             if days >= 365:
                 days += 1
 
         gregorian_year += 4 * (days // 1461)
         days %= 1461
-        gregorian_year += (days - 1) // 365
-
         if days > 365:
+            gregorian_year += (days - 1) // 365
             days = (days - 1) % 365
 
         gregorian_day = days + 1
 
+        # Handle leap years for February day count adjustment
+        if (gregorian_year % 4 == 0 and gregorian_year % 100 != 0) or (gregorian_year % 400 == 0):
+            feb_days = 29
+        else:
+            feb_days = 28
+
         # Days in each month of the Gregorian calendar
-        gregorian_days_in_month = [
-            0,
-            31,
-            29 if (gregorian_year % 4 == 0 and gregorian_year % 100 != 0) or gregorian_year % 400 == 0 else 28,
-            31,
-            30,
-            31,
-            30,
-            31,
-            31,
-            30,
-            31,
-            30,
-            31,
-        ]
+        gregorian_days_in_month = [0, 31, feb_days, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
         # Determine the Gregorian month
-        for _gregorian_month, g in enumerate(gregorian_days_in_month):
-            if gregorian_day <= g:
+        gregorian_month = 1
+        for days_in_month in gregorian_days_in_month[1:]:
+            if gregorian_day <= days_in_month:
                 break
-            gregorian_day -= g
+            gregorian_day -= days_in_month
+            gregorian_month += 1
 
-        return date(gregorian_year, _gregorian_month, gregorian_day)
+        return date(gregorian_year, gregorian_month, gregorian_day)
 
     @classmethod
     def today(cls):

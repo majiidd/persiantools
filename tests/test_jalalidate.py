@@ -23,6 +23,12 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1400, 4, 25).to_gregorian(), date(2021, 7, 16))
         self.assertEqual(JalaliDate(1400, 12, 20).to_gregorian(), date(2022, 3, 11))
         self.assertEqual(JalaliDate(1403, 1, 5).to_gregorian(), date(2024, 3, 24))
+        self.assertEqual(JalaliDate(1390, 10, 11).to_gregorian(), date(2012, 1, 1))
+        self.assertEqual(JalaliDate(1398, 10, 11).to_gregorian(), date(2020, 1, 1))
+        self.assertEqual(JalaliDate(1402, 10, 11).to_gregorian(), date(2024, 1, 1))
+        self.assertEqual(JalaliDate(1402, 10, 10).to_gregorian(), date(2023, 12, 31))
+        self.assertEqual(JalaliDate(1403, 10, 11).to_gregorian(), date(2024, 12, 31))
+        self.assertEqual(JalaliDate(1403, 2, 23).to_gregorian(), date(2024, 5, 12))
 
         self.assertEqual(JalaliDate.today().to_gregorian(), date.today())
 
@@ -40,6 +46,13 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.to_jalali(2021, 2, 11), JalaliDate(1399, 11, 23))
         self.assertEqual(JalaliDate.to_jalali(2021, 7, 16), JalaliDate(1400, 4, 25))
         self.assertEqual(JalaliDate.to_jalali(2024, 3, 24), JalaliDate(1403, 1, 5))
+        self.assertEqual(JalaliDate.to_jalali(2012, 1, 1), JalaliDate(1390, 10, 11))
+        self.assertEqual(JalaliDate.to_jalali(2020, 1, 1), JalaliDate(1398, 10, 11))
+        self.assertEqual(JalaliDate.to_jalali(2024, 1, 1), JalaliDate(1402, 10, 11))
+        self.assertEqual(JalaliDate.to_jalali(2024, 1, 1), JalaliDate(1402, 10, 11))
+        self.assertEqual(JalaliDate.to_jalali(2023, 12, 31), JalaliDate(1402, 10, 10))
+        self.assertEqual(JalaliDate.to_jalali(2024, 12, 31), JalaliDate(1403, 10, 11))
+        self.assertEqual(JalaliDate.to_jalali(2024, 5, 12), JalaliDate(1403, 2, 23))
 
         self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
 
