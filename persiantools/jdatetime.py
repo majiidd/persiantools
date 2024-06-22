@@ -247,9 +247,10 @@ class JalaliDate:
         days %= 12053
         jalali_year += 4 * (days // 1461)
         days %= 1461
-        jalali_year += (days - 1) // 365
 
+        # Correct for the leap year case
         if days > 365:
+            jalali_year += (days - 1) // 365
             days = (days - 1) % 365
 
         # Determine the Jalali month and day

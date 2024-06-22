@@ -22,6 +22,10 @@ class TestJalaliDateTime(TestCase):
             JalaliDateTime(1399, 11, 23, 13, 12, 0, 0).to_gregorian(),
             datetime(2021, 2, 11, 13, 12, 0, 0),
         )
+        self.assertEqual(
+            JalaliDateTime(1404, 1, 1, 13, 12, 0, 0).to_gregorian(),
+            datetime(2025, 3, 21, 13, 12, 0, 0),
+        )
 
     def test_gregorian_to_shamsi(self):
         self.assertEqual(
