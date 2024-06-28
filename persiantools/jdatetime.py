@@ -1428,7 +1428,7 @@ class JalaliDateTime(JalaliDate):
             "%S": "%02d" % self._second,
             "%f": "%06d" % self._microsecond,
             "%z": datetime.strftime("%z"),
-            "%Z": ("" if not self._tzinfo else self._tzinfo.tzname(self)),
+            "%Z": ("" if not self._tzinfo else self._tzinfo.tzname(datetime)),
             "%X": "%02d:%02d:%02d" % (self._hour, self._minute, self._second),
         }
 

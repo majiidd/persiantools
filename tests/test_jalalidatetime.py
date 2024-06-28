@@ -546,3 +546,49 @@ class TestJalaliDateTime(TestCase):
         expected = timedelta(days=1)
 
         self.assertEqual(result, expected)
+
+    def test_to_jalali_with_timezone(self):
+        dt = datetime.now(timezone.utc)
+        jdate = JalaliDateTime.to_jalali(dt)
+        self.assertEqual(jdate.tzinfo, timezone.utc)
+
+    def test_strftime_basic(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        self.assertEqual(jdate.strftime("%Y-%m-%d %H:%M:%S"), "1400-01-01 15:30:45")
+
+    def test_strftime_locale_fa(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45, locale="fa")
+        self.assertEqual(jdate.strftime("%Y-%m-%d %H:%M:%S", locale="fa"), "۱۴۰۰-۰۱-۰۱ ۱۵:۳۰:۴۵")
+
+    def test_strftime_with_timezone_utc(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45, tzinfo=timezone.utc)
+        self.assertEqual(jdate.strftime("%Y-%m-%d %H:%M:%S %Z"), "1400-01-01 15:30:45 UTC")
+
+    def test_strftime_with_timezone_offset(self):
+        tz = timezone(timedelta(hours=3, minutes=30))
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45, tzinfo=tz)
+        self.assertEqual(jdate.strftime("%Y-%m-%d %H:%M:%S %z"), "1400-01-01 15:30:45 +0330")
+
+    def test_strftime_with_abbreviated_month_day(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        self.assertEqual(jdate.strftime("%b %a"), "Far Yek")
+
+    def test_strftime_with_full_month_day(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        self.assertEqual(jdate.strftime("%B %A"), "Farvardin Yekshanbeh")
+
+    def test_strftime_with_custom_format(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        self.assertEqual(jdate.strftime("%d %B %Y - %H:%M"), "01 Farvardin 1400 - 15:30")
+
+    def test_strftime_with_persian_locale(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45, locale="fa")
+        self.assertEqual(jdate.strftime("%A, %d %B %Y - %H:%M", locale="fa"), "یکشنبه, ۰۱ فروردین ۱۴۰۰ - ۱۵:۳۰")
+
+    def test_strftime_with_periodic_time(self):
+        jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        self.assertEqual(jdate.strftime("%I:%M %p"), "03:30 PM")
+
+    def test_strftime_edge_case_midnight(self):
+        jdate = JalaliDateTime(1400, 1, 1, 0, 0, 0)
+        self.assertEqual(jdate.strftime("%Y-%m-%d %H:%M:%S"), "1400-01-01 00:00:00")
