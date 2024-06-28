@@ -5,3 +5,13 @@ extend-ignore =
     W503,
 max-complexity = 10
 select = B,C,E,F,W
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    migrations,
+    venv,
+    .venv,
+    .eggs,
+    *.egg

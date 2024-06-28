@@ -10,10 +10,16 @@ import pytz
 
 from persiantools import digits, utils
 
+# The minimum year supported by the JalaliDate module
 MINYEAR = 1
+
+# The maximum year supported by the JalaliDate module
 MAXYEAR = 9377
+
+# The maximum ordinal value supported by the JalaliDate module
 _MAXORDINAL = 3424878
 
+# Full month names in English for the Jalali calendar
 MONTH_NAMES_EN = [
     None,
     "Farvardin",
@@ -29,6 +35,8 @@ MONTH_NAMES_EN = [
     "Bahman",
     "Esfand",
 ]
+
+# Full month names in Persian for the Jalali calendar
 MONTH_NAMES_FA = [
     None,
     "فروردین",
@@ -45,6 +53,7 @@ MONTH_NAMES_FA = [
     "اسفند",
 ]
 
+# Abbreviated month names in English for the Jalali calendar
 MONTH_NAMES_ABBR_EN = [
     None,
     "Far",
@@ -60,6 +69,8 @@ MONTH_NAMES_ABBR_EN = [
     "Bah",
     "Esf",
 ]
+
+# Abbreviated month names in Persian for the Jalali calendar
 MONTH_NAMES_ABBR_FA = [
     None,
     "فرو",
@@ -76,6 +87,7 @@ MONTH_NAMES_ABBR_FA = [
     "اسف",
 ]
 
+# Full weekday names in English for the Jalali calendar
 WEEKDAY_NAMES_EN = [
     "Shanbeh",
     "Yekshanbeh",
@@ -85,11 +97,22 @@ WEEKDAY_NAMES_EN = [
     "Panjshanbeh",
     "Jomeh",
 ]
+
+# Full weekday names in Persian for the Jalali calendar
 WEEKDAY_NAMES_FA = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
 
+# Abbreviated weekday names in English for the Jalali calendar
 WEEKDAY_NAMES_ABBR_EN = ["Sha", "Yek", "Dos", "Ses", "Cha", "Pan", "Jom"]
+
+# Abbreviated weekday names in Persian for the Jalali calendar
 WEEKDAY_NAMES_ABBR_FA = ["ش", "ی", "د", "س", "چ", "پ", "ج"]
 
+# The number of days in each month of the Jalali calendar.
+# Each list contains the following columns:
+# 1. The number of days in the month for a non-leap year.
+# 2. The number of days in the month for a leap year.
+# 3. The cumulative number of days from the start of the year to the start of the month (in a non-leap year).
+# The first entry is for indexing purposes and is not used in calculations.
 _MONTH_COUNT = [
     [-1, -1, -1],  # for indexing purposes
     [31, 31, 0],  # farvardin
@@ -108,9 +131,52 @@ _MONTH_COUNT = [
 
 
 class JalaliDate:
+    """
+    Represents a date in the Jalali (Persian) calendar.
+
+    Attributes:
+        year (int): The year of the Jalali date.
+        month (int): The month of the Jalali date.
+        day (int): The day of the Jalali date.
+        locale (str): The locale for the Jalali date ('en' or 'fa').
+    """
+
+    # Using __slots__ to declare a fixed set of attributes for the JalaliDate class.
+    # This helps to save memory by preventing the creation of a __dict__ for each instance.
+    # The attributes are:
+    # _year: The year of the Jalali date.
+    # _month: The month of the Jalali date.
+    # _day: The day of the Jalali date.
+    # _locale: The locale for the date representation (e.g., 'en' or 'fa').
+    # _hashcode: Cached hash code for the instance to speed up hash-based operations.
     __slots__ = "_year", "_month", "_day", "_locale", "_hashcode"
 
     def __init__(self, year, month=None, day=None, locale="en"):
+        """
+        Initialize a JalaliDate object.
+
+        Args:
+            year (int, JalaliDate, datetime.date, bytes, or str): The year of the Jalali date. It can also be:
+                - An instance of JalaliDate.
+                - An instance of datetime.date.
+                - A 4-byte representation of the date.
+                - A string that starts with '['.
+            month (int, optional): The month of the Jalali date. Default is None.
+            day (int, optional): The day of the Jalali date. Default is None.
+            locale (str, optional): The locale for the date representation. It must be 'en' or 'fa'. Default is 'en'.
+
+        Raises:
+            ValueError: If the locale is not 'en' or 'fa'.
+
+        Notes:
+            - If `year` is an instance of JalaliDate and `month` is None, the date will be initialized with the values from the JalaliDate instance.
+            - If `year` is an instance of datetime.date, the date will be converted to Jalali date.
+            - If `year` is a 4-byte representation or a string starting with '[', the state will be set from these representations.
+
+        """
+        if locale not in ["en", "fa"]:
+            raise ValueError("locale must be 'en' or 'fa'")
+
         if isinstance(year, JalaliDate) and month is None:
             month = year.month
             day = year.day
@@ -161,6 +227,21 @@ class JalaliDate:
 
     @classmethod
     def _check_date_fields(cls, year, month, day, locale):
+        """
+        Validate and normalize the date fields.
+
+        Args:
+            year (int): The year of the Jalali date.
+            month (int): The month of the Jalali date.
+            day (int): The day of the Jalali date.
+            locale (str): The locale for the date representation. It must be 'en' or 'fa'.
+
+        Returns:
+            tuple: A tuple containing validated and normalized year, month, day, and locale.
+
+        Raises:
+            ValueError: If the provided date fields are not valid.
+        """
         year = operator.index(year)
         month = operator.index(month)
         day = operator.index(day)
@@ -182,6 +263,21 @@ class JalaliDate:
 
     @classmethod
     def check_date(cls, year, month, day):
+        """
+        Check if the given Jalali date fields constitute a valid date.
+
+        Args:
+            year (int): The year of the Jalali date.
+            month (int): The month of the Jalali date (1 through 12).
+            day (int): The day of the Jalali date (1 through 31, depending on the month).
+
+        Returns:
+            bool: True if the provided date fields constitute a valid Jalali date, False otherwise.
+
+        Notes:
+            - This method checks whether the given year, month, and day form a valid Jalali date.
+            - It considers the specific rules for leap years in the Jalali calendar.
+        """
         try:
             cls._check_date_fields(year, month, day, "en")
         except (ValueError, TypeError):
@@ -201,12 +297,35 @@ class JalaliDate:
 
         If the result of this calculation is less than 683, the year is a leap year in the Persian calendar.
         This is because there are 683 leap years in each 2820-year cycle of the Persian calendar.
+
+        Args:
+            year (int): The year to check.
+
+        Returns:
+            bool: True if the year is a leap year, False otherwise.
+
+        Raises:
+            ValueError: If the year is out of the valid range.
         """
-        assert MINYEAR <= year <= MAXYEAR
+        if not MINYEAR <= year <= MAXYEAR:
+            raise ValueError(f"Year must be between {MINYEAR} and {MAXYEAR}")
         return ((year + 2346) * 683) % 2820 < 683
 
     @classmethod
     def days_in_month(cls, month, year):
+        """
+        Get the number of days in a given month for a specified year.
+
+        Args:
+            month (int): The month (1-12).
+            year (int): The year.
+
+        Returns:
+            int: The number of days in the month.
+
+        Raises:
+            AssertionError: If the month is out of the valid range.
+        """
         assert 1 <= month <= 12, "month must be in 1..12"
 
         if month == 12 and cls.is_leap(year):
@@ -216,13 +335,49 @@ class JalaliDate:
 
     @staticmethod
     def days_before_month(month):
+        """
+        Get the number of days before the start of a given month.
+
+        Args:
+            month (int): The month (1-12).
+
+        Returns:
+            int: The number of days before the month.
+
+        Raises:
+            AssertionError: If the month is out of the valid range.
+        """
         assert 1 <= month <= 12, "month must be in 1..12"
 
         return _MONTH_COUNT[month][2]
 
     @classmethod
     def to_jalali(cls, year, month=None, day=None):
-        """based on jdf.scr.ir"""
+        """
+        Convert a Gregorian date to a Jalali (Persian) date.
+
+        This method converts a given Gregorian date (or a datetime.date object) to its
+        corresponding Jalali (Persian) date. If a datetime.date object is provided,
+        the month and day parameters are automatically extracted.
+
+        Parameters:
+        year (int or datetime.date): The year of the Gregorian date, or a datetime.date object.
+        month (int, optional): The month of the Gregorian date.
+        day (int, optional): The day of the Gregorian date.
+
+        Returns:
+        JalaliDate: A JalaliDate object representing the corresponding Jalali date.
+
+        Example:
+        >>> g_date = date(2021, 3, 21)
+        >>> j_date = JalaliDate.to_jalali(g_date)
+        >>> print(j_date)
+        JalaliDate(1400, 1, 1)
+
+        >>> j_date = JalaliDate.to_jalali(2021, 3, 21)
+        >>> print(j_date)
+        JalaliDate(1400, 1, 1)
+        """
         if month is None and isinstance(year, date):
             month = year.month
             day = year.day
@@ -265,7 +420,21 @@ class JalaliDate:
         return cls(jalali_year, jalali_month, jalali_day)
 
     def to_gregorian(self):
-        """based on jdf.scr.ir"""
+        """
+        Convert a Jalali (Persian) date to a Gregorian date.
+
+        This method converts the current Jalali (Persian) date instance to its
+        corresponding Gregorian date.
+
+        Returns:
+        date: A datetime.date object representing the corresponding Gregorian date.
+
+        Example:
+        >>> j_date = JalaliDate(1400, 1, 1)
+        >>> g_date = j_date.to_gregorian()
+        >>> print(g_date)
+        2021-03-21
+        """
         year = self.year + 1595
         month = self.month
         day = self.day
@@ -317,13 +486,56 @@ class JalaliDate:
 
     @classmethod
     def today(cls):
+        """
+        Get the current date in the Jalali (Persian) calendar.
+
+        This method returns a JalaliDate object representing the current date,
+        based on the system's local time.
+
+        Returns:
+            JalaliDate: A JalaliDate object representing today's date.
+
+        Example:
+            >>> j_date = JalaliDate.today()
+            >>> print(j_date)
+        """
         return cls(date.today())
 
     def timetuple(self):
-        "Return local time tuple compatible with time.localtime()."
+        """
+        Return the Jalali date as a time.struct_time object.
+
+        This method returns the Jalali date as a struct_time object, which is
+        similar to the output of the `time.localtime()` or `time.gmtime()` functions.
+        It contains year, month, day, hour, minute, second, weekday, Julian day, and DST flag.
+
+        Returns:
+            struct_time: A time.struct_time object representing the Jalali date.
+
+        Example:
+            >>> from persiantools.jdatetime import JalaliDate
+            >>> jdate = JalaliDate(1398, 3, 17)
+            >>> jdate.timetuple()
+            time.struct_time(tm_year=2019, tm_mon=6, tm_mday=7, tm_hour=0, tm_min=0, tm_sec=0, tm_wday=4, tm_yday=158, tm_isdst=-1)
+        """
         return self.to_gregorian().timetuple()
 
     def isoformat(self):
+        """
+        Return the Jalali date as a string in ISO 8601 format.
+
+        This method returns the Jalali date as a string formatted according to the
+        ISO 8601 standard, which is `YYYY-MM-DD`.
+
+        Returns:
+            str: The Jalali date in ISO 8601 format.
+
+        Example:
+            >>> from persiantools.jdatetime import JalaliDate
+            >>> jdate = JalaliDate(1398, 3, 17)
+            >>> jdate.isoformat()
+            '1398-03-17'
+        """
         iso = "%04d-%02d-%02d" % (self._year, self._month, self._day)
 
         if self._locale == "fa":
@@ -396,6 +608,28 @@ class JalaliDate:
     resolution = timedelta(1)
 
     def replace(self, year=None, month=None, day=None, locale=None):
+        """
+        Return a new JalaliDate instance with one or more of the specified fields replaced.
+
+        This method allows for the replacement of the year, month, day, or locale
+        of an existing JalaliDate instance. If a field is not specified, the current
+        value of that field is retained.
+
+        Args:
+            year (int, optional): The new year value. Defaults to None.
+            month (int, optional): The new month value. Defaults to None.
+            day (int, optional): The new day value. Defaults to None.
+            locale (str, optional): The new locale value ('en' or 'fa'). Defaults to None.
+
+        Returns:
+            JalaliDate: A new JalaliDate instance with the specified fields replaced.
+
+        Example:
+            >>> jdate = JalaliDate(1400, 1, 1)
+            >>> new_jdate = jdate.replace(month=2)
+            >>> new_jdate
+            JalaliDate(1400, 2, 1)
+        """
         if year is None:
             year = self._year
 
@@ -447,6 +681,28 @@ class JalaliDate:
         return self.strftime("%c")
 
     def strftime(self, fmt, locale=None):
+        """
+        Format a Jalali date according to the given format string.
+
+        This method returns a string representing the Jalali date, controlled by an explicit format string.
+        It is similar to the `strftime` method used with `datetime` objects.
+
+        Args:
+            fmt (str): The format string.
+            locale (str, optional): The locale to use for formatting ('en' for English or 'fa' for Persian).
+                                    If None, the instance's locale is used.
+
+        Returns:
+            str: The formatted date string.
+
+        Example:
+            >>> j_date = JalaliDate(1400, 1, 1)
+            >>> j_date.strftime("%A, %d %B %Y")
+            'Yekshanbeh, 01 Farvardin 1400'
+
+            >>> j_date.strftime("%A, %d %B %Y", locale="fa")
+            'یکشنبه, ۰۱ فروردین ۱۴۰۰'
+        """
         if locale is None or locale not in ["fa", "en"]:
             locale = self._locale
 
@@ -803,6 +1059,36 @@ class JalaliDateTime(JalaliDate):
         return self.to_gregorian().utctimetuple()
 
     def astimezone(self, tz=None):
+        """
+        Convert the current JalaliDateTime to another timezone.
+
+        This method returns a new JalaliDateTime object representing the same
+        time instant in a different timezone. The returned object will have
+        its `tzinfo` attribute set to the new timezone.
+
+        Parameters:
+        tz (tzinfo, optional): The timezone to convert the JalaliDateTime to.
+                            If `None`, the method will use the system's local timezone.
+                            The `tz` parameter must be an instance of a subclass of `datetime.tzinfo`.
+
+        Returns:
+        JalaliDateTime: A new JalaliDateTime object with the same time instant in the specified timezone.
+
+        Raises:
+        TypeError: If the `tz` parameter is not `None` and is not an instance of a subclass of `datetime.tzinfo`.
+
+        Example:
+        >>> from datetime import timezone, timedelta
+        >>> jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=3)))
+        >>> jdt_utc = jdt.astimezone(timezone.utc)
+        >>> print(jdt_utc)
+        JalaliDateTime(1400, 1, 1, 9, 30, 45, tzinfo=datetime.timezone.utc)
+
+        >>> new_tz = timezone(timedelta(hours=5))
+        >>> jdt_new_tz = jdt.astimezone(new_tz)
+        >>> print(jdt_new_tz)
+        JalaliDateTime(1400, 1, 1, 17, 30, 45, tzinfo=datetime.timezone(datetime.timedelta(seconds=18000)))
+        """
         return JalaliDateTime(self.to_gregorian().astimezone(tz))
 
     def ctime(self):
@@ -910,6 +1196,36 @@ class JalaliDateTime(JalaliDate):
         microsecond=None,
         tzinfo=None,
     ):
+        """
+        Convert a Gregorian date or datetime to a Jalali (Persian) datetime.
+
+        This method converts a given Gregorian date or datetime to its corresponding
+        Jalali (Persian) date or datetime. The conversion considers all date and time
+        components, including year, month, day, hour, minute, second, and microsecond.
+
+        Parameters:
+        year (int or datetime): The year of the Gregorian date, or a datetime object.
+        month (int, optional): The month of the Gregorian date.
+        day (int, optional): The day of the Gregorian date.
+        hour (int, optional): The hour of the Gregorian datetime.
+        minute (int, optional): The minute of the Gregorian datetime.
+        second (int, optional): The second of the Gregorian datetime.
+        microsecond (int, optional): The microsecond of the Gregorian datetime.
+        tzinfo (tzinfo, optional): The timezone information.
+
+        Returns:
+        JalaliDateTime: A JalaliDateTime object representing the corresponding Jalali date and time.
+
+        Example:
+        >>> g_date = datetime(2021, 3, 21, 15, 30, 45)
+        >>> j_date = JalaliDateTime.to_jalali(g_date)
+        >>> print(j_date)
+        JalaliDateTime(1400, 1, 1, 15, 30, 45)
+
+        >>> j_date = JalaliDateTime.to_jalali(2021, 3, 21, 15, 30, 45)
+        >>> print(j_date)
+        JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        """
         if month is None and isinstance(year, dt):
             month = year.month
             day = year.day
@@ -928,6 +1244,22 @@ class JalaliDateTime(JalaliDate):
         )
 
     def to_gregorian(self):
+        """
+        Convert a Jalali (Persian) datetime to a Gregorian datetime.
+
+        This method converts the current Jalali (Persian) datetime instance to its
+        corresponding Gregorian datetime. It considers both date and time components,
+        including year, month, day, hour, minute, second, microsecond, and timezone.
+
+        Returns:
+        datetime: A datetime.datetime object representing the corresponding Gregorian datetime.
+
+        Example:
+        >>> j_datetime = JalaliDateTime(1400, 1, 1, 15, 30, 45)
+        >>> g_datetime = j_datetime.to_gregorian()
+        >>> print(g_datetime)
+        2021-03-21 15:30:45
+        """
         g_date = super().to_gregorian()
 
         return dt.combine(
@@ -1138,6 +1470,37 @@ class JalaliDateTime(JalaliDate):
         )
 
     def _cmp(self, other, allow_mixed=False):
+        """
+        Compare the current JalaliDateTime object with another JalaliDateTime object.
+
+        This method compares two JalaliDateTime objects, taking into account their
+        timezone offsets. It returns:
+        - 0 if both objects represent the same point in time.
+        - 1 if the current object is later than the other.
+        - -1 if the current object is earlier than the other.
+
+        Parameters:
+        other (JalaliDateTime): The other JalaliDateTime object to compare with.
+        allow_mixed (bool, optional): If True, allows comparison between naive and aware datetimes,
+                                    returning an arbitrary non-zero value. Defaults to False.
+
+        Returns:
+        int: 0 if both objects represent the same time, 1 if the current object is later,
+            -1 if the current object is earlier.
+
+        Raises:
+        TypeError: If trying to compare naive and aware datetimes when allow_mixed is False.
+
+        Example:
+        >>> jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        >>> jdt2 = JalaliDateTime(1400, 1, 1, 13, 30, 45, tzinfo=timezone.utc)
+        >>> jdt1._cmp(jdt2)
+        -1
+        >>> jdt2._cmp(jdt1)
+        1
+        >>> jdt1._cmp(jdt1)
+        0
+        """
         assert isinstance(other, JalaliDateTime)
 
         mytz = self._tzinfo

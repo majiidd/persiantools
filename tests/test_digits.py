@@ -11,6 +11,8 @@ class TestDigits(TestCase):
         self.assertEqual(digits.en_to_fa("0987654321"), "۰۹۸۷۶۵۴۳۲۱")
         self.assertEqual(digits.en_to_fa("۰۹۸۷۶۵۴۳۲۱"), "۰۹۸۷۶۵۴۳۲۱")
         self.assertEqual(digits.en_to_fa("+0987654321 abcd"), "+۰۹۸۷۶۵۴۳۲۱ abcd")
+        self.assertEqual(digits.en_to_fa(""), "")
+        self.assertEqual(digits.en_to_fa("abcd"), "abcd")
 
         with pytest.raises(TypeError):
             digits.en_to_fa(12345)
@@ -18,6 +20,8 @@ class TestDigits(TestCase):
     def test_ar_to_fa(self):
         self.assertEqual(digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١"), "۰۹۸۷۶۵۴۳۲۱")
         self.assertEqual(digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١"), "۰۹۸۷۶۵۴۳۲۱")
+        self.assertEqual(digits.ar_to_fa(""), "")
+        self.assertEqual(digits.ar_to_fa("abcd"), "abcd")
 
         orig = "0987٦٥٤٣۲۱"
         converted = digits.en_to_fa(orig)
@@ -27,16 +31,22 @@ class TestDigits(TestCase):
 
     def test_fa_to_en(self):
         self.assertEqual(digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱"), "0987654321")
+        self.assertEqual(digits.fa_to_en(""), "")
+        self.assertEqual(digits.fa_to_en("abcd"), "abcd")
 
     def test_fa_to_ar(self):
         self.assertEqual(digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱"), "٠٩٨٧٦٥٤٣٢١")
         self.assertEqual(digits.fa_to_ar(" ۰۹۸۷۶۵۴۳۲۱"), " ٠٩٨٧٦٥٤٣٢١")
+        self.assertEqual(digits.fa_to_ar(""), "")
+        self.assertEqual(digits.fa_to_ar("abcd"), "abcd")
 
     def test_to_letter(self):
+        self.assertEqual(digits.to_word(0), "صفر")
         self.assertEqual(digits.to_word(1), "یک")
         self.assertEqual(digits.to_word(12), "دوازده")
         self.assertEqual(digits.to_word(49), "چهل و نه")
         self.assertEqual(digits.to_word(77), "هفتاد و هفت")
+        self.assertEqual(digits.to_word(123), "یکصد و بیست و سه")
         self.assertEqual(digits.to_word(250), "دویست و پنجاه")
         self.assertEqual(digits.to_word(809), "هشتصد و نه")
         self.assertEqual(digits.to_word(1001), "یک هزار و یک")
@@ -55,6 +65,9 @@ class TestDigits(TestCase):
         self.assertEqual(digits.to_word(15.007), "پانزده و هفت هزارم")
         self.assertEqual(digits.to_word(12519.85), "دوازده هزار و پانصد و نوزده و هشتاد و پنج صدم")
         self.assertEqual(digits.to_word(123.50), "یکصد و بیست و سه و پنج دهم")
+        self.assertEqual(digits.to_word(123.456), "یکصد و بیست و سه و چهارصد و پنجاه و شش هزارم")
+        self.assertEqual(digits.to_word(123.0), "یکصد و بیست و سه")
+        self.assertEqual(digits.to_word(-123.0), "منفی یکصد و بیست و سه")
 
         self.assertEqual(
             digits.to_word(-0.1554845), "منفی یک میلیون و پانصد و پنجاه و چهار هزار و هشتصد و چهل و پنج ده میلیونیم"
@@ -62,3 +75,6 @@ class TestDigits(TestCase):
 
         with pytest.raises(digits.OutOfRangeException):
             digits.to_word(1000000000000001)
+
+        with pytest.raises(TypeError):
+            digits.to_word("123")

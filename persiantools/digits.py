@@ -1,4 +1,5 @@
 import re
+from typing import Tuple
 
 EN_TO_FA_MAP = {
     "0": "۰",
@@ -98,58 +99,114 @@ class OutOfRangeException(Exception):
 
 
 def en_to_fa(string: str) -> str:
-    """Convert EN digits to Persian
+    """
+    Convert English digits to Persian digits.
 
-    Usage::
+    This function takes a string containing English digits and converts them to their
+    corresponding Persian digits.
+
+    Parameters:
+    string (str): A string containing English digits to be converted.
+
+    Returns:
+    str: A string with English digits converted to Persian digits.
+
+    Example:
     >>> from persiantools import digits
     >>> converted = digits.en_to_fa("0123456789")
-
-    :param string:  A string, will be converted
-    :rtype: str
+    >>> print(converted)
+    ۰۱۲۳۴۵۶۷۸۹
     """
     return EN_TO_FA_REGEX.sub(lambda x: EN_TO_FA_MAP[x.group()], string)
 
 
 def ar_to_fa(string: str) -> str:
-    """Convert Arabic digits to Persian
+    """
+    Convert Arabic digits to Persian digits.
 
-    Usage::
+    This function takes a string containing Arabic digits and converts them to their
+    corresponding Persian digits.
+
+    Parameters:
+    string (str): A string containing Arabic digits to be converted.
+
+    Returns:
+    str: A string with Arabic digits converted to Persian digits.
+
+    Example:
     >>> from persiantools import digits
     >>> converted = digits.ar_to_fa("٠١٢٣٤٥٦٧٨٩")
-
-    :param string: A string, will be converted
-    :rtype: str
+    >>> print(converted)
+    ۰۱۲۳۴۵۶۷۸۹
     """
     return AR_TO_FA_REGEX.sub(lambda x: AR_TO_FA_MAP[x.group()], string)
 
 
 def fa_to_en(string: str) -> str:
-    """Convert Persian digits to EN
+    """
+    Convert Persian digits to English digits.
 
-    Usage::
+    This function takes a string containing Persian digits and converts them to their
+    corresponding English digits.
+
+    Parameters:
+    string (str): A string containing Persian digits to be converted.
+
+    Returns:
+    str: A string with Persian digits converted to English digits.
+
+    Example:
     >>> from persiantools import digits
     >>> converted = digits.fa_to_en("۰۱۲۳۴۵۶۷۸۹")
-
-    :param string: A string, will be converted
-    :rtype: str
+    >>> print(converted)
+    0123456789
     """
     return FA_TO_EN_REGEX.sub(lambda x: FA_TO_EN_MAP[x.group()], string)
 
 
 def fa_to_ar(string: str) -> str:
-    """Convert Persian digits to Arabic
+    """
+    Convert Persian digits to Arabic digits.
 
-    Usage::
+    This function takes a string containing Persian digits and converts them to their
+    corresponding Arabic digits.
+
+    Parameters:
+    string (str): A string containing Persian digits to be converted.
+
+    Returns:
+    str: A string with Persian digits converted to Arabic digits.
+
+    Example:
     >>> from persiantools import digits
     >>> converted = digits.fa_to_ar("۰۱۲۳۴۵۶۷۸۹")
-
-    :param string: A string, will be converted
-    :rtype: str
+    >>> print(converted)
+    ٠١٢٣٤٥٦٧٨٩
     """
     return FA_TO_AR_REGEX.sub(lambda x: FA_TO_AR_MAP[x.group()], string)
 
 
 def _to_word(number: int, depth: bool) -> str:
+    """
+    Convert a number to its Persian word representation.
+
+    This function takes an integer and converts it to its Persian word representation.
+    It handles numbers up to 1,000,000,000,000,000 (one quadrillion).
+
+    Parameters:
+    number (int): The number to be converted.
+    depth (bool): A flag indicating if the function is called recursively.
+
+    Returns:
+    str: The Persian word representation of the number.
+
+    Raises:
+    OutOfRangeException: If the number is outside the supported range.
+
+    Example:
+    >>> print(_to_word(123, False))
+    یکصد و بیست و سه
+    """
     if number == 0:
         return ZERO if not depth else ""
 
@@ -169,6 +226,26 @@ def _to_word(number: int, depth: bool) -> str:
 
 
 def _floating_number_to_word(number: float, depth: bool) -> str:
+    """
+    Convert a floating-point number to its Persian word representation.
+
+    This function takes a floating-point number and converts it to its Persian word representation.
+    It handles floating-point numbers up to 14 decimal places.
+
+    Parameters:
+    number (float): The floating-point number to be converted.
+    depth (bool): A flag indicating if the function is called recursively.
+
+    Returns:
+    str: The Persian word representation of the floating-point number.
+
+    Raises:
+    OutOfRangeException: If the floating-point number has more than 14 decimal places.
+
+    Example:
+    >>> print(_floating_number_to_word(123.456, False))
+    یکصد و بیست و سه و چهارصد و پنجاه و شش هزارم
+    """
     left, right = str(abs(number)).split(".")
     if len(right) > 14:
         raise OutOfRangeException("You are allowed to use 14 digits for a floating point")
@@ -189,7 +266,32 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
         return _to_word(int(left), False)
 
 
-def to_word(number: (float, int)) -> str:
+def to_word(number: Tuple[float, int]) -> str:
+    """
+    Convert a number to its Persian word representation.
+
+    This function converts both integers and floating-point numbers to their
+    Persian word representations. It handles numbers up to 1 quadrillion (10^15)
+    for integers and up to 14 decimal places for floating-point numbers.
+
+    Parameters:
+    number (float or int): The number to be converted. It can be an integer or a floating-point number.
+
+    Returns:
+    str: The Persian word representation of the number.
+
+    Raises:
+    OutOfRangeException: If the number is greater than or equal to 1 quadrillion (10^15) or if the
+                         floating-point number has more than 14 decimal places.
+    TypeError: If the input is not a float or an int.
+
+    Examples:
+    >>> digits.to_word(123)
+    'یکصد و بیست و سه'
+
+    >>> digits.to_word(123.456)
+    'یکصد و بیست و سه و چهارصد و پنجاه و شش هزارم'
+    """
     if isinstance(number, int):
         return _to_word(number, False)
     elif isinstance(number, float):

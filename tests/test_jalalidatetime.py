@@ -3,7 +3,7 @@ import pickle
 import time
 from datetime import date, datetime
 from datetime import time as _time
-from datetime import timedelta
+from datetime import timedelta, timezone
 from unittest import TestCase
 
 import pytest
@@ -253,7 +253,7 @@ class TestJalaliDateTime(TestCase):
         file.close()
 
         file2 = open("save.p", "rb")
-        j = pickle.load(file2)
+        j = pickle.load(file2)  # nosec B301
         file2.close()
 
         self.assertEqual(j, now)
@@ -328,3 +328,221 @@ class TestJalaliDateTime(TestCase):
 
         jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, pytz.utc)
         self.assertEqual(jdt, JalaliDateTime.strptime(jdt.strftime("%c %f %z %Z"), "%c %f %z %Z"))
+
+    def test_strptime_basic(self):
+        date_string = "1400-01-01 12:30:45"
+        fmt = "%Y-%m-%d %H:%M:%S"
+        jdt = JalaliDateTime.strptime(date_string, fmt)
+        self.assertEqual(jdt.year, 1400)
+        self.assertEqual(jdt.month, 1)
+        self.assertEqual(jdt.day, 1)
+        self.assertEqual(jdt.hour, 12)
+        self.assertEqual(jdt.minute, 30)
+        self.assertEqual(jdt.second, 45)
+
+    def test_strptime_with_timezone(self):
+        date_string = "1400-01-01 12:30:45 +0330"
+        fmt = "%Y-%m-%d %H:%M:%S %z"
+        jdt = JalaliDateTime.strptime(date_string, fmt)
+        self.assertEqual(jdt.year, 1400)
+        self.assertEqual(jdt.month, 1)
+        self.assertEqual(jdt.day, 1)
+        self.assertEqual(jdt.hour, 12)
+        self.assertEqual(jdt.minute, 30)
+        self.assertEqual(jdt.second, 45)
+        self.assertEqual(jdt.utcoffset(), timedelta(hours=3, minutes=30))
+
+    def test_strptime_with_locale_fa(self):
+        date_string = "۱۴۰۰-۰۱-۰۱ ۱۲:۳۰:۴۵"
+        fmt = "%Y-%m-%d %H:%M:%S"
+        jdt = JalaliDateTime.strptime(date_string, fmt, locale="fa")
+        self.assertEqual(jdt.year, 1400)
+        self.assertEqual(jdt.month, 1)
+        self.assertEqual(jdt.day, 1)
+        self.assertEqual(jdt.hour, 12)
+        self.assertEqual(jdt.minute, 30)
+        self.assertEqual(jdt.second, 45)
+
+    def test_strptime_invalid_format(self):
+        date_string = "1400/01/01"
+        fmt = "%Y-%m-%d"
+        with self.assertRaises(ValueError):
+            JalaliDateTime.strptime(date_string, fmt)
+
+    def test_strptime_invalid_locale(self):
+        date_string = "1400-01-01 12:30:45"
+        fmt = "%Y-%m-%d %H:%M:%S"
+        with self.assertRaises(ValueError):
+            JalaliDateTime.strptime(date_string, fmt, locale="invalid")
+
+    def test_utcnow(self):
+        now_utc = datetime.utcnow()
+        jalali_now = JalaliDateTime.utcnow()
+        gregorian_now = jalali_now.to_gregorian()
+
+        self.assertTrue(
+            abs(now_utc - gregorian_now) < timedelta(seconds=1),
+            f"Expected the times to be close. now_utc: {now_utc}, gregorian_now: {gregorian_now}",
+        )
+
+    def test_check_tzinfo_arg_valid(self):
+        JalaliDateTime._check_tzinfo_arg(None)
+        JalaliDateTime._check_tzinfo_arg(timezone.utc)
+
+    def test_check_tzinfo_arg_invalid(self):
+        with self.assertRaises(TypeError):
+            JalaliDateTime._check_tzinfo_arg(123)
+
+        with self.assertRaises(TypeError):
+            JalaliDateTime._check_tzinfo_arg("InvalidTzinfo")
+
+    def test_combine(self):
+        jdate = JalaliDate(1367, 2, 14)
+        time_v = _time(4, 30, 1)
+        combined = JalaliDateTime.combine(jdate, time_v)
+
+        self.assertEqual(combined.year, 1367)
+        self.assertEqual(combined.month, 2)
+        self.assertEqual(combined.day, 14)
+        self.assertEqual(combined.hour, 4)
+        self.assertEqual(combined.minute, 30)
+        self.assertEqual(combined.second, 1)
+
+        with self.assertRaises(TypeError):
+            JalaliDateTime.combine("InvalidDate", _time(12, 30, 45))
+
+        jdate = JalaliDate(1400, 1, 1)
+        with self.assertRaises(TypeError):
+            JalaliDateTime.combine(jdate, "InvalidTime")
+
+    def test_astimezone_utc(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=3)))
+        jdt_utc = jdt.astimezone(timezone.utc)
+
+        gregorian_utc = jdt_utc.to_gregorian()
+        expected_utc = datetime(2021, 3, 21, 9, 30, 45, tzinfo=timezone.utc)
+
+        self.assertEqual(gregorian_utc, expected_utc)
+
+    def test_astimezone_other(self):
+        jdt = JalaliDateTime(1400, 1, 1, 20, 30, 45, tzinfo=timezone.utc)
+        new_tz = timezone(timedelta(hours=5))
+        jdt_new_tz = jdt.astimezone(new_tz)
+
+        gregorian_new_tz = jdt_new_tz.to_gregorian()
+        expected_new_tz = datetime(2021, 3, 22, 1, 30, 45, tzinfo=new_tz)  # 5 hours added, next day
+
+        self.assertEqual(gregorian_new_tz, expected_new_tz)
+
+    def test_astimezone_invalid(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        with self.assertRaises(TypeError):
+            jdt.astimezone("InvalidTimezone")
+
+    def test_isoformat_positive_offset(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=3, minutes=30)))
+        iso_format = jdt.isoformat()
+        expected_iso_format = "1400-01-01T12:30:45+03:30"
+        self.assertEqual(iso_format, expected_iso_format)
+
+    def test_isoformat_negative_offset(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(-timedelta(hours=4, minutes=45)))
+        iso_format = jdt.isoformat()
+        expected_iso_format = "1400-01-01T12:30:45-04:45"
+        self.assertEqual(iso_format, expected_iso_format)
+
+    def test_isoformat_no_offset(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45)
+        iso_format = jdt.isoformat()
+        expected_iso_format = "1400-01-01T12:30:45"
+        self.assertEqual(iso_format, expected_iso_format)
+
+    def test_isoformat_utc(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        iso_format = jdt.isoformat()
+        expected_iso_format = "1400-01-01T12:30:45+00:00"
+        self.assertEqual(iso_format, expected_iso_format)
+
+    def test_cmp_naive_vs_aware(self):
+        jdt_naive = JalaliDateTime(1400, 1, 1, 12, 30, 45)
+        jdt_aware = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+
+        with self.assertRaises(TypeError):
+            jdt_naive._cmp(jdt_aware)
+
+    def test_cmp_aware_vs_naive(self):
+        jdt_naive = JalaliDateTime(1400, 1, 1, 12, 30, 45)
+        jdt_aware = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+
+        with self.assertRaises(TypeError):
+            jdt_aware._cmp(jdt_naive)
+
+    def test_cmp_aware_with_different_offsets(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=3)))
+        jdt2 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=5)))
+
+        self.assertEqual(jdt1._cmp(jdt2), 1)
+        self.assertEqual(jdt2._cmp(jdt1), -1)
+
+    def test_cmp_aware_with_same_offset(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        jdt2 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+
+        self.assertEqual(jdt1._cmp(jdt2), 0)
+
+    def test_cmp_diff_days(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        jdt2 = JalaliDateTime(1400, 1, 2, 12, 30, 45, tzinfo=timezone.utc)
+
+        self.assertEqual(jdt1._cmp(jdt2), -1)
+        self.assertEqual(jdt2._cmp(jdt1), 1)
+
+    def test_cmp_diff_seconds(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        jdt2 = JalaliDateTime(1400, 1, 1, 12, 30, 46, tzinfo=timezone.utc)
+
+        self.assertEqual(jdt1._cmp(jdt2), -1)
+        self.assertEqual(jdt2._cmp(jdt1), 1)
+
+    def test_subtract_same_offset(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 46, tzinfo=timezone.utc)
+        jdt2 = JalaliDateTime(1400, 1, 1, 10, 30, 45, tzinfo=timezone.utc)
+
+        result = jdt1 - jdt2
+        expected = timedelta(hours=2, seconds=1)
+
+        self.assertEqual(result, expected)
+
+    def test_subtract_different_offset(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=3)))
+        jdt2 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone(timedelta(hours=5)))
+
+        result = jdt1 - jdt2
+        expected = timedelta(hours=2)  # jdt1 is 2 hours behind jdt2
+
+        self.assertEqual(result, expected)
+
+    def test_subtract_naive_and_aware(self):
+        jdt1 = JalaliDateTime(1400, 1, 1, 12, 30, 45)
+        jdt2 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+
+        with self.assertRaises(TypeError):
+            _ = jdt1 - jdt2
+
+    def test_subtract_with_timedelta(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+        delta = timedelta(days=1, hours=1, minutes=30, seconds=15)
+
+        result = jdt - delta
+        expected = JalaliDateTime(1399, 12, 30, 11, 0, 30, tzinfo=timezone.utc)
+
+        self.assertEqual(result, expected)
+
+    def test_subtract_different_dates(self):
+        jdt1 = JalaliDateTime(1400, 1, 2, 12, 30, 45, tzinfo=timezone.utc)
+        jdt2 = JalaliDateTime(1400, 1, 1, 12, 30, 45, tzinfo=timezone.utc)
+
+        result = jdt1 - jdt2
+        expected = timedelta(days=1)
+
+        self.assertEqual(result, expected)

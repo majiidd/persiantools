@@ -31,5 +31,9 @@ class TestDigits(TestCase):
     def test_fa_to_ar(self):
         self.assertEqual(characters.fa_to_ar("کیک"), "كيك")
 
+        text = "یکی بود یکی نبود"
+        expected = "يكي بود يكي نبود"
+        self.assertEqual(characters.fa_to_ar(text), expected)
+
         with pytest.raises(TypeError):
             characters.ar_to_fa(12345)
