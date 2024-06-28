@@ -129,6 +129,12 @@ _MONTH_COUNT = [
     [29, 30, 336],  # esfand
 ]
 
+_FRACTION_CORRECTION = [100000, 10000, 1000, 100, 10]
+
+
+def _is_ascii_digit(c):
+    return c in "0123456789"
+
 
 class JalaliDate:
     """
@@ -558,12 +564,20 @@ class JalaliDate:
         if not isinstance(date_string, str):
             raise TypeError("fromisoformat: argument must be str")
 
-        return cls(*cls._parse_isoformat_date(digits.fa_to_en(date_string)))
+        if len(date_string) not in (7, 8, 10):
+            raise ValueError(f"Invalid isoformat string: {date_string!r}")
+
+        try:
+            return cls(*cls._parse_isoformat_date(digits.fa_to_en(date_string)))
+        except Exception:
+            raise ValueError(f"Invalid isoformat string: {date_string!r}")
 
     @classmethod
     def _parse_isoformat_date(cls, dtstr):
         # It is assumed that this function will only be called with a
         # string of length exactly 10, and (though this is not used) ASCII-only
+        assert len(dtstr) in (7, 8, 10)
+
         year = int(dtstr[0:4])
         if dtstr[4] != "-":
             raise ValueError("Invalid date separator: %s" % dtstr[4])
@@ -952,7 +966,7 @@ class JalaliDateTime(JalaliDate):
 
     @classmethod
     def utcfromtimestamp(cls, t):
-        return cls(dt.utcfromtimestamp(t))
+        return cls(dt.fromtimestamp(t, tz=timezone.utc))
 
     def date(self):
         return JalaliDate(self.year, self.month, self.day).to_gregorian()
@@ -1025,7 +1039,187 @@ class JalaliDateTime(JalaliDate):
 
     @classmethod
     def utcnow(cls):
-        return cls(dt.utcnow())
+        return cls(dt.now(tz=timezone.utc))
+
+    @classmethod
+    def fromisoformat(cls, date_string):
+        """Construct a datetime from a string in one of the ISO 8601 formats."""
+        if not isinstance(date_string, str):
+            raise TypeError("fromisoformat: argument must be str")
+
+        if len(date_string) < 7:
+            raise ValueError(f"Invalid isoformat string: {date_string!r}")
+
+        # Split this at the separator
+        try:
+            separator_location = cls._find_isoformat_datetime_separator(date_string)
+            dstr = date_string[0:separator_location]
+            tstr = date_string[(separator_location + 1) :]
+
+            date_components = cls._parse_isoformat_date(dstr)
+        except ValueError:
+            raise ValueError(f"Invalid isoformat string: {date_string!r}") from None
+
+        if tstr:
+            try:
+                time_components = cls._parse_isoformat_time(tstr)
+            except ValueError:
+                raise ValueError(f"Invalid isoformat string: {date_string!r}") from None
+        else:
+            time_components = [0, 0, 0, 0, None]
+
+        return cls(*(date_components + time_components))
+
+    @classmethod
+    def _find_isoformat_datetime_separator(cls, dtstr):
+        # See the comment in _datetimemodule.c:_find_isoformat_datetime_separator
+        len_dtstr = len(dtstr)
+        if len_dtstr == 7:
+            return 7
+
+        assert len_dtstr > 7
+        date_separator = "-"
+        week_indicator = "W"
+
+        if dtstr[4] == date_separator:
+            if dtstr[5] == week_indicator:
+                if len_dtstr < 8:
+                    raise ValueError("Invalid ISO string")
+                if len_dtstr > 8 and dtstr[8] == date_separator:
+                    if len_dtstr == 9:
+                        raise ValueError("Invalid ISO string")
+                    if len_dtstr > 10 and _is_ascii_digit(dtstr[10]):
+                        # This is as far as we need to resolve the ambiguity for
+                        # the moment - if we have YYYY-Www-##, the separator is
+                        # either a hyphen at 8 or a number at 10.
+                        #
+                        # We'll assume it's a hyphen at 8 because it's way more
+                        # likely that someone will use a hyphen as a separator than
+                        # a number, but at this point it's really best effort
+                        # because this is an extension of the spec anyway.
+                        # TODO(pganssle): Document this
+                        return 8
+                    return 10
+                else:
+                    # YYYY-Www (8)
+                    return 8
+            else:
+                # YYYY-MM-DD (10)
+                return 10
+        else:
+            if dtstr[4] == week_indicator:
+                # YYYYWww (7) or YYYYWwwd (8)
+                idx = 7
+                while idx < len_dtstr:
+                    if not _is_ascii_digit(dtstr[idx]):
+                        break
+                    idx += 1
+
+                if idx < 9:
+                    return idx
+
+                if idx % 2 == 0:
+                    # If the index of the last number is even, it's YYYYWwwd
+                    return 7
+                else:
+                    return 8
+            else:
+                # YYYYMMDD (8)
+                return 8
+
+    @classmethod
+    def _parse_isoformat_time(cls, tstr):
+        # Format supported is HH[:MM[:SS[.fff[fff]]]][+HH:MM[:SS[.ffffff]]]
+        len_str = len(tstr)
+        if len_str < 2:
+            raise ValueError("Isoformat time too short")
+
+        # This is equivalent to re.search('[+-Z]', tstr), but faster
+        tz_pos = tstr.find("-") + 1 or tstr.find("+") + 1 or tstr.find("Z") + 1
+        timestr = tstr[: tz_pos - 1] if tz_pos > 0 else tstr
+
+        time_comps = cls._parse_hh_mm_ss_ff(timestr)
+
+        tzi = None
+        if tz_pos == len_str and tstr[-1] == "Z":
+            tzi = timezone.utc
+        elif tz_pos > 0:
+            tzstr = tstr[tz_pos:]
+
+            # Valid time zone strings are:
+            # HH                  len: 2
+            # HHMM                len: 4
+            # HH:MM               len: 5
+            # HHMMSS              len: 6
+            # HHMMSS.f+           len: 7+
+            # HH:MM:SS            len: 8
+            # HH:MM:SS.f+         len: 10+
+
+            if len(tzstr) in (0, 1, 3):
+                raise ValueError("Malformed time zone string")
+
+            tz_comps = cls._parse_hh_mm_ss_ff(tzstr)
+
+            if all(x == 0 for x in tz_comps):
+                tzi = timezone.utc
+            else:
+                tzsign = -1 if tstr[tz_pos - 1] == "-" else 1
+
+                td = timedelta(hours=tz_comps[0], minutes=tz_comps[1], seconds=tz_comps[2], microseconds=tz_comps[3])
+
+                tzi = timezone(tzsign * td)
+
+        time_comps.append(tzi)
+
+        return time_comps
+
+    @classmethod
+    def _parse_hh_mm_ss_ff(cls, tstr):
+        # Parses things of the form HH[:?MM[:?SS[{.,}fff[fff]]]]
+        len_str = len(tstr)
+
+        time_comps = [0, 0, 0, 0]
+        pos = 0
+        for comp in range(0, 3):
+            if (len_str - pos) < 2:
+                raise ValueError("Incomplete time component")
+
+            time_comps[comp] = int(tstr[pos : pos + 2])
+
+            pos += 2
+            next_char = tstr[pos : pos + 1]
+
+            if comp == 0:
+                has_sep = next_char == ":"
+
+            if not next_char or comp >= 2:
+                break
+
+            if has_sep and next_char != ":":
+                raise ValueError("Invalid time separator: %c" % next_char)
+
+            pos += has_sep
+
+        if pos < len_str:
+            if tstr[pos] not in ".,":
+                raise ValueError("Invalid microsecond component")
+            else:
+                pos += 1
+
+                len_remainder = len_str - pos
+
+                if len_remainder >= 6:
+                    to_parse = 6
+                else:
+                    to_parse = len_remainder
+
+                time_comps[3] = int(tstr[pos : (pos + to_parse)])
+                if to_parse < 6:
+                    time_comps[3] *= _FRACTION_CORRECTION[to_parse - 1]
+                if len_remainder > to_parse and not all(map(_is_ascii_digit, tstr[(pos + to_parse) :])):
+                    raise ValueError("Non-digit values in unparsed fraction")
+
+        return time_comps
 
     @staticmethod
     def _check_tzinfo_arg(tz):

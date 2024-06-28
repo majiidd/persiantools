@@ -1,8 +1,10 @@
 [flake8]
 max-line-length = 120
 extend-ignore =
+    E203,
     E501,
     W503,
+    C901,
 max-complexity = 10
 select = B,C,E,F,W
 exclude =

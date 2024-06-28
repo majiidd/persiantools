@@ -9,7 +9,7 @@ from unittest import TestCase
 import pytest
 import pytz
 
-from persiantools.jdatetime import JalaliDate, JalaliDateTime
+from persiantools.jdatetime import JalaliDate, JalaliDateTime, _is_ascii_digit
 
 
 class TestJalaliDateTime(TestCase):
@@ -64,7 +64,7 @@ class TestJalaliDateTime(TestCase):
         )
         self.assertEqual(
             JalaliDateTime.utcfromtimestamp(578723400),
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0),
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, tzinfo=timezone.utc),
         )
 
         with pytest.raises(TypeError):
@@ -376,7 +376,7 @@ class TestJalaliDateTime(TestCase):
             JalaliDateTime.strptime(date_string, fmt, locale="invalid")
 
     def test_utcnow(self):
-        now_utc = datetime.utcnow()
+        now_utc = datetime.now(timezone.utc)
         jalali_now = JalaliDateTime.utcnow()
         gregorian_now = jalali_now.to_gregorian()
 
@@ -592,3 +592,48 @@ class TestJalaliDateTime(TestCase):
     def test_strftime_edge_case_midnight(self):
         jdate = JalaliDateTime(1400, 1, 1, 0, 0, 0)
         self.assertEqual(jdate.strftime("%Y-%m-%d %H:%M:%S"), "1400-01-01 00:00:00")
+
+    def test_fromisoformat_valid_date_and_time(self):
+        jdt = JalaliDateTime.fromisoformat("1403-08-09T02:21:45.123456+04:30")
+        self.assertEqual(jdt.year, 1403)
+        self.assertEqual(jdt.month, 8)
+        self.assertEqual(jdt.day, 9)
+        self.assertEqual(jdt.hour, 2)
+        self.assertEqual(jdt.minute, 21)
+        self.assertEqual(jdt.second, 45)
+        self.assertEqual(jdt.microsecond, 123456)
+        self.assertEqual(jdt.tzinfo, timezone(timedelta(hours=4, minutes=30)))
+
+    def test_fromisoformat_with_timezone(self):
+        jdt = JalaliDateTime.fromisoformat("1403-08-09T02:21:45+04:30")
+        self.assertEqual(jdt.tzinfo, timezone(timedelta(hours=4, minutes=30)))
+
+    def test_fromisoformat_invalid_string(self):
+        with self.assertRaises(ValueError):
+            JalaliDateTime.fromisoformat("invalid-date-time")
+
+    def test_find_isoformat_datetime_separator(self):
+        separator = JalaliDateTime._find_isoformat_datetime_separator("1403-08-09T02:21:45")
+        self.assertEqual(separator, 10)
+
+    def test_parse_isoformat_time_with_microseconds(self):
+        time_components = JalaliDateTime._parse_isoformat_time("02:21:45.123456")
+        self.assertEqual(time_components, [2, 21, 45, 123456, None])
+
+    def test_parse_isoformat_time_with_timezone(self):
+        time_components = JalaliDateTime._parse_isoformat_time("02:21:45+04:30")
+        self.assertEqual(time_components, [2, 21, 45, 0, timezone(timedelta(hours=4, minutes=30))])
+
+    def test_parse_hh_mm_ss_ff_with_microseconds(self):
+        time_components = JalaliDateTime._parse_hh_mm_ss_ff("02:21:45.123456")
+        self.assertEqual(time_components, [2, 21, 45, 123456])
+
+    def test_is_ascii_digit(self):
+        self.assertTrue(_is_ascii_digit("5"))
+        self.assertFalse(_is_ascii_digit("a"))
+
+    def test_isoformat_round_trip(self):
+        original = JalaliDateTime(1403, 8, 9, 2, 21, 45, 123456, tzinfo=timezone.utc)
+        iso_format = original.isoformat()
+        parsed = JalaliDateTime.fromisoformat(iso_format)
+        self.assertEqual(original, parsed)

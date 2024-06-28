@@ -278,7 +278,7 @@ class TestJalaliDate(TestCase):
         with pytest.raises(TypeError):
             JalaliDate.fromisoformat(13670214)
 
-        with pytest.raises(ValueError, match="Invalid date separator: /"):
+        with pytest.raises(ValueError):
             JalaliDate.fromisoformat("1367/02/14")
 
         with pytest.raises(ValueError):
