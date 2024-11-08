@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import pytest
 
-from persiantools.jdatetime import JalaliDate, MINYEAR, MAXYEAR
+from persiantools.jdatetime import MAXYEAR, MINYEAR, JalaliDate
 
 
 class TestJalaliDate(TestCase):

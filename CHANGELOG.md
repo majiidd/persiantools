@@ -1,6 +1,10 @@
 
 # Changelog
 
+## [5.1.0](https://github.com/majiidd/persiantools/compare/5.0.0...5.1.0) - 2024-11-08
+
+- Improved CI/CD pipeline run time through optimized caching.
+
 ## [5.0.0](https://github.com/majiidd/persiantools/compare/4.2.0...5.0.0) - 2024-11-08
 
 - Dropped Python 3.8 support; added Python 3.13 compatibility.
