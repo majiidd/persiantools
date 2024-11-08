@@ -1,7 +1,14 @@
 
 # Changelog
 
-## [4.2.0](https://github.com/majiidd/persiantools/compare/4.1.2...4.2.0) (2024-06-28)
+## [5.0.0](https://github.com/majiidd/persiantools/compare/4.2.0...5.0.0) - 2024-11-08
+
+- Dropped Python 3.8 support; added Python 3.13 compatibility.
+- Added type annotations to methods.
+- Expanded test suite with new tests.
+- Updated dependencies to the latest versions.
+
+## [4.2.0](https://github.com/majiidd/persiantools/compare/4.1.2...4.2.0) - 2024-06-28
 
 - Added `CHANGELOG.md` to track changes in the project.
 

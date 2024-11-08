@@ -16,6 +16,11 @@ class TestDigits(TestCase):
             "ظ ط ذ د ز ر و ، . ش س ی ب ل ا ت ن م ک ض ص ث ق ف غ ع ه خ ح ؟",
         )
 
+        self.assertEqual(characters.ar_to_fa(""), "")
+        self.assertEqual(characters.ar_to_fa("123456"), "123456")
+        self.assertEqual(characters.ar_to_fa("!@#$%^&*()"), "!@#$%^&*()")
+        self.assertEqual(characters.ar_to_fa("123 ي"), "123 ی")
+
         with pytest.raises(TypeError):
             characters.ar_to_fa(12345)
 
@@ -26,14 +31,20 @@ class TestDigits(TestCase):
 
     def test_fa_to_fa(self):
         self.assertEqual(characters.ar_to_fa("السلام علیکم"), "السلام علیکم")
-        self.assertEqual(characters.ar_to_fa("السلام علیکم"), "السلام علیکم")
+        self.assertEqual(characters.ar_to_fa("کیک"), "کیک")
 
     def test_fa_to_ar(self):
         self.assertEqual(characters.fa_to_ar("کیک"), "كيك")
+        self.assertEqual(characters.fa_to_ar("سلام به همه"), "سلام به همه")
 
         text = "یکی بود یکی نبود"
         expected = "يكي بود يكي نبود"
         self.assertEqual(characters.fa_to_ar(text), expected)
 
+        self.assertEqual(characters.fa_to_ar(""), "")
+        self.assertEqual(characters.fa_to_ar("123456"), "123456")
+        self.assertEqual(characters.fa_to_ar("!@#$%^&*()"), "!@#$%^&*()")
+        self.assertEqual(characters.fa_to_ar("123 ک"), "123 ك")
+
         with pytest.raises(TypeError):
-            characters.ar_to_fa(12345)
+            characters.fa_to_ar(12345)

@@ -1,59 +1,9 @@
-import re
-from typing import Tuple
+from typing import Union
 
-EN_TO_FA_MAP = {
-    "0": "۰",
-    "1": "۱",
-    "2": "۲",
-    "3": "۳",
-    "4": "۴",
-    "5": "۵",
-    "6": "۶",
-    "7": "۷",
-    "8": "۸",
-    "9": "۹",
-}
-AR_TO_FA_MAP = {
-    "٠": "۰",
-    "١": "۱",
-    "٢": "۲",
-    "٣": "۳",
-    "٤": "۴",
-    "٥": "۵",
-    "٦": "۶",
-    "٧": "۷",
-    "٨": "۸",
-    "٩": "۹",
-}
-FA_TO_EN_MAP = {
-    "۰": "0",
-    "۱": "1",
-    "۲": "2",
-    "۳": "3",
-    "۴": "4",
-    "۵": "5",
-    "۶": "6",
-    "۷": "7",
-    "۸": "8",
-    "۹": "9",
-}
-FA_TO_AR_MAP = {
-    "۰": "٠",
-    "۱": "١",
-    "۲": "٢",
-    "۳": "٣",
-    "۴": "٤",
-    "۵": "٥",
-    "۶": "٦",
-    "۷": "٧",
-    "۸": "٨",
-    "۹": "٩",
-}
-
-EN_TO_FA_REGEX = re.compile("|".join(EN_TO_FA_MAP.keys()))
-AR_TO_FA_REGEX = re.compile("|".join(AR_TO_FA_MAP.keys()))
-FA_TO_EN_REGEX = re.compile("|".join(FA_TO_EN_MAP.keys()))
-FA_TO_AR_REGEX = re.compile("|".join(FA_TO_AR_MAP.keys()))
+EN_TO_FA_MAP = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
+AR_TO_FA_MAP = str.maketrans("٠١٢٣٤٥٦٧٨٩", "۰۱۲۳۴۵۶۷۸۹")
+FA_TO_EN_MAP = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789")
+FA_TO_AR_MAP = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "٠١٢٣٤٥٦٧٨٩")
 
 ONES = ("یک", "دو", "سه", "چهار", "پنج", "شش", "هفت", "هشت", "نه")
 TENS = ("بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "هشتاد", "نود")
@@ -85,12 +35,14 @@ DECISION = {
     20: lambda n, depth: RANGE[n - 10],
     100: lambda n, depth: TENS[n // 10 - 2] + _to_word(n % 10, True),
     1000: lambda n, depth: HUNDREDS[n // 100 - 1] + _to_word(n % 100, True),
-    1000000: lambda n, depth: _to_word(n // 1000, depth) + BIG_RANGE[0] + _to_word(n % 1000, True),
-    1000000000: lambda n, depth: _to_word(n // 1000000, depth) + BIG_RANGE[1] + _to_word(n % 1000000, True),
-    1000000000000: lambda n, depth: _to_word(n // 1000000000, depth) + BIG_RANGE[2] + _to_word(n % 1000000000, True),
-    1000000000000000: lambda n, depth: _to_word(n // 1000000000000, depth)
+    1_000_000: lambda n, depth: _to_word(n // 1_000, depth) + BIG_RANGE[0] + _to_word(n % 1_000, True),
+    1_000_000_000: lambda n, depth: _to_word(n // 1_000_000, depth) + BIG_RANGE[1] + _to_word(n % 1_000_000, True),
+    1_000_000_000_000: lambda n, depth: _to_word(n // 1_000_000_000, depth)
+    + BIG_RANGE[2]
+    + _to_word(n % 1_000_000_000, True),
+    1_000_000_000_000_000: lambda n, depth: _to_word(n // 1_000_000_000_000, depth)
     + BIG_RANGE[3]
-    + _to_word(n % 1000000000000, True),
+    + _to_word(n % 1_000_000_000_000, True),
 }
 
 
@@ -117,7 +69,10 @@ def en_to_fa(string: str) -> str:
     >>> print(converted)
     ۰۱۲۳۴۵۶۷۸۹
     """
-    return EN_TO_FA_REGEX.sub(lambda x: EN_TO_FA_MAP[x.group()], string)
+    if not isinstance(string, str):
+        raise TypeError("Input must be a string")
+
+    return string.translate(EN_TO_FA_MAP)
 
 
 def ar_to_fa(string: str) -> str:
@@ -139,7 +94,10 @@ def ar_to_fa(string: str) -> str:
     >>> print(converted)
     ۰۱۲۳۴۵۶۷۸۹
     """
-    return AR_TO_FA_REGEX.sub(lambda x: AR_TO_FA_MAP[x.group()], string)
+    if not isinstance(string, str):
+        raise TypeError("Input must be a string")
+
+    return string.translate(AR_TO_FA_MAP)
 
 
 def fa_to_en(string: str) -> str:
@@ -161,7 +119,10 @@ def fa_to_en(string: str) -> str:
     >>> print(converted)
     0123456789
     """
-    return FA_TO_EN_REGEX.sub(lambda x: FA_TO_EN_MAP[x.group()], string)
+    if not isinstance(string, str):
+        raise TypeError("Input must be a string")
+
+    return string.translate(FA_TO_EN_MAP)
 
 
 def fa_to_ar(string: str) -> str:
@@ -183,7 +144,10 @@ def fa_to_ar(string: str) -> str:
     >>> print(converted)
     ٠١٢٣٤٥٦٧٨٩
     """
-    return FA_TO_AR_REGEX.sub(lambda x: FA_TO_AR_MAP[x.group()], string)
+    if not isinstance(string, str):
+        raise TypeError("Input must be a string")
+
+    return string.translate(FA_TO_AR_MAP)
 
 
 def _to_word(number: int, depth: bool) -> str:
@@ -195,7 +159,7 @@ def _to_word(number: int, depth: bool) -> str:
 
     Parameters:
     number (int): The number to be converted.
-    depth (bool): A flag indicating if the function is called recursively.
+    depth (bool): Indicates if the function is called recursively.
 
     Returns:
     str: The Persian word representation of the number.
@@ -250,23 +214,24 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
     if len(right) > 14:
         raise OutOfRangeException("You are allowed to use 14 digits for a floating point")
 
-    if len(str(right).strip("0")) > 0:
+    if right.strip("0"):
         left_word = _to_word(int(left), False)
-        result = "{}{} {}".format(
-            left_word + DELI if left_word != ZERO else "",
-            _to_word(int(right), False),
-            MANTISSA[len(str(right).rstrip("0")) - 1],
+        mantissa_index = len(right.rstrip("0")) - 1
+        if mantissa_index >= len(MANTISSA):
+            raise ValueError("Fractional part is too long")
+        result = (
+            f"{left_word + DELI if left_word != ZERO else ''}{_to_word(int(right), False)} {MANTISSA[mantissa_index]}"
         )
         if number < 0:
             return NEGATIVE + result
         return result
     else:
         if number < 0:
-            return NEGATIVE + (_to_word(int(left), False))
+            return NEGATIVE + _to_word(int(left), False)
         return _to_word(int(left), False)
 
 
-def to_word(number: Tuple[float, int]) -> str:
+def to_word(number: Union[int, float]) -> str:
     """
     Convert a number to its Persian word representation.
 

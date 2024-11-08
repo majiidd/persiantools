@@ -1,8 +1,7 @@
 import re
-from typing import Dict
 
 
-def replace(string: str, dictionary: Dict[str, str]) -> str:
+def replace(string: str, dictionary: dict[str, str]) -> str:
     """
     Replace occurrences of keys in the dictionary with their corresponding values in the given string.
 
@@ -22,5 +21,5 @@ def replace(string: str, dictionary: Dict[str, str]) -> str:
     if not dictionary:
         return string
 
-    pattern = re.compile("|".join(re.escape(key) for key in dictionary.keys()))
+    pattern = re.compile("|".join(re.escape(key) for key in dictionary))
     return pattern.sub(lambda x: dictionary[x.group()], string)

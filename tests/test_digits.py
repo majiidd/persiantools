@@ -29,16 +29,25 @@ class TestDigits(TestCase):
 
         self.assertEqual(converted, "۰۹۸۷۶۵۴۳۲۱")
 
+        with pytest.raises(TypeError):
+            digits.ar_to_fa(12345)
+
     def test_fa_to_en(self):
         self.assertEqual(digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱"), "0987654321")
         self.assertEqual(digits.fa_to_en(""), "")
         self.assertEqual(digits.fa_to_en("abcd"), "abcd")
+
+        with pytest.raises(TypeError):
+            digits.fa_to_en(12345)
 
     def test_fa_to_ar(self):
         self.assertEqual(digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱"), "٠٩٨٧٦٥٤٣٢١")
         self.assertEqual(digits.fa_to_ar(" ۰۹۸۷۶۵۴۳۲۱"), " ٠٩٨٧٦٥٤٣٢١")
         self.assertEqual(digits.fa_to_ar(""), "")
         self.assertEqual(digits.fa_to_ar("abcd"), "abcd")
+
+        with pytest.raises(TypeError):
+            digits.fa_to_ar(12345)
 
     def test_to_letter(self):
         self.assertEqual(digits.to_word(0), "صفر")

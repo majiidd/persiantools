@@ -1,4 +1,18 @@
-from persiantools import utils
+from persiantools.utils import replace
+
+CHARACTER_MAP_AR_TO_FA = {
+    "دِ": "د",
+    "بِ": "ب",
+    "زِ": "ز",
+    "ذِ": "ذ",
+    "شِ": "ش",
+    "سِ": "س",
+    "ى": "ی",
+    "ي": "ی",
+    "ك": "ک",
+}
+
+CHARACTER_MAP_FA_TO_AR = {"ی": "ي", "ک": "ك"}
 
 
 def ar_to_fa(string: str) -> str:
@@ -21,19 +35,7 @@ def ar_to_fa(string: str) -> str:
     if not isinstance(string, str):
         raise TypeError("Input must be of type str")
 
-    characters_map = {
-        "دِ": "د",
-        "بِ": "ب",
-        "زِ": "ز",
-        "ذِ": "ذ",
-        "شِ": "ش",
-        "سِ": "س",
-        "ى": "ی",
-        "ي": "ی",
-        "ك": "ک",
-    }
-
-    return utils.replace(string, characters_map)
+    return replace(string, CHARACTER_MAP_AR_TO_FA)
 
 
 def fa_to_ar(string: str) -> str:
@@ -56,6 +58,4 @@ def fa_to_ar(string: str) -> str:
     if not isinstance(string, str):
         raise TypeError("Input must be of type str")
 
-    characters_map = {"ی": "ي", "ک": "ك"}
-
-    return utils.replace(string, characters_map)
+    return replace(string, CHARACTER_MAP_FA_TO_AR)

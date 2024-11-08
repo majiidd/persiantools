@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import pytest
 
-from persiantools.jdatetime import JalaliDate
+from persiantools.jdatetime import JalaliDate, MINYEAR, MAXYEAR
 
 
 class TestJalaliDate(TestCase):
@@ -28,6 +28,7 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1403, 2, 23), date(2024, 5, 12)),
             (JalaliDate(1403, 4, 3), date(2024, 6, 23)),
             (JalaliDate(1403, 4, 8), date(2024, 6, 28)),
+            (JalaliDate(1403, 8, 18), date(2024, 11, 8)),
             (JalaliDate(1367, 12, 29), date(1989, 3, 20)),
             (JalaliDate(1392, 12, 29), date(2014, 3, 20)),
             (JalaliDate(1398, 12, 29), date(2020, 3, 19)),
@@ -189,6 +190,10 @@ class TestJalaliDate(TestCase):
         with pytest.raises(ValueError):
             JalaliDate(1400, 1, 1, "us")
 
+        jdate = JalaliDate.today()
+        with pytest.raises(ValueError, match="locale must be 'en' or 'fa'"):
+            jdate.replace(locale="de")
+
     def test_leap(self):
         cases = [
             (1214, True),
@@ -220,6 +225,15 @@ class TestJalaliDate(TestCase):
         ]
         for year, is_leap in cases:
             self.assertEqual(JalaliDate.is_leap(year), is_leap)
+
+        invalid_year_below = MINYEAR - 1
+        invalid_year_above = MAXYEAR + 1
+
+        with pytest.raises(ValueError, match=f"Year must be between {MINYEAR} and {MAXYEAR}"):
+            JalaliDate.is_leap(invalid_year_below)
+
+        with pytest.raises(ValueError, match=f"Year must be between {MINYEAR} and {MAXYEAR}"):
+            JalaliDate.is_leap(invalid_year_above)
 
     def test_format(self):
         j = JalaliDate(date(1988, 5, 4))
@@ -283,6 +297,21 @@ class TestJalaliDate(TestCase):
 
         with pytest.raises(ValueError):
             JalaliDate.fromisoformat("1367-02/14")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("2021-W1")
+
+        with pytest.raises(ValueError, match="Invalid isoformat string: '2021-W12-'"):
+            JalaliDate.fromisoformat("2021-W12-")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("2021-W12-34")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("2021W12-X")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("2021W123")
 
         j_date = JalaliDate(1400, 1, 1)
         self.assertEqual(j_date.strftime("%A, %d %B %Y"), "Yekshanbeh, 01 Farvardin 1400")
@@ -431,3 +460,9 @@ class TestJalaliDate(TestCase):
     def test_strptime_raises_not_implemented_error(self):
         with self.assertRaises(NotImplementedError):
             JalaliDate.strptime("1400-01-01", "%Y-%m-%d")
+
+    def test_locale_setter_invalid_value(self):
+        jdate = JalaliDate.today()
+
+        with pytest.raises(ValueError, match="locale must be 'en' or 'fa'"):
+            jdate.locale = "de"

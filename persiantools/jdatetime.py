@@ -115,18 +115,18 @@ WEEKDAY_NAMES_ABBR_FA = ["ش", "ی", "د", "س", "چ", "پ", "ج"]
 # The first entry is for indexing purposes and is not used in calculations.
 _MONTH_COUNT = [
     [-1, -1, -1],  # for indexing purposes
-    [31, 31, 0],  # farvardin
-    [31, 31, 31],  # ordibehesht
-    [31, 31, 62],  # khordad
-    [31, 31, 93],  # tir
-    [31, 31, 124],  # mordad
-    [31, 31, 155],  # shahrivar
-    [30, 30, 186],  # mehr
-    [30, 30, 216],  # aban
-    [30, 30, 246],  # azar
-    [30, 30, 276],  # dey
-    [30, 30, 306],  # bahman
-    [29, 30, 336],  # esfand
+    [31, 31, 0],  # Farvardin
+    [31, 31, 31],  # Ordibehesht
+    [31, 31, 62],  # Khordad
+    [31, 31, 93],  # Tir
+    [31, 31, 124],  # Mordad
+    [31, 31, 155],  # Shahrivar
+    [30, 30, 186],  # Mehr
+    [30, 30, 216],  # Aban
+    [30, 30, 246],  # Azar
+    [30, 30, 276],  # Dey
+    [30, 30, 306],  # Bahman
+    [29, 30, 336],  # Esfand
 ]
 
 _FRACTION_CORRECTION = [100000, 10000, 1000, 100, 10]
@@ -211,15 +211,15 @@ class JalaliDate:
         self._hashcode = -1
 
     @property
-    def year(self):
+    def year(self) -> int:
         return self._year
 
     @property
-    def month(self):
+    def month(self) -> int:
         return self._month
 
     @property
-    def day(self):
+    def day(self) -> int:
         return self._day
 
     @property
@@ -227,12 +227,14 @@ class JalaliDate:
         return self._locale
 
     @locale.setter
-    def locale(self, locale):
-        assert locale in ("en", "fa"), "locale must be 'en' or 'fa'"
+    def locale(self, locale: str):
+        if locale not in ("en", "fa"):
+            raise ValueError("locale must be 'en' or 'fa'")
+
         self._locale = locale
 
     @classmethod
-    def _check_date_fields(cls, year, month, day, locale):
+    def _check_date_fields(cls, year: int, month: int, day: int, locale: str):
         """
         Validate and normalize the date fields.
 
@@ -253,14 +255,14 @@ class JalaliDate:
         day = operator.index(day)
 
         if not MINYEAR <= year <= MAXYEAR:
-            raise ValueError("year must be in %d..%d" % (MINYEAR, MAXYEAR), year)
+            raise ValueError(f"year must be in {MINYEAR}..{MAXYEAR}", year)
 
         if not 1 <= month <= 12:
             raise ValueError("month must be in 1..12", month)
 
         dim = cls.days_in_month(month, year)
         if not 1 <= day <= dim:
-            raise ValueError("day must be in 1..%d" % dim, day)
+            raise ValueError(f"day must be in 1..{dim}", day)
 
         if locale not in ["en", "fa"]:
             raise ValueError("locale must be 'en' or 'fa'")
@@ -268,7 +270,7 @@ class JalaliDate:
         return year, month, day, locale
 
     @classmethod
-    def check_date(cls, year, month, day):
+    def check_date(cls, year: int, month: int, day: int) -> bool:
         """
         Check if the given Jalali date fields constitute a valid date.
 
@@ -292,9 +294,9 @@ class JalaliDate:
             return True
 
     @staticmethod
-    def is_leap(year):
+    def is_leap(year: int) -> bool:
         """
-        This function calculates whether a given year in the Persian calendar is a leap year.
+        Calculate whether a given year in the Persian calendar is a leap year.
 
         It calculates `((year + 2346) * 683) % 2820`. This expression does a few things:
         - It offsets the input year by 2346. This is done to align the Persian calendar with the astronomical solar year.
@@ -318,7 +320,7 @@ class JalaliDate:
         return ((year + 2346) * 683) % 2820 < 683
 
     @classmethod
-    def days_in_month(cls, month, year):
+    def days_in_month(cls, month: int, year: int) -> int:
         """
         Get the number of days in a given month for a specified year.
 
@@ -332,7 +334,8 @@ class JalaliDate:
         Raises:
             AssertionError: If the month is out of the valid range.
         """
-        assert 1 <= month <= 12, "month must be in 1..12"
+        if not 1 <= month <= 12:
+            raise ValueError("month must be in 1..12")
 
         if month == 12 and cls.is_leap(year):
             return _MONTH_COUNT[month][1]
@@ -340,7 +343,7 @@ class JalaliDate:
         return _MONTH_COUNT[month][0]
 
     @staticmethod
-    def days_before_month(month):
+    def days_before_month(month: int) -> int:
         """
         Get the number of days before the start of a given month.
 
@@ -353,7 +356,8 @@ class JalaliDate:
         Raises:
             AssertionError: If the month is out of the valid range.
         """
-        assert 1 <= month <= 12, "month must be in 1..12"
+        if not 1 <= month <= 12:
+            raise ValueError("month must be in 1..12")
 
         return _MONTH_COUNT[month][2]
 
@@ -425,7 +429,7 @@ class JalaliDate:
 
         return cls(jalali_year, jalali_month, jalali_day)
 
-    def to_gregorian(self):
+    def to_gregorian(self) -> date:
         """
         Convert a Jalali (Persian) date to a Gregorian date.
 
@@ -526,7 +530,7 @@ class JalaliDate:
         """
         return self.to_gregorian().timetuple()
 
-    def isoformat(self):
+    def isoformat(self) -> str:
         """
         Return the Jalali date as a string in ISO 8601 format.
 
@@ -542,7 +546,7 @@ class JalaliDate:
             >>> jdate.isoformat()
             '1398-03-17'
         """
-        iso = "%04d-%02d-%02d" % (self._year, self._month, self._day)
+        iso = f"{self._year:04d}-{self._month:02d}-{self._day:02d}"
 
         if self._locale == "fa":
             iso = digits.en_to_fa(iso)
@@ -551,15 +555,15 @@ class JalaliDate:
 
     __str__ = isoformat
 
-    def toordinal(self):
+    def toordinal(self) -> int:
         return self.to_gregorian().toordinal() - 226894
 
     @classmethod
-    def fromordinal(cls, n):
+    def fromordinal(cls, n: int):
         return cls(date.fromordinal(n + 226894))
 
     @classmethod
-    def fromisoformat(cls, date_string):
+    def fromisoformat(cls, date_string: str):
         """Construct a date from the output of JalaliDate.isoformat()."""
         if not isinstance(date_string, str):
             raise TypeError("fromisoformat: argument must be str")
@@ -573,14 +577,14 @@ class JalaliDate:
             raise ValueError(f"Invalid isoformat string: {date_string!r}")
 
     @classmethod
-    def _parse_isoformat_date(cls, dtstr):
+    def _parse_isoformat_date(cls, dtstr: str):
         # It is assumed that this function will only be called with a
         # string of length exactly 10, and (though this is not used) ASCII-only
         assert len(dtstr) in (7, 8, 10)
 
         year = int(dtstr[0:4])
         if dtstr[4] != "-":
-            raise ValueError("Invalid date separator: %s" % dtstr[4])
+            raise ValueError(f"Invalid date separator: {dtstr[4]}")
 
         month = int(dtstr[5:7])
 
@@ -612,12 +616,7 @@ class JalaliDate:
         return self.__class__, self.__getstate__()
 
     def __repr__(self):
-        return "JalaliDate(%d, %d, %d, %s)" % (
-            self._year,
-            self._month,
-            self._day,
-            WEEKDAY_NAMES_EN[self.weekday()],
-        )
+        return f"JalaliDate({self._year}, {self._month}, {self._day}, {WEEKDAY_NAMES_EN[self.weekday()]})"
 
     resolution = timedelta(1)
 
@@ -659,24 +658,24 @@ class JalaliDate:
         return JalaliDate(year, month, day, locale)
 
     @classmethod
-    def fromtimestamp(cls, timestamp):
+    def fromtimestamp(cls, timestamp: float):
         return cls(date.fromtimestamp(timestamp))
 
-    def weekday(self):
+    def weekday(self) -> int:
         return (self.toordinal() + 4) % 7
 
-    def __format__(self, fmt):
+    def __format__(self, fmt: str):
         if not isinstance(fmt, str):
-            raise TypeError("must be str, not %s" % type(fmt).__name__)
+            raise TypeError(f"must be str, not {type(fmt).__name__}")
         if len(fmt) != 0:
             return self.strftime(fmt)
 
         return str(self)
 
-    def isoweekday(self):
+    def isoweekday(self) -> int:
         return self.weekday() + 1
 
-    def week_of_year(self):
+    def week_of_year(self) -> int:
         o = JalaliDate(self._year, 1, 1).weekday()
         days = self.days_before_month(self._month) + self._day + o
 
@@ -691,10 +690,10 @@ class JalaliDate:
         """Return a 3-tuple containing ISO year, week number, and weekday."""
         return self.year, self.week_of_year(), self.isoweekday()
 
-    def ctime(self):
+    def ctime(self) -> str:
         return self.strftime("%c")
 
-    def strftime(self, fmt, locale=None):
+    def strftime(self, fmt: str, locale=None) -> str:
         """
         Format a Jalali date according to the given format string.
 
@@ -730,12 +729,12 @@ class JalaliDate:
             "%a": day_names_abbr[self.weekday()],
             "%A": day_names[self.weekday()],
             "%w": str(self.weekday()),
-            "%d": "%02d" % self._day,
+            "%d": f"{self._day:02d}",
             "%b": month_names_abbr[self._month],
             "%B": month_names[self._month],
-            "%m": "%02d" % self._month,
-            "%y": "%02d" % (self._year % 100),
-            "%Y": "%04d" % self._year,
+            "%m": f"{self._month:02d}",
+            "%y": f"{self._year % 100:02d}",
+            "%Y": f"{self._year:04d}",
             "%H": "00",
             "%I": "00",
             "%p": am,
@@ -744,9 +743,9 @@ class JalaliDate:
             "%f": "000000",
             "%z": "",
             "%Z": "",
-            "%j": "%03d" % (self.days_before_month(self._month) + self._day),
-            "%U": "%02d" % self.week_of_year(),
-            "%W": "%02d" % self.week_of_year(),
+            "%j": f"{self.days_before_month(self._month) + self._day:03d}",
+            "%U": f"{self.week_of_year():02d}",
+            "%W": f"{self.week_of_year():02d}",
             "%X": "00:00:00",
             "%%": "%",
         }
@@ -941,19 +940,19 @@ class JalaliDateTime(JalaliDate):
             raise ValueError("microsecond must be in 0..999999", microsecond)
 
     @property
-    def hour(self):
+    def hour(self) -> int:
         return self._hour
 
     @property
-    def minute(self):
+    def minute(self) -> int:
         return self._minute
 
     @property
-    def second(self):
+    def second(self) -> int:
         return self._second
 
     @property
-    def microsecond(self):
+    def microsecond(self) -> int:
         return self._microsecond
 
     @property
@@ -1042,7 +1041,7 @@ class JalaliDateTime(JalaliDate):
         return cls(dt.now(tz=timezone.utc))
 
     @classmethod
-    def fromisoformat(cls, date_string):
+    def fromisoformat(cls, date_string: str):
         """Construct a datetime from a string in one of the ISO 8601 formats."""
         if not isinstance(date_string, str):
             raise TypeError("fromisoformat: argument must be str")
@@ -1071,7 +1070,7 @@ class JalaliDateTime(JalaliDate):
         return cls(*(date_components + time_components))
 
     @classmethod
-    def _find_isoformat_datetime_separator(cls, dtstr):
+    def _find_isoformat_datetime_separator(cls, dtstr: str):
         # See the comment in _datetimemodule.c:_find_isoformat_datetime_separator
         len_dtstr = len(dtstr)
         if len_dtstr == 7:
@@ -1128,7 +1127,7 @@ class JalaliDateTime(JalaliDate):
                 return 8
 
     @classmethod
-    def _parse_isoformat_time(cls, tstr):
+    def _parse_isoformat_time(cls, tstr: str):
         # Format supported is HH[:MM[:SS[.fff[fff]]]][+HH:MM[:SS[.ffffff]]]
         len_str = len(tstr)
         if len_str < 2:
@@ -1174,7 +1173,7 @@ class JalaliDateTime(JalaliDate):
         return time_comps
 
     @classmethod
-    def _parse_hh_mm_ss_ff(cls, tstr):
+    def _parse_hh_mm_ss_ff(cls, tstr: str):
         # Parses things of the form HH[:?MM[:?SS[{.,}fff[fff]]]]
         len_str = len(tstr)
 
@@ -1304,7 +1303,7 @@ class JalaliDateTime(JalaliDate):
 
         return c
 
-    def isoformat(self, sep="T"):
+    def isoformat(self, sep="T") -> str:
         s = "%04d-%02d-%02d%c%02d:%02d:%02d" % (
             self.year,
             self.month,
@@ -1608,7 +1607,7 @@ class JalaliDateTime(JalaliDate):
     def __str__(self):
         return self.isoformat(sep=" ")
 
-    def strftime(self, fmt, locale=None):
+    def strftime(self, fmt: str, locale=None) -> str:
         if locale is None or locale not in ["fa", "en"]:
             locale = self._locale
 
