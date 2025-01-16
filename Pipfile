@@ -7,11 +7,11 @@ name = "pypi"
 pytz = "==2024.2"
 
 [dev-packages]
-coverage = "==7.6.4"
-pytest = "==8.3.3"
+coverage = "==7.6.10"
+pytest = "==8.3.4"
 pytest-cov = "==6.0.0"
 pre-commit = "==4.0.1"
-tomli = "==2.0.2"
+tomli = "==2.2.1"
 exceptiongroup = {version = "1.2.2", python_versions = "<3.11"}
 atomicwrites = {version = "1.4.1", sys_platform = "== 'win32'"}
 
