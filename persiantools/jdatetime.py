@@ -131,8 +131,94 @@ _MONTH_COUNT = [
 
 _FRACTION_CORRECTION = [100000, 10000, 1000, 100, 10]
 
+# List of years that are exceptions to the 33-year leap year rule
+NON_LEAP_CORRECTION = [
+    1502,
+    1601,
+    1634,
+    1667,
+    1700,
+    1733,
+    1766,
+    1799,
+    1832,
+    1865,
+    1898,
+    1931,
+    1964,
+    1997,
+    2030,
+    2059,
+    2063,
+    2096,
+    2129,
+    2158,
+    2162,
+    2191,
+    2195,
+    2224,
+    2228,
+    2257,
+    2261,
+    2290,
+    2294,
+    2323,
+    2327,
+    2356,
+    2360,
+    2389,
+    2393,
+    2422,
+    2426,
+    2455,
+    2459,
+    2488,
+    2492,
+    2521,
+    2525,
+    2554,
+    2558,
+    2587,
+    2591,
+    2620,
+    2624,
+    2653,
+    2657,
+    2686,
+    2690,
+    2719,
+    2723,
+    2748,
+    2752,
+    2756,
+    2781,
+    2785,
+    2789,
+    2818,
+    2822,
+    2847,
+    2851,
+    2855,
+    2880,
+    2884,
+    2888,
+    2913,
+    2917,
+    2921,
+    2946,
+    2950,
+    2954,
+    2979,
+    2983,
+    2987,
+]
 
-def _is_ascii_digit(c):
+NON_LEAP_CORRECTION_SET = frozenset(NON_LEAP_CORRECTION)
+
+MIN_NON_LEAP_CORRECTION = NON_LEAP_CORRECTION[0]
+
+
+def _is_ascii_digit(c: str) -> bool:
     return c in "0123456789"
 
 
@@ -296,28 +382,31 @@ class JalaliDate:
     @staticmethod
     def is_leap(year: int) -> bool:
         """
-        Calculate whether a given year in the Persian calendar is a leap year.
+        Determines if a given Persian year is a leap year using the 33-year rule,
+        with corrections for specific years that deviate from the rule.
 
-        It calculates `((year + 2346) * 683) % 2820`. This expression does a few things:
-        - It offsets the input year by 2346. This is done to align the Persian calendar with the astronomical solar year.
-        - It multiplies the result by 683, which is the number of leap years in a 2820-year cycle.
-        - It then takes the result modulo 2820 to get the position of the year within the current 2820-year cycle.
-
-        If the result of this calculation is less than 683, the year is a leap year in the Persian calendar.
-        This is because there are 683 leap years in each 2820-year cycle of the Persian calendar.
+        This function is based on the Rust implementation from the ICU4X project:
+        https://github.com/unicode-org/icu4x/blob/main/utils/calendrical_calculations/src/persian.rs
 
         Args:
-            year (int): The year to check.
+            year (int): The Persian year to check.
 
         Returns:
             bool: True if the year is a leap year, False otherwise.
-
-        Raises:
-            ValueError: If the year is out of the valid range.
         """
         if not MINYEAR <= year <= MAXYEAR:
             raise ValueError(f"Year must be between {MINYEAR} and {MAXYEAR}")
-        return ((year + 2346) * 683) % 2820 < 683
+
+        if year < MIN_NON_LEAP_CORRECTION:
+            return (25 * year + 11) % 33 < 8
+
+        if year in NON_LEAP_CORRECTION_SET:
+            return False
+
+        if (year - 1) in NON_LEAP_CORRECTION_SET:
+            return True
+
+        return (25 * year + 11) % 33 < 8
 
     @classmethod
     def days_in_month(cls, month: int, year: int) -> int:
