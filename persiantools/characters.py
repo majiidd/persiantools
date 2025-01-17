@@ -1,4 +1,4 @@
-from persiantools.utils import replace
+import re
 
 CHARACTER_MAP_AR_TO_FA = {
     "دِ": "د",
@@ -13,6 +13,9 @@ CHARACTER_MAP_AR_TO_FA = {
 }
 
 CHARACTER_MAP_FA_TO_AR = {"ی": "ي", "ک": "ك"}
+
+AR_TO_FA_PATTERN = re.compile("|".join(map(re.escape, CHARACTER_MAP_AR_TO_FA.keys())))
+FA_TO_AR_PATTERN = re.compile("|".join(map(re.escape, CHARACTER_MAP_FA_TO_AR.keys())))
 
 
 def ar_to_fa(string: str) -> str:
@@ -35,7 +38,7 @@ def ar_to_fa(string: str) -> str:
     if not isinstance(string, str):
         raise TypeError("Input must be of type str")
 
-    return replace(string, CHARACTER_MAP_AR_TO_FA)
+    return AR_TO_FA_PATTERN.sub(lambda match: CHARACTER_MAP_AR_TO_FA[match.group(0)], string)
 
 
 def fa_to_ar(string: str) -> str:
@@ -58,4 +61,4 @@ def fa_to_ar(string: str) -> str:
     if not isinstance(string, str):
         raise TypeError("Input must be of type str")
 
-    return replace(string, CHARACTER_MAP_FA_TO_AR)
+    return FA_TO_AR_PATTERN.sub(lambda match: CHARACTER_MAP_FA_TO_AR[match.group(0)], string)

@@ -12,9 +12,7 @@ from persiantools.jdatetime import MAXYEAR, MINYEAR, JalaliDate
 class TestJalaliDate(TestCase):
     def test_shamsi_to_gregorian(self):
         cases = [
-            (JalaliDate(1210, 12, 29), date(1832, 3, 19)),
-            (JalaliDate(1210, 12, 30), date(1832, 3, 20)),
-            (JalaliDate(1211, 1, 1), date(1832, 3, 21)),
+            (JalaliDate(1100, 1, 1), date(1721, 3, 21)),
             (JalaliDate(1367, 2, 14), date(1988, 5, 4)),
             (JalaliDate(1395, 3, 21), date(2016, 6, 10)),
             (JalaliDate(1395, 12, 9), date(2017, 2, 27)),
@@ -33,6 +31,7 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1403, 4, 8), date(2024, 6, 28)),
             (JalaliDate(1403, 8, 18), date(2024, 11, 8)),
             (JalaliDate(1403, 10, 27), date(2025, 1, 16)),
+            (JalaliDate(1210, 12, 29), date(1832, 3, 19)),
             (JalaliDate(1367, 12, 29), date(1989, 3, 20)),
             (JalaliDate(1392, 12, 29), date(2014, 3, 20)),
             (JalaliDate(1398, 12, 29), date(2020, 3, 19)),
@@ -40,6 +39,8 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1400, 12, 29), date(2022, 3, 20)),
             (JalaliDate(1402, 12, 29), date(2024, 3, 19)),
             (JalaliDate(1403, 12, 29), date(2025, 3, 19)),
+            (JalaliDate(1504, 12, 29), date(2126, 3, 20)),
+            (JalaliDate(1210, 12, 30), date(1832, 3, 20)),
             (JalaliDate(1391, 12, 30), date(2013, 3, 20)),
             (JalaliDate(1395, 12, 30), date(2017, 3, 20)),
             (JalaliDate(1399, 12, 30), date(2021, 3, 20)),
@@ -55,6 +56,7 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1400, 10, 11), date(2022, 1, 1)),
             (JalaliDate(1402, 10, 11), date(2024, 1, 1)),
             (JalaliDate(1403, 10, 12), date(2025, 1, 1)),
+            (JalaliDate(1211, 1, 1), date(1832, 3, 21)),
             (JalaliDate(1367, 1, 1), date(1988, 3, 21)),
             (JalaliDate(1388, 1, 1), date(2009, 3, 21)),
             (JalaliDate(1396, 1, 1), date(2017, 3, 21)),
@@ -64,6 +66,7 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1402, 1, 1), date(2023, 3, 21)),
             (JalaliDate(1403, 1, 1), date(2024, 3, 20)),
             (JalaliDate(1404, 1, 1), date(2025, 3, 21)),
+            (JalaliDate(1505, 1, 1), date(2126, 3, 21)),
             (JalaliDate.today(), date.today()),
         ]
         for jdate, gdate in cases:
@@ -71,9 +74,6 @@ class TestJalaliDate(TestCase):
 
     def test_gregorian_to_shamsi(self):
         cases = [
-            (date(1832, 3, 19), JalaliDate(1210, 12, 29)),
-            (date(1832, 3, 20), JalaliDate(1210, 12, 30)),
-            (date(1832, 3, 21), JalaliDate(1211, 1, 1)),
             (date(1988, 5, 4), JalaliDate(1367, 2, 14)),
             (date(2122, 1, 31), JalaliDate(1500, 11, 11)),
             (date(2017, 10, 19), JalaliDate(1396, 7, 27)),
@@ -90,9 +90,12 @@ class TestJalaliDate(TestCase):
             (date(2000, 12, 31), JalaliDate(1379, 10, 11)),
             (date(2023, 12, 31), JalaliDate(1402, 10, 10)),
             (date(2024, 12, 31), JalaliDate(1403, 10, 11)),
+            (date(1832, 3, 19), JalaliDate(1210, 12, 29)),
+            (date(1832, 3, 20), JalaliDate(1210, 12, 30)),
             (date(2017, 3, 20), JalaliDate(1395, 12, 30)),
             (date(2021, 3, 20), JalaliDate(1399, 12, 30)),
             (date(2025, 3, 20), JalaliDate(1403, 12, 30)),
+            (date(1832, 3, 21), JalaliDate(1211, 1, 1)),
             (date(2000, 1, 1), JalaliDate(1378, 10, 11)),
             (date(2012, 1, 1), JalaliDate(1390, 10, 11)),
             (date(2013, 1, 1), JalaliDate(1391, 10, 12)),
@@ -107,6 +110,12 @@ class TestJalaliDate(TestCase):
             (date(2023, 3, 21), JalaliDate(1402, 1, 1)),
             (date(2024, 3, 20), JalaliDate(1403, 1, 1)),
             (date(2025, 3, 21), JalaliDate(1404, 1, 1)),
+            (date(1827, 3, 22), JalaliDate(1206, 1, 1)),
+            (date(1828, 3, 21), JalaliDate(1207, 1, 1)),
+            (date(1839, 3, 21), JalaliDate(1218, 1, 1)),
+            (date(1864, 3, 20), JalaliDate(1243, 1, 1)),
+            (date(2118, 3, 21), JalaliDate(1497, 1, 1)),
+            (date(2119, 3, 21), JalaliDate(1498, 1, 1)),
             (date.today(), JalaliDate.today()),
         ]
         for gdate, jdate in cases:
@@ -279,6 +288,8 @@ class TestJalaliDate(TestCase):
             # Known non-leap years
             (1206, False),
             (1207, False),
+            (1208, False),
+            (1209, False),
             (1211, False),
             (1215, False),
             (1216, False),
@@ -302,6 +313,10 @@ class TestJalaliDate(TestCase):
             (1409, False),
             (1410, False),
             (1411, False),
+            (1493, False),
+            (1495, False),
+            (1496, False),
+            (1497, False),
         ]
         for year, is_leap in cases:
             self.assertEqual(JalaliDate.is_leap(year), is_leap)
@@ -413,6 +428,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1399, 1, 2).week_of_year(), 2)
         self.assertEqual(JalaliDate(1403, 1, 5).week_of_year(), 2)
         self.assertEqual(JalaliDate(1403, 4, 3).week_of_year(), 15)
+        self.assertEqual(JalaliDate(1403, 10, 28).week_of_year(), 44)
 
         self.assertEqual(JalaliDate(1367, 2, 14).weekday(), 4)
         self.assertEqual(JalaliDate(1393, 1, 1).weekday(), 6)
@@ -425,10 +441,13 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1397, 1, 1).weekday(), 4)
         self.assertEqual(JalaliDate(1397, 11, 29).weekday(), 2)
         self.assertEqual(JalaliDate(1400, 1, 1).weekday(), 1)
+        self.assertEqual(JalaliDate(1403, 10, 28).weekday(), 6)
+
         self.assertEqual(JalaliDate(1403, 4, 3).isoweekday(), 2)
         self.assertEqual(JalaliDate(1400, 1, 1).isoweekday(), 2)
         self.assertEqual(JalaliDate(1396, 7, 27).isoweekday(), 6)
         self.assertEqual(JalaliDate(1397, 11, 29).isoweekday(), 3)
+        self.assertEqual(JalaliDate(1403, 10, 28).isoweekday(), 7)
 
     def test_operators(self):
         self.assertTrue(JalaliDate(1367, 2, 14) == JalaliDate(date(1988, 5, 4)))
@@ -481,6 +500,8 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1395, 3, 21) + timedelta(days=-38), JalaliDate(1395, 2, 14))
         self.assertEqual(JalaliDate(1395, 3, 21) - timedelta(days=38), JalaliDate(1395, 2, 14))
         self.assertEqual(JalaliDate(1397, 11, 29) + timedelta(days=2), JalaliDate(1397, 12, 1))
+        self.assertEqual(JalaliDate(1403, 12, 29) + timedelta(days=2), JalaliDate(1404, 1, 1))
+        self.assertEqual(JalaliDate(1403, 12, 29) + timedelta(days=365), JalaliDate(1404, 12, 28))
 
         self.assertEqual(JalaliDate(1395, 3, 21) - JalaliDate(1395, 2, 14), timedelta(days=38))
         self.assertEqual(JalaliDate(1397, 12, 1) - JalaliDate(1397, 11, 29), timedelta(hours=48))
@@ -492,6 +513,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1400, 1, 1) - JalaliDate(1399, 12, 29), timedelta(days=2))
         self.assertEqual(JalaliDate(1403, 1, 1) - JalaliDate(1402, 12, 29), timedelta(days=1))
         self.assertEqual(JalaliDate(1404, 1, 1) - JalaliDate(1403, 12, 29), timedelta(days=2))
+        self.assertEqual(JalaliDate(1404, 1, 1) - JalaliDate(1403, 12, 30), timedelta(days=1))
 
     def test_pickle(self):
         file = open("save.p", "wb")
@@ -513,7 +535,7 @@ class TestJalaliDate(TestCase):
 
         self.assertEqual(
             {j1: "today", j2: "majid1", j3: "majid2"},
-            {JalaliDate.today(): "today", JalaliDate(1367, 2, 14): "majid2"},
+            {JalaliDate.today(): "today", JalaliDate(date(1988, 5, 4)): "majid1", JalaliDate(1367, 2, 14): "majid2"},
         )
 
     def test_invalid_dates(self):
