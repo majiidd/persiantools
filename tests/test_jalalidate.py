@@ -559,7 +559,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(str(JalaliDate(1403, 4, 7)), "1403-04-07")
         self.assertEqual(repr(JalaliDate(1403, 4, 7)), "JalaliDate(1403, 4, 7, Panjshanbeh)")
 
-    def test_strptime_raises_not_implemented_error(self):
+    def test_strptime(self):
         with self.assertRaises(NotImplementedError):
             JalaliDate.strptime("1400-01-01", "%Y-%m-%d")
 
@@ -568,3 +568,17 @@ class TestJalaliDate(TestCase):
 
         with pytest.raises(ValueError, match="locale must be 'en' or 'fa'"):
             jdate.locale = "de"
+
+    def test_setstate(self):
+        jdate = JalaliDate(1400, 1, 1)
+        state = bytes([5, 87, 2, 14])
+        jdate.__setstate__(state)
+
+        self.assertEqual(jdate.year, 1367)
+        self.assertEqual(jdate.month, 2)
+        self.assertEqual(jdate.day, 14)
+
+        jdate = JalaliDate(1400, 1, 1)
+        state = bytes([5, 112, 1])  # Invalid length
+        with pytest.raises(TypeError, match="not enough arguments"):
+            jdate.__setstate__(state)
