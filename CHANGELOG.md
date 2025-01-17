@@ -1,6 +1,14 @@
 
 # Changelog
 
+## [5.2.0](https://github.com/majiidd/persiantools/compare/5.1.1...5.2.0) - 2025-01-17
+
+- 
+
+## [5.1.1](https://github.com/majiidd/persiantools/compare/5.1.0...5.1.1) - 2025-01-16
+
+- Improved leap year calculation for issue #48.
+
 ## [5.1.0](https://github.com/majiidd/persiantools/compare/5.0.0...5.1.0) - 2024-11-08
 
 - Improved CI/CD pipeline run time through optimized caching.
