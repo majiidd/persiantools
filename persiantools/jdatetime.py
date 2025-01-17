@@ -132,90 +132,21 @@ _MONTH_COUNT = [
 _FRACTION_CORRECTION = [100000, 10000, 1000, 100, 10]
 
 # List of years that are exceptions to the 33-year leap year rule
-NON_LEAP_CORRECTION = [
-    1502,
-    1601,
-    1634,
-    1667,
-    1700,
-    1733,
-    1766,
-    1799,
-    1832,
-    1865,
-    1898,
-    1931,
-    1964,
-    1997,
-    2030,
-    2059,
-    2063,
-    2096,
-    2129,
-    2158,
-    2162,
-    2191,
-    2195,
-    2224,
-    2228,
-    2257,
-    2261,
-    2290,
-    2294,
-    2323,
-    2327,
-    2356,
-    2360,
-    2389,
-    2393,
-    2422,
-    2426,
-    2455,
-    2459,
-    2488,
-    2492,
-    2521,
-    2525,
-    2554,
-    2558,
-    2587,
-    2591,
-    2620,
-    2624,
-    2653,
-    2657,
-    2686,
-    2690,
-    2719,
-    2723,
-    2748,
-    2752,
-    2756,
-    2781,
-    2785,
-    2789,
-    2818,
-    2822,
-    2847,
-    2851,
-    2855,
-    2880,
-    2884,
-    2888,
-    2913,
-    2917,
-    2921,
-    2946,
-    2950,
-    2954,
-    2979,
-    2983,
-    2987,
-]
+# fmt: off
+NON_LEAP_CORRECTION_SET = frozenset(
+    [
+        1502, 1601, 1634, 1667, 1700, 1733, 1766, 1799, 1832, 1865, 1898, 1931,
+        1964, 1997, 2030, 2059, 2063, 2096, 2129, 2158, 2162, 2191, 2195, 2224,
+        2228, 2257, 2261, 2290, 2294, 2323, 2327, 2356, 2360, 2389, 2393, 2422,
+        2426, 2455, 2459, 2488, 2492, 2521, 2525, 2554, 2558, 2587, 2591, 2620,
+        2624, 2653, 2657, 2686, 2690, 2719, 2723, 2748, 2752, 2756, 2781, 2785,
+        2789, 2818, 2822, 2847, 2851, 2855, 2880, 2884, 2888, 2913, 2917, 2921,
+        2946, 2950, 2954, 2979, 2983, 2987,
+    ]
+)
+# fmt: on
 
-NON_LEAP_CORRECTION_SET = frozenset(NON_LEAP_CORRECTION)
-
-MIN_NON_LEAP_CORRECTION = NON_LEAP_CORRECTION[0]
+MIN_NON_LEAP_CORRECTION = 1502
 
 
 def _is_ascii_digit(c: str) -> bool:
@@ -270,10 +201,7 @@ class JalaliDate:
             raise ValueError("locale must be 'en' or 'fa'")
 
         if isinstance(year, JalaliDate) and month is None:
-            month = year.month
-            day = year.day
-            locale = year.locale
-            year = year.year
+            year, month, day, locale = year.year, year.month, year.day, year.locale
 
         elif isinstance(year, date):
             jdate = self.to_jalali(year)
@@ -284,32 +212,49 @@ class JalaliDate:
         ):
             self.__setstate__(year)
 
-            year = self._year
-            month = self._month
-            day = self._day
+            year, month, day = self._year, self._month, self._day
 
-        year, month, day, locale = self._check_date_fields(year, month, day, locale)
-
-        self._year = year
-        self._month = month
-        self._day = day
-        self._locale = locale
+        self._year, self._month, self._day, self._locale = self._check_date_fields(year, month, day, locale)
         self._hashcode = -1
 
     @property
     def year(self) -> int:
+        """
+        Get the year component of the date.
+
+        Returns:
+            int: The year as an integer.
+        """
         return self._year
 
     @property
     def month(self) -> int:
+        """
+        Get the month component of the date.
+
+        Returns:
+            int: The month as an integer.
+        """
         return self._month
 
     @property
     def day(self) -> int:
+        """
+        Get the day of the month.
+
+        Returns:
+            int: The day of the month.
+        """
         return self._day
 
     @property
     def locale(self):
+        """
+        Get the locale setting for the current instance.
+
+        Returns:
+            str: The locale setting.
+        """
         return self._locale
 
     @locale.setter
@@ -394,7 +339,7 @@ class JalaliDate:
         Returns:
             bool: True if the year is a leap year, False otherwise.
         """
-        if not MINYEAR <= year <= MAXYEAR:
+        if not (MINYEAR <= year <= MAXYEAR):
             raise ValueError(f"Year must be between {MINYEAR} and {MAXYEAR}")
 
         if year < MIN_NON_LEAP_CORRECTION:
@@ -653,7 +598,19 @@ class JalaliDate:
 
     @classmethod
     def fromisoformat(cls, date_string: str):
-        """Construct a date from the output of JalaliDate.isoformat()."""
+        """
+        Construct a JalaliDate from an ISO 8601 formatted date string.
+
+        Args:
+            date_string (str): The date string in ISO 8601 format.
+
+        Returns:
+            JalaliDate: A JalaliDate object corresponding to the given date string.
+
+        Raises:
+            TypeError: If the provided argument is not a string.
+            ValueError: If the provided string is not a valid ISO 8601 formatted date.
+        """
         if not isinstance(date_string, str):
             raise TypeError("fromisoformat: argument must be str")
 
@@ -751,6 +708,21 @@ class JalaliDate:
         return cls(date.fromtimestamp(timestamp))
 
     def weekday(self) -> int:
+        """
+        Returns the day of the week as an integer.
+
+        The days of the week are represented as follows:
+        0 - Shanbeh
+        1 - Yekshanbeh
+        2 - Doshanbeh
+        3 - Seshanbeh
+        4 - Chaharshanbeh
+        5 - Panjshanbeh
+        6 - Jomeh
+
+        Returns:
+            int: An integer representing the day of the week.
+        """
         return (self.toordinal() + 4) % 7
 
     def __format__(self, fmt: str):
@@ -762,9 +734,23 @@ class JalaliDate:
         return str(self)
 
     def isoweekday(self) -> int:
+        """
+        Return the ISO weekday.
+
+        The ISO weekday is a number representing the day of the week, where Shanbeh is 1 and Jomeh is 7.
+
+        Returns:
+            int: An integer representing the ISO weekday.
+        """
         return self.weekday() + 1
 
     def week_of_year(self) -> int:
+        """
+        Calculate the week number of the year for the current Jalali date.
+
+        Returns:
+            int: The week number of the year, starting from 1.
+        """
         o = JalaliDate(self._year, 1, 1).weekday()
         days = self.days_before_month(self._month) + self._day + o
 
@@ -776,10 +762,24 @@ class JalaliDate:
         return week_no
 
     def isocalendar(self):
-        """Return a 3-tuple containing ISO year, week number, and weekday."""
+        """
+        Return a 3-tuple containing ISO year, week number, and weekday.
+
+        Returns:
+            tuple: A tuple containing the ISO year, ISO week number, and ISO weekday.
+        """
         return self.year, self.week_of_year(), self.isoweekday()
 
     def ctime(self) -> str:
+        """
+        Return a string representing the date and time in a locale’s appropriate format.
+
+        This method uses the strftime() function with the format code "%c" to generate
+        a string representation of the date and time.
+
+        Returns:
+            str: A string representing the date and time.
+        """
         return self.strftime("%c")
 
     def strftime(self, fmt: str, locale=None) -> str:
@@ -923,7 +923,6 @@ class JalaliDate:
     __radd__ = __add__
 
     def __sub__(self, other):
-        """Subtract two JalaliDates/dates, or a JalaliDate/date and a timedelta."""
         if isinstance(other, timedelta):
             return self + timedelta(-other.days)
 
@@ -1030,22 +1029,52 @@ class JalaliDateTime(JalaliDate):
 
     @property
     def hour(self) -> int:
+        """
+        Get the hour component of the datetime.
+
+        Returns:
+            int: The hour component of the datetime.
+        """
         return self._hour
 
     @property
     def minute(self) -> int:
+        """
+        Get the minute component of the datetime.
+
+        Returns:
+            int: The minute component of the datetime.
+        """
         return self._minute
 
     @property
     def second(self) -> int:
+        """
+        Get the second component of the time.
+
+        Returns:
+            int: The second component of the time.
+        """
         return self._second
 
     @property
     def microsecond(self) -> int:
+        """
+        Returns the microsecond component of the datetime.
+
+        Returns:
+            int: The microsecond component of the datetime.
+        """
         return self._microsecond
 
     @property
     def tzinfo(self):
+        """
+        Returns the time zone information associated with this datetime object.
+
+        :return: The time zone information.
+        :rtype: tzinfo
+        """
         return self._tzinfo
 
     @classmethod

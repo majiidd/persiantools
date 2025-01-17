@@ -24,10 +24,17 @@ class TestDigits(TestCase):
         with pytest.raises(TypeError):
             characters.ar_to_fa(12345)
 
+        with self.assertRaises(TypeError):
+            characters.ar_to_fa(None)
+
         orig = "السلام عليكم ٠١٢٣٤٥٦٧٨٩"
         converted = characters.ar_to_fa(orig)
         converted = digits.ar_to_fa(converted)
         self.assertEqual(converted, "السلام علیکم ۰۱۲۳۴۵۶۷۸۹")
+
+        input_string = "يياكشيسِ"
+        expected_output = "ییاکشیس"
+        self.assertEqual(characters.ar_to_fa(input_string), expected_output)
 
     def test_fa_to_fa(self):
         self.assertEqual(characters.ar_to_fa("السلام علیکم"), "السلام علیکم")
@@ -48,3 +55,6 @@ class TestDigits(TestCase):
 
         with pytest.raises(TypeError):
             characters.fa_to_ar(12345)
+
+        with self.assertRaises(TypeError):
+            characters.fa_to_ar(None)

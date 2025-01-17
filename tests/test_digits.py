@@ -85,5 +85,8 @@ class TestDigits(TestCase):
         with pytest.raises(digits.OutOfRangeException):
             digits.to_word(1000000000000001)
 
+        with pytest.raises(digits.OutOfRangeException):
+            digits.to_word(0.123456789012345)
+
         with pytest.raises(TypeError):
             digits.to_word("123")
