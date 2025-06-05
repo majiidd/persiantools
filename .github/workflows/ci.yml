@@ -37,7 +37,6 @@ jobs:
           GIT_ASK_YESNO: "false"
           PIPENV_VENV_IN_PROJECT: "1"
         run: |
-          pipenv --rm || :
           pipenv --python "$(which python)" install --dev
           pipenv run python -V
 
@@ -46,6 +45,7 @@ jobs:
           PIPENV_NOSPIN: "1"
           GIT_ASK_YESNO: "false"
           PYTHONIOENCODING: "utf-8"
+          PIPENV_VENV_IN_PROJECT: "1"
         run: |
           pipenv run python -V
           pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
