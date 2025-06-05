@@ -7,12 +7,12 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
-`PersianTools` is a Python library for working with Jalali (Persian or Shamsi) dates and times, converting Persian and Arabic characters and digits, and converting numbers to Persian words.
+`PersianTools` is a library written in Python for working with Jalali (Persian or Shamsi) dates and times, converting Persian and Arabic characters and digits, and converting numbers to Persian words.
 
 ## Key Features
 
 - Conversion between Jalali and Gregorian dates/datetimes using Python's native datetime module.
-- Full support for date and datetime operations like `+`, `-`, `==`, `>` and `>=`.
+- Full support for operations such as `+`, `-`, `==`, `>` and `>=`.
 - Timezone-aware date and datetime handling.
 - Conversion between Persian, Arabic, and English characters and digits.
 - Conversion of numbers to their Persian word representation.
@@ -213,6 +213,7 @@ This section covers converting between different numeral systems (Persian, Arabi
 >>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
 '0987654321'
 
+# Convert Persian digits to Arabic
 >>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
 '٠٩٨٧٦٥٤٣٢١'
 ```
