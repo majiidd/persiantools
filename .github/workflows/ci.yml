@@ -36,6 +36,7 @@ jobs:
           GIT_ASK_YESNO: "false"
           PYTHONIOENCODING: "utf-8"
         run: |
+          pipenv --rm || true
           pipenv --python ${{ matrix.python-version }} install --dev
           pipenv run python -V
           pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
