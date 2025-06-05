@@ -1,13 +1,14 @@
 
 # Changelog
 
-## [5.2.1](https://github.com/majiidd/persiantools/compare/5.2.0...5.2.1) - 2025-06-05
+## [5.2.1](https://github.com/majiidd/persiantools/compare/5.2.0...5.2.1) - 2025-06-06
 
 - Added a Support section to the README.
 - Added a lint step to the CI/CD pipeline.
 - Updated dependencies to the latest versions.
 - Added PyPy 3.11 to GitHub Workflows test matrix.
 - Fixed Python version mismatch in CI workflows.
+- Enhanced README with comprehensive usage examples.
 
 ## [5.2.0](https://github.com/majiidd/persiantools/compare/5.1.1...5.2.0) - 2025-01-17
 
