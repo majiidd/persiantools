@@ -37,6 +37,7 @@ jobs:
             export PIPENV_PYTHON="${pythonLocation}/bin/python"
           fi
 
+          pipenv --rm || true
           pipenv install --dev
 
       - name: Display Python version
