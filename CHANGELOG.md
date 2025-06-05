@@ -5,6 +5,7 @@
 
 - Added a Support section to the README.
 - Added a lint step to the CI/CD pipeline.
+- Updated dependencies to the latest versions.
 
 ## [5.2.0](https://github.com/majiidd/persiantools/compare/5.1.1...5.2.0) - 2025-01-17
 
