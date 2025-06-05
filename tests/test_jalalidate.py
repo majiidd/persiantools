@@ -11,6 +11,12 @@ from persiantools.jdatetime import MAXYEAR, MINYEAR, JalaliDate
 
 class TestJalaliDate(TestCase):
     def test_shamsi_to_gregorian(self):
+        """
+        Tests conversion of JalaliDate instances to their corresponding Gregorian dates.
+        
+        Verifies that the `to_gregorian()` method of JalaliDate returns the correct Gregorian
+        `date` object for a variety of known Jalali dates, including edge cases and today's date.
+        """
         cases = [
             (JalaliDate(1100, 1, 1), date(1721, 3, 21)),
             (JalaliDate(1367, 2, 14), date(1988, 5, 4)),
