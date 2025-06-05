@@ -31,7 +31,13 @@ jobs:
           PIPENV_NOSPIN: "1"
           PIPENV_VENV_IN_PROJECT: "1"
         run: |
-          python -m pipenv install --dev
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            export PIPENV_PYTHON="${pythonLocation}\\python.exe"
+          else
+            export PIPENV_PYTHON="${pythonLocation}/bin/python"
+          fi
+
+          pipenv install --dev
 
       - name: Display Python version
         env:
