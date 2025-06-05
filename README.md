@@ -156,7 +156,7 @@ JalaliDateTime(1404, 3, 16, 2, 24, 8, 835877, tzinfo=<DstTzInfo 'Asia/Tehran' +0
 >>> dt_obj.hour
 14
 >>> dt_obj.minute
-30 
+30
 >>> dt_obj.second
 15
 >>> dt_obj.microsecond
