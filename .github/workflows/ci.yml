@@ -32,12 +32,11 @@ jobs:
 
       - name: Install dependencies
         env:
-          PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
           PIPENV_NOSPIN: "1"
           PYTHONIOENCODING: "utf-8"
           GIT_ASK_YESNO: "false"
         run: |
-          pipenv install --dev
+          pipenv --python ${{ matrix.python-version }} install --dev
 
       - name: Run tests
         env:
