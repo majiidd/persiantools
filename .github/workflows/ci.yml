@@ -30,7 +30,8 @@ jobs:
         env:
           PIPENV_NOSPIN: "1"
           PIPENV_VENV_IN_PROJECT: "1"
-        run: pipenv install --dev
+        run: |
+          pipenv --python python install --dev
 
       - name: Display Python version
         env:
