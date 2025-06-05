@@ -30,6 +30,7 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1403, 4, 3), date(2024, 6, 23)),
             (JalaliDate(1403, 4, 8), date(2024, 6, 28)),
             (JalaliDate(1403, 8, 18), date(2024, 11, 8)),
+            (JalaliDate(1404, 3, 16), date(2025, 6, 6)),
             (JalaliDate(1403, 10, 27), date(2025, 1, 16)),
             (JalaliDate(1210, 12, 29), date(1832, 3, 19)),
             (JalaliDate(1367, 12, 29), date(1989, 3, 20)),

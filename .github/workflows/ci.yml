@@ -66,11 +66,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-      - name: Install Flake8
-        run: pip install flake8
-      - name: Run Flake8
-        run: flake8 .
+          python-version: '3.12'
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files
 
   build-and-publish:
     if: github.repository == 'majiidd/persiantools' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
