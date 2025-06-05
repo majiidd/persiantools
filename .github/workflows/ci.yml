@@ -23,32 +23,25 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pipenv'
 
-      - name: Display Python version
-        run: python --version
-
       - name: Install pipenv
-        run: |
-          python -m pip install pipenv
+        run: python -m pip install pipenv
 
       - name: Install dependencies
         env:
           PIPENV_NOSPIN: "1"
-          PYTHONIOENCODING: "utf-8"
-          GIT_ASK_YESNO: "false"
           PIPENV_VENV_IN_PROJECT: "1"
-        run: |
-          pipenv --python "$(which python)" install --dev
-          pipenv run python -V
+        run: pipenv --python "$(which python)" install --dev
+
+      - name: Display Python version
+        env:
+          PIPENV_VENV_IN_PROJECT: "1"
+        run: pipenv run python -V
 
       - name: Run tests
         env:
           PIPENV_NOSPIN: "1"
-          GIT_ASK_YESNO: "false"
-          PYTHONIOENCODING: "utf-8"
           PIPENV_VENV_IN_PROJECT: "1"
-        run: |
-          pipenv run python -V
-          pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
+        run: pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
