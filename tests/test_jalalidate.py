@@ -13,7 +13,7 @@ class TestJalaliDate(TestCase):
     def test_shamsi_to_gregorian(self):
         """
         Tests conversion of JalaliDate instances to their corresponding Gregorian dates.
-        
+
         Verifies that the `to_gregorian()` method of JalaliDate returns the correct Gregorian
         `date` object for a variety of known Jalali dates, including edge cases and today's date.
         """
