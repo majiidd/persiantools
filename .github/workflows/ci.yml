@@ -37,6 +37,7 @@ jobs:
           PYTHONIOENCODING: "utf-8"
         run: |
           pipenv --python ${{ matrix.python-version }} install --dev
+          pipenv run python -V
           pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
 
       - name: Upload coverage to Codecov
