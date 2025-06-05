@@ -35,9 +35,10 @@ jobs:
           PIPENV_NOSPIN: "1"
           PYTHONIOENCODING: "utf-8"
           GIT_ASK_YESNO: "false"
+          PIPENV_VENV_IN_PROJECT: "1"
         run: |
           pipenv --rm || :
-          pipenv --python ${{ matrix.python-version }} install --dev
+          pipenv --python "$(which python)" install --dev
           pipenv run python -V
 
       - name: Run tests
