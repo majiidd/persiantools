@@ -166,3 +166,12 @@ datetime.timedelta(365)
 >>> jalali
 JalaliDate(1367, 2, 14, Chaharshanbeh)
 ```
+
+## Support This Project
+If you find this project helpful and would like to support its continued development, please consider donating.
+
+*   **Bitcoin (BTC):** `bc1qg5rp7ymznc98wmhltzvpwl2dvfuvjr33m4hy77`
+*   **Tron (TRX):** `TDd63bVWZDBHmwVNFgJ6T2WdWmk9z7PBLg`
+*   **Stellar (XLM):** `GDSFPPLY34QSAOTOP4DQDXAI2YDRNRIADZHTN3HCGMQXRLIGPYOEH7L5`
+*   **Solana (SOL):** `CXHKgCBqBYy1hbZKGqaSmMzQoTC4Wx2v8QfL9Z7JBo3A`
+*   **Dogecoin (DOGE):** `DRZ2QLuXfa5vV1AG83K3XHfYXAHj9b4h4V`

@@ -1,6 +1,10 @@
 
 # Changelog
 
+## [5.2.1](https://github.com/majiidd/persiantools/compare/5.2.0...5.2.1) - 2025-06-05
+
+- Added a Support section to the README.
+
 ## [5.2.0](https://github.com/majiidd/persiantools/compare/5.1.1...5.2.0) - 2025-01-17
 
 - Enhanced character conversion functions using regular expressions.
