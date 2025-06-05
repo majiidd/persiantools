@@ -21,7 +21,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pipenv'
 
       - name: Install pipenv
         run: python -m pip install pipenv
@@ -30,6 +29,7 @@ jobs:
         shell: bash
         env:
           PIPENV_NOSPIN: "1"
+          PIPENV_VENV_IN_PROJECT: "1"
         run: |
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             export PIPENV_PYTHON="${pythonLocation}\\python.exe"
@@ -37,15 +37,18 @@ jobs:
             export PIPENV_PYTHON="${pythonLocation}/bin/python"
           fi
 
-          pipenv --rm || true
           pipenv install --dev
 
       - name: Display Python version
+        env:
+          PIPENV_NOSPIN: "1"
+          PIPENV_VENV_IN_PROJECT: "1"
         run: pipenv run python -V
 
       - name: Run tests
         env:
           PIPENV_NOSPIN: "1"
+          PIPENV_VENV_IN_PROJECT: "1"
         run: pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
 
       - name: Upload coverage to Codecov
