@@ -633,11 +633,12 @@ class JalaliDate:
             raise ValueError(f"Invalid date separator: {dtstr[4]}")
 
         month = int(dtstr[5:7])
-
         if dtstr[7] != "-":
             raise ValueError("Invalid date separator")
 
         day = int(dtstr[8:10])
+
+        cls._check_date_fields(year, month, day, "en")
 
         return [year, month, day]
 
@@ -957,7 +958,7 @@ class JalaliDate:
             "%Y": r"(?P<Y>\d{4})",
             "%y": r"(?P<y>\d{2})",
             "%m": r"(?P<m>1[0-2]|0?[1-9])",
-            "%d": r"(?P<d>3[0-1]|[1-2]\d|0?[1-9])",
+            "%d": r"(?P<d>\d{1,2})",
             "%b": cls._seqToRE(month_names_abbr_list, "b"),
             "%B": cls._seqToRE(month_names_list, "B"),
             "%a": cls._seqToRE(weekday_names_abbr_list, "a"),
@@ -973,8 +974,9 @@ class JalaliDate:
         )
 
         data_string_regex = utils.replace(fmt, directives_regex_pattern)
+        full_pattern = f"^{data_string_regex}$"
 
-        match = re.match(data_string_regex, data_string, re.IGNORECASE)
+        match = re.match(full_pattern, data_string, re.IGNORECASE)
         if not match:
             match_strict = re.match(f"^{data_string_regex}$", data_string, re.IGNORECASE)
             if not match_strict:
@@ -1005,9 +1007,6 @@ class JalaliDate:
             # values like 71, 72 .. 99 => 13xx.
         elif year is None:
             raise ValueError("Year information is missing from the date string or format.")
-
-        if "Y" in parsed_components and len(str(parsed_components["Y"])) != 4:
-            raise ValueError("Year specified with %Y must be a 4-digit number.")
 
         month = parsed_components.get("m")
         if month is None:

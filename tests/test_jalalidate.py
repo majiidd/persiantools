@@ -136,6 +136,7 @@ class TestJalaliDate(TestCase):
             (1396, 7, 27, True),
             (1397, 11, 29, True),
             (1399, 11, 31, False),
+            (1400, 1, 32, False),
             (1400, 4, 25, True),
             (1400, 12, 30, False),
             (1403, 4, 3, True),
@@ -643,16 +644,16 @@ class TestJalaliDate(TestCase):
         )
 
         # 8. Invalid inputs
-        with self.assertRaises(ValueError, msg="Month out of range"):  # Invalid month number
+        with self.assertRaises(ValueError, msg="Month out of range"):
             JalaliDate.strptime("1400-13-01", "%Y-%m-%d")
-        # with self.assertRaises(ValueError, msg="Day out of range for month"): # Invalid day number
-        #     JalaliDate.strptime("1400-01-32", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Day out of range for month"):
+            JalaliDate.strptime("1400-01-32", "%Y-%m-%d")
         with self.assertRaises(ValueError, msg="Day out of range for month (Mehr has 30 days)"):
             JalaliDate.strptime("1400-07-31", "%Y-%m-%d")
         with self.assertRaises(ValueError, msg="Invalid month name"):
             JalaliDate.strptime("1399/Feb/20", "%Y/%b/%d")
-        # with self.assertRaises(ValueError, msg="String does not match format"):
-        #     JalaliDate.strptime("1400/01/01 Extra", "%Y/%m/%d")
+        with self.assertRaises(ValueError, msg="String does not match format"):
+            JalaliDate.strptime("1400/01/01 Extra", "%Y/%m/%d")
         with self.assertRaises(ValueError, msg="String does not match format - incorrect separator"):
             JalaliDate.strptime("1400.01.01", "%Y-%m-%d")
         with self.assertRaises(ValueError, msg="Year with %Y must be 4 digits"):
@@ -661,9 +662,7 @@ class TestJalaliDate(TestCase):
             JalaliDate.strptime("1-01-01", "%y-%m-%d")
         with self.assertRaises(ValueError, msg="Date string does not match format (empty date string)"):
             JalaliDate.strptime("", "%Y-%m-%d")
-        with self.assertRaises(
-            ValueError, msg="Date string does not match format (empty format string)"
-        ):  # This might lead to unexpected regex
+        with self.assertRaises(ValueError, msg="Date string does not match format (empty format string)"):
             JalaliDate.strptime("1400-01-01", "")
         with self.assertRaises(ValueError, msg="Month information missing"):
             JalaliDate.strptime("1400--01", "%Y-%m-%d")
@@ -671,9 +670,9 @@ class TestJalaliDate(TestCase):
             JalaliDate.strptime("1400-01-", "%Y-%m-%d")
         with self.assertRaises(ValueError, msg="Year information missing"):
             JalaliDate.strptime("-01-01", "%Y-%m-%d")
-        with self.assertRaises(ValueError):  # Esfand 30 for non-leap year 1402
+        with self.assertRaises(ValueError):
             JalaliDate.strptime("1402-12-30", "%Y-%m-%d")
-        with self.assertRaises(ValueError):  # Esfand 30 for non-leap year 1398
+        with self.assertRaises(ValueError):
             JalaliDate.strptime("98-12-30", "%y-%m-%d")
 
         # 9. Edge cases
@@ -688,8 +687,8 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.strptime("1403-12-30", "%Y-%m-%d"), JalaliDate(1403, 12, 30))
         self.assertEqual(JalaliDate.strptime("03-12-30", "%y-%m-%d"), JalaliDate(1403, 12, 30))
 
-        # self.assertEqual(JalaliDate.strptime(f"{MINYEAR}-01-01", "%Y-%m-%d"), JalaliDate(MINYEAR, 1, 1))
-        # self.assertEqual(JalaliDate.strptime(f"{MAXYEAR}-12-29", "%Y-%m-%d"), JalaliDate(MAXYEAR, 12, 29))
+        self.assertEqual(JalaliDate.strptime(f"{MINYEAR:04d}-01-01", "%Y-%m-%d"), JalaliDate(MINYEAR, 1, 1))
+        self.assertEqual(JalaliDate.strptime(f"{MAXYEAR:04d}-12-29", "%Y-%m-%d"), JalaliDate(MAXYEAR, 12, 29))
 
         # Test %x and %c replacements
         # %x: %Y/%m/%d
