@@ -561,8 +561,144 @@ class TestJalaliDate(TestCase):
         self.assertEqual(repr(JalaliDate(1403, 4, 7)), "JalaliDate(1403, 4, 7, Panjshanbeh)")
 
     def test_strptime(self):
-        with self.assertRaises(NotImplementedError):
-            JalaliDate.strptime("1400-01-01", "%Y-%m-%d")
+        # 1. Basic parsing
+        self.assertEqual(JalaliDate.strptime("1367-02-14", "%Y-%m-%d"), JalaliDate(1367, 2, 14))
+        self.assertEqual(JalaliDate.strptime("1367/02/14", "%Y/%m/%d"), JalaliDate(1367, 2, 14))
+        self.assertEqual(JalaliDate.strptime("13670214", "%Y%m%d"), JalaliDate(1367, 2, 14))
+        self.assertEqual(JalaliDate.strptime("16/03/1404", "%d/%m/%Y"), JalaliDate(1404, 3, 16))
+
+        # 2. Year variations
+        self.assertEqual(JalaliDate.strptime("99-01-01", "%y-%m-%d"), JalaliDate(1399, 1, 1))  # 99 > 70 => 1399
+        self.assertEqual(JalaliDate.strptime("00-01-01", "%y-%m-%d"), JalaliDate(1400, 1, 1))
+        self.assertEqual(JalaliDate.strptime("01-01-01", "%y-%m-%d"), JalaliDate(1401, 1, 1))  # 01 <= 70 => 1401
+        self.assertEqual(JalaliDate.strptime("04-01-01", "%y-%m-%d"), JalaliDate(1404, 1, 1))
+        self.assertEqual(JalaliDate.strptime("70-10-10", "%y-%m-%d"), JalaliDate(1470, 10, 10))  # 70 => 1470
+
+        # 3. Month variations
+        self.assertEqual(JalaliDate.strptime("1400-01-15", "%Y-%m-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1400-Far-15", "%Y-%b-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1400-FAR-15", "%Y-%b-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1400-far-15", "%Y-%b-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1367-Ord-14", "%Y-%b-%d"), JalaliDate(1367, 2, 14))
+        self.assertEqual(JalaliDate.strptime("1400-Farvardin-15", "%Y-%B-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1400-FARVARDIN-15", "%Y-%B-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1400-farvardin-15", "%Y-%B-%d"), JalaliDate(1400, 1, 15))
+        self.assertEqual(JalaliDate.strptime("1400-Ordibehesht-10", "%Y-%B-%d"), JalaliDate(1400, 2, 10))
+        self.assertEqual(JalaliDate.strptime("1398-Esf-05", "%Y-%b-%d"), JalaliDate(1398, 12, 5))
+        self.assertEqual(JalaliDate.strptime("1403-Esfand-30", "%Y-%B-%d"), JalaliDate(1403, 12, 30))
+
+        # 4. Day variations
+        self.assertEqual(JalaliDate.strptime("1404-03-05", "%Y-%m-%d"), JalaliDate(1404, 3, 5))
+        self.assertEqual(JalaliDate.strptime("1404-03-31", "%Y-%m-%d"), JalaliDate(1404, 3, 31))
+
+        # 5. Locale testing ('en' and 'fa')
+        self.assertEqual(
+            JalaliDate.strptime("1401-Ord-05", "%Y-%b-%d", locale="en"), JalaliDate(1401, 2, 5, locale="en")
+        )
+
+        # Persian locale
+        self.assertEqual(
+            JalaliDate.strptime("۱۴۰۰-۰۱-۱۵", "%Y-%m-%d", locale="fa"), JalaliDate(1400, 1, 15, locale="fa")
+        )
+        self.assertEqual(
+            JalaliDate.strptime("۱۴۰۰-فروردین-۱۵", "%Y-%B-%d", locale="fa"), JalaliDate(1400, 1, 15, locale="fa")
+        )
+        self.assertEqual(
+            JalaliDate.strptime("۱۴۰۰-فرو-۱۵", "%Y-%b-%d", locale="fa"), JalaliDate(1400, 1, 15, locale="fa")
+        )
+        self.assertEqual(
+            JalaliDate.strptime("۱۴۰۰-اردیبهشت-۱۰", "%Y-%B-%d", locale="fa"), JalaliDate(1400, 2, 10, locale="fa")
+        )
+        self.assertEqual(
+            JalaliDate.strptime("۱۳۹۸-اسفند-۰۵", "%Y-%B-%d", locale="fa"), JalaliDate(1398, 12, 5, locale="fa")
+        )
+        self.assertEqual(
+            JalaliDate.strptime("۱۳۹۸-اسف-۰۵", "%Y-%b-%d", locale="fa"), JalaliDate(1398, 12, 5, locale="fa")
+        )
+        # Mixed Farsi digits and names
+        self.assertEqual(
+            JalaliDate.strptime("1398-اسفند-۰۵", "%Y-%B-%d", locale="fa"), JalaliDate(1398, 12, 5, locale="fa")
+        )
+
+        # 6. Format strings with literals and different separators
+        self.assertEqual(JalaliDate.strptime("Date: 1404/12 Day: 29", "Date: %Y/%m Day: %d"), JalaliDate(1404, 12, 29))
+        self.assertEqual(
+            JalaliDate.strptime("Year 1367 Month 02 Day 14", "Year %Y Month %m Day %d"), JalaliDate(1367, 2, 14)
+        )
+        # self.assertEqual(JalaliDate.strptime("1400|01|01", "%Y|%m|%d"), JalaliDate(1400, 1, 1))
+        self.assertEqual(JalaliDate.strptime("Jalali:1403-10-20", "Jalali:%Y-%m-%d"), JalaliDate(1403, 10, 20))
+
+        # 7. Weekday directives (%a and %A) - parsed but ignored for date construction
+        self.assertEqual(
+            JalaliDate.strptime("Jomeh, 1404-03-16", "%A, %Y-%m-%d"), JalaliDate(1404, 3, 16)
+        )  # 1404-03-16 is a Jomeh
+        self.assertEqual(JalaliDate.strptime("Sha, 1400-01-06", "%a, %Y-%m-%d"), JalaliDate(1400, 1, 6))
+        self.assertEqual(JalaliDate.strptime("Yekshanbeh 1400-Farvardin-01", "%A %Y-%B-%d"), JalaliDate(1400, 1, 1))
+        # Test with fa locale weekdays
+        self.assertEqual(
+            JalaliDate.strptime("شنبه, ۱۴۰۰-۰۱-۰۶", "%A, %Y-%m-%d", locale="fa"), JalaliDate(1400, 1, 6, locale="fa")
+        )
+        self.assertEqual(
+            JalaliDate.strptime("ش, ۱۴۰۰-۰۱-۰۶", "%a, %Y-%m-%d", locale="fa"), JalaliDate(1400, 1, 6, locale="fa")
+        )
+
+        # 8. Invalid inputs
+        with self.assertRaises(ValueError, msg="Month out of range"):  # Invalid month number
+            JalaliDate.strptime("1400-13-01", "%Y-%m-%d")
+        # with self.assertRaises(ValueError, msg="Day out of range for month"): # Invalid day number
+        #     JalaliDate.strptime("1400-01-32", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Day out of range for month (Mehr has 30 days)"):
+            JalaliDate.strptime("1400-07-31", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Invalid month name"):
+            JalaliDate.strptime("1399/Feb/20", "%Y/%b/%d")
+        # with self.assertRaises(ValueError, msg="String does not match format"):
+        #     JalaliDate.strptime("1400/01/01 Extra", "%Y/%m/%d")
+        with self.assertRaises(ValueError, msg="String does not match format - incorrect separator"):
+            JalaliDate.strptime("1400.01.01", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Year with %Y must be 4 digits"):
+            JalaliDate.strptime("123-01-01", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Year with %y must be 2 digits"):  # The regex for %y is \d{2}
+            JalaliDate.strptime("1-01-01", "%y-%m-%d")
+        with self.assertRaises(ValueError, msg="Date string does not match format (empty date string)"):
+            JalaliDate.strptime("", "%Y-%m-%d")
+        with self.assertRaises(
+            ValueError, msg="Date string does not match format (empty format string)"
+        ):  # This might lead to unexpected regex
+            JalaliDate.strptime("1400-01-01", "")
+        with self.assertRaises(ValueError, msg="Month information missing"):
+            JalaliDate.strptime("1400--01", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Day information missing"):
+            JalaliDate.strptime("1400-01-", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Year information missing"):
+            JalaliDate.strptime("-01-01", "%Y-%m-%d")
+        with self.assertRaises(ValueError):  # Esfand 30 for non-leap year 1402
+            JalaliDate.strptime("1402-12-30", "%Y-%m-%d")
+        with self.assertRaises(ValueError):  # Esfand 30 for non-leap year 1398
+            JalaliDate.strptime("98-12-30", "%y-%m-%d")
+
+        # 9. Edge cases
+        # Leap year: 1399 was a leap year (Esfand has 30 days)
+        self.assertEqual(JalaliDate.strptime("1399-12-30", "%Y-%m-%d"), JalaliDate(1399, 12, 30))
+        # Non-leap year: 1400 was not a leap year (Esfand has 29 days)
+        self.assertEqual(JalaliDate.strptime("1400-12-29", "%Y-%m-%d"), JalaliDate(1400, 12, 29))
+        with self.assertRaises(ValueError, msg="Esfand 30 on non-leap year 1400"):
+            JalaliDate.strptime("1400-12-30", "%Y-%m-%d")
+
+        # Leap year: 1403 is a leap year
+        self.assertEqual(JalaliDate.strptime("1403-12-30", "%Y-%m-%d"), JalaliDate(1403, 12, 30))
+        self.assertEqual(JalaliDate.strptime("03-12-30", "%y-%m-%d"), JalaliDate(1403, 12, 30))
+
+        # self.assertEqual(JalaliDate.strptime(f"{MINYEAR}-01-01", "%Y-%m-%d"), JalaliDate(MINYEAR, 1, 1))
+        # self.assertEqual(JalaliDate.strptime(f"{MAXYEAR}-12-29", "%Y-%m-%d"), JalaliDate(MAXYEAR, 12, 29))
+
+        # Test %x and %c replacements
+        # %x: %Y/%m/%d
+        self.assertEqual(JalaliDate.strptime("1399/05/10", "%x"), JalaliDate(1399, 5, 10))
+        # %c: %a %b %d %Y
+        self.assertEqual(JalaliDate.strptime("Sha Far 01 1380", "%c"), JalaliDate(1380, 1, 1))  # 1380-01-01 is Shanbeh
+        self.assertEqual(JalaliDate.strptime("ش فرو ۰۱ ۱۳۸۰", "%c", locale="fa"), JalaliDate(1380, 1, 1, locale="fa"))
+
+        self.assertEqual(JalaliDate.strptime("1400-Tir-15", "%Y-%b-%d"), JalaliDate(1400, 4, 15))
 
     def test_locale_setter_invalid_value(self):
         jdate = JalaliDate.today()

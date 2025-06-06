@@ -941,8 +941,124 @@ class JalaliDate:
         raise NotImplementedError
 
     @classmethod
-    def strptime(cls, data_string, fmt):
-        raise NotImplementedError
+    def strptime(cls, data_string, fmt, locale="en"):
+        if locale not in ["en", "fa"]:
+            raise ValueError("locale must be 'en' or 'fa'")
+
+        if locale == "fa":
+            data_string = digits.fa_to_en(data_string)
+
+        month_names_list = MONTH_NAMES_EN[1:] if locale == "en" else MONTH_NAMES_FA[1:]
+        month_names_abbr_list = MONTH_NAMES_ABBR_EN[1:] if locale == "en" else MONTH_NAMES_ABBR_FA[1:]
+        weekday_names_list = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
+        weekday_names_abbr_list = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
+
+        directives_regex_pattern = {
+            "%Y": r"(?P<Y>\d{4})",
+            "%y": r"(?P<y>\d{2})",
+            "%m": r"(?P<m>1[0-2]|0?[1-9])",
+            "%d": r"(?P<d>3[0-1]|[1-2]\d|0?[1-9])",
+            "%b": cls._seqToRE(month_names_abbr_list, "b"),
+            "%B": cls._seqToRE(month_names_list, "B"),
+            "%a": cls._seqToRE(weekday_names_abbr_list, "a"),
+            "%A": cls._seqToRE(weekday_names_list, "A"),
+        }
+
+        fmt = utils.replace(
+            fmt,
+            {
+                "%x": "%Y/%m/%d",
+                "%c": "%a %b %d %Y",
+            },
+        )
+
+        data_string_regex = utils.replace(fmt, directives_regex_pattern)
+
+        match = re.match(data_string_regex, data_string, re.IGNORECASE)
+        if not match:
+            match_strict = re.match(f"^{data_string_regex}$", data_string, re.IGNORECASE)
+            if not match_strict:
+                raise ValueError(f"Date string '{data_string}' does not match format '{fmt}'")
+            directives = match_strict.groupdict()
+        else:
+            directives = match.groupdict()
+
+        parsed_components = {}
+        for k, v in directives.items():
+            if v is not None:
+                if k not in ["a", "A", "b", "B"] and v.isdigit():
+                    parsed_components[k] = int(v)
+                else:
+                    parsed_components[k] = v
+
+        year = parsed_components.get("Y")
+        yy = parsed_components.get("y")
+
+        if year is None and yy is not None:
+            if not (0 <= yy <= 99):
+                raise ValueError(f"Year without century (yy) '{yy}' out of range 00-99.")
+            # Heuristic: if yy > 70, assume 13yy, else 14yy.
+            year = (
+                (1300 + yy) if yy > (2070 - 2000) else (1400 + yy)
+            )  # Adjusted heuristic to be roughly 70 for 1300 century.
+            # Current Jalali year is around 140x. So values like 01, 02.. up to e.g. 70 => 14xx.
+            # values like 71, 72 .. 99 => 13xx.
+        elif year is None:
+            raise ValueError("Year information is missing from the date string or format.")
+
+        if "Y" in parsed_components and len(str(parsed_components["Y"])) != 4:
+            raise ValueError("Year specified with %Y must be a 4-digit number.")
+
+        month = parsed_components.get("m")
+        if month is None:
+            month_name_abbr = parsed_components.get("b")
+            month_name_full = parsed_components.get("B")
+
+            found_month = False
+            if month_name_abbr is not None:
+                normalized_month_abbr = month_name_abbr.capitalize() if locale == "en" else month_name_abbr
+                try:
+                    month = month_names_abbr_list.index(normalized_month_abbr) + 1
+                    found_month = True
+                except ValueError:
+                    try:
+                        month = month_names_list.index(normalized_month_abbr) + 1
+                        found_month = True
+                    except ValueError:
+                        pass
+
+            if not found_month and month_name_full is not None:
+                normalized_month_full = month_name_full.capitalize() if locale == "en" else month_name_full
+                try:
+                    month = month_names_list.index(normalized_month_full) + 1
+                    found_month = True
+                except ValueError:
+                    pass
+
+            if not found_month:
+                raise ValueError(
+                    f"Month name not recognized from '{month_name_abbr or month_name_full}' for locale '{locale}'."
+                )
+
+        day = parsed_components.get("d")
+        if day is None:
+            raise ValueError("Day information is missing from the date string or format.")
+
+        cls._check_date_fields(year, month, day, locale)
+
+        return cls(year, month, day, locale=locale)
+
+    @staticmethod
+    def _seqToRE(to_convert, directive):
+        to_convert = sorted(to_convert, key=len, reverse=True)
+        for value in to_convert:
+            if value != "":
+                break
+        else:
+            return ""
+        regex = "|".join(re_escape(stuff) for stuff in to_convert)
+        regex = f"(?P<{directive}>{regex}"
+        return "%s)" % regex
 
 
 _tzinfo_class = tzinfo
@@ -1607,18 +1723,18 @@ class JalaliDateTime(JalaliDate):
             "%Y": r"(?P<Y>\d\d\d\d)",
             "%m": r"(?P<m>1[0-2]|0[1-9]|[1-9])",
             "%d": r"(?P<d>3[0-1]|[1-2]\d|0[1-9]|[1-9]| [1-9])",
-            "%a": cls.__seqToRE(cls, weekday_names_abbr, "a"),
-            "%A": cls.__seqToRE(cls, weekday_names, "A"),
-            "%b": cls.__seqToRE(cls, month_names_abbr, "b"),
-            "%B": cls.__seqToRE(cls, month_names, "B"),
+            "%a": cls._seqToRE(weekday_names_abbr, "a"),
+            "%A": cls._seqToRE(weekday_names, "A"),
+            "%b": cls._seqToRE(month_names_abbr, "b"),
+            "%B": cls._seqToRE(month_names, "B"),
             "%H": r"(?P<H>2[0-3]|[0-1]\d|\d)",
             "%I": r"(?P<I>1[0-2]|0[1-9]|[1-9])",
-            "%p": cls.__seqToRE(cls, periods, "p"),
+            "%p": cls._seqToRE(periods, "p"),
             "%M": r"(?P<M>[0-5]\d|\d)",
             "%S": r"(?P<S>6[0-1]|[0-5]\d|\d)",
             "%f": r"(?P<f>\d{1,6})",
             "%z": r"(?P<z>[-+](?P<zH>[0-1]?[0-9]|2[0-3])(?P<zM>[0-5]?[0-9])(?P<zS>[0-5]?[0-9])?(\.(?P<zf>(\d{,6})))?)",
-            "%Z": cls.__seqToRE(cls, pytz.all_timezones, "Z"),
+            "%Z": cls._seqToRE(pytz.all_timezones, "Z"),
         }
 
         fmt = utils.replace(
@@ -1683,17 +1799,6 @@ class JalaliDateTime(JalaliDate):
             return cls(**cls_attrs)
         else:
             raise ValueError("data string and format are not matched")
-
-    def __seqToRE(self, to_convert, directive):
-        to_convert = sorted(to_convert, key=len, reverse=True)
-        for value in to_convert:
-            if value != "":
-                break
-        else:
-            return ""
-        regex = "|".join(re_escape(stuff) for stuff in to_convert)
-        regex = f"(?P<{directive}>{regex}"
-        return "%s)" % regex
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
