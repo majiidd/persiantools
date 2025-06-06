@@ -220,6 +220,11 @@ class TestJalaliDate(TestCase):
         with pytest.raises(ValueError, match="locale must be 'en' or 'fa'"):
             jdate.replace(locale="de")
 
+        with pytest.raises(ValueError):
+            JalaliDate.days_before_month(0)
+        with pytest.raises(ValueError):
+            JalaliDate.days_before_month(13)
+
     def test_leap(self):
         cases = [
             # First 33-year cycle
@@ -575,6 +580,7 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate.strptime("1367/02/14", "%Y/%m/%d"), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDate.strptime("13670214", "%Y%m%d"), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDate.strptime("16/03/1404", "%d/%m/%Y"), JalaliDate(1404, 3, 16))
+        self.assertEqual(JalaliDate.strptime("16/03/1404", "%d/%m/%Y", locale="en"), JalaliDate(1404, 3, 16))
 
         # 2. Year variations
         self.assertEqual(JalaliDate.strptime("99-01-01", "%y-%m-%d"), JalaliDate(1399, 1, 1))  # 99 > 70 => 1399
@@ -682,6 +688,8 @@ class TestJalaliDate(TestCase):
             JalaliDate.strptime("1402-12-30", "%Y-%m-%d")
         with self.assertRaises(ValueError):
             JalaliDate.strptime("98-12-30", "%y-%m-%d")
+        with self.assertRaises(ValueError):
+            JalaliDate.strptime("1404-01-01", "%Y-%m-%d", "ar")
 
         # 9. Edge cases
         # Leap year: 1399 was a leap year (Esfand has 30 days)
