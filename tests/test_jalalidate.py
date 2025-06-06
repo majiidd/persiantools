@@ -13,6 +13,7 @@ class TestJalaliDate(TestCase):
     def test_shamsi_to_gregorian(self):
         cases = [
             (JalaliDate(1100, 1, 1), date(1721, 3, 21)),
+            (JalaliDate(1210, 12, 30), date(1832, 3, 20)),
             (JalaliDate(1367, 2, 14), date(1988, 5, 4)),
             (JalaliDate(1395, 3, 21), date(2016, 6, 10)),
             (JalaliDate(1395, 12, 9), date(2017, 2, 27)),
@@ -67,6 +68,7 @@ class TestJalaliDate(TestCase):
             (JalaliDate(1402, 1, 1), date(2023, 3, 21)),
             (JalaliDate(1403, 1, 1), date(2024, 3, 20)),
             (JalaliDate(1404, 1, 1), date(2025, 3, 21)),
+            (JalaliDate(1498, 12, 30), date(2120, 3, 20)),
             (JalaliDate(1505, 1, 1), date(2126, 3, 21)),
             (JalaliDate.today(), date.today()),
         ]
@@ -124,6 +126,9 @@ class TestJalaliDate(TestCase):
 
     def test_checkdate(self):
         cases = [
+            (1206, 12, 30, False),
+            (1210, 12, 30, True),
+            (1214, 12, 30, True),
             (1367, 2, 14, True),
             (1395, 12, 30, True),
             (1394, 12, 30, False),
@@ -141,6 +146,9 @@ class TestJalaliDate(TestCase):
             (1400, 12, 30, False),
             (1403, 4, 3, True),
             (1403, 12, 30, True),
+            (1473, 12, 30, False),
+            (1474, 12, 30, True),
+            (1498, 12, 30, True),
         ]
         for year, month, day, valid in cases:
             self.assertEqual(JalaliDate.check_date(year, month, day), valid)
