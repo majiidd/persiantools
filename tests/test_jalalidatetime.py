@@ -728,7 +728,7 @@ class TestJalaliDateTime(TestCase):
     def test_fromisoformat_invalid_string(self):
         with self.assertRaises(ValueError):
             JalaliDateTime.fromisoformat("invalid-date-time")
-        
+
         self.assertEqual(JalaliDateTime._find_isoformat_datetime_separator("2021W12"), 7)
 
         with pytest.raises(ValueError, match="Invalid ISO string"):
