@@ -92,6 +92,23 @@ class TestJalaliDateTime(TestCase):
             time.struct_time((1988, 5, 4, 14, 0, 0, 2, 125, 0)),
         )
 
+    def test_check_utc_offset(self):
+        JalaliDateTime.check_utc_offset("utcoffset", None)
+        JalaliDateTime.check_utc_offset("dst", None)
+
+        offset = timedelta(minutes=30)
+        JalaliDateTime.check_utc_offset("utcoffset", offset)
+        JalaliDateTime.check_utc_offset("dst", offset)
+
+        with pytest.raises(AssertionError):
+            JalaliDateTime.check_utc_offset("invalid", timedelta(minutes=30))
+
+        with pytest.raises(TypeError):
+            JalaliDateTime.check_utc_offset("utcoffset", 30)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime.check_utc_offset("dst", timedelta(seconds=61))
+
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time() - 10) <= JalaliDateTime.now())
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
@@ -113,6 +130,9 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(JalaliDateTime.now(pytz.utc).tzname(), "UTC")
         self.assertIsNone(JalaliDateTime.today().tzname())
         self.assertIsNone(JalaliDateTime.today().dst())
+
+        dt = JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc)
+        self.assertEqual(dt.dst(), timedelta(0))
 
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).ctime(),
@@ -329,6 +349,11 @@ class TestJalaliDateTime(TestCase):
         jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, pytz.utc)
         self.assertEqual(jdt, JalaliDateTime.strptime(jdt.strftime("%c %f %z %Z"), "%c %f %z %Z"))
 
+        jdt_utc_combined = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, timezone.utc)
+        self.assertEqual(
+            jdt_utc_combined, JalaliDateTime.strptime(jdt_utc_combined.strftime("%c %f %z %Z"), "%c %f %z %Z")
+        )
+
     def test_strptime_basic(self):
         date_string = "1400-01-01 12:30:45"
         fmt = "%Y-%m-%d %H:%M:%S"
@@ -351,6 +376,98 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(jdt.minute, 30)
         self.assertEqual(jdt.second, 45)
         self.assertEqual(jdt.utcoffset(), timedelta(hours=3, minutes=30))
+
+    def test_strptime_z_directive_valid_formats(self):
+        base_dt_str = "1400-01-01 10:00:00"
+        fmt_base = "%Y-%m-%d %H:%M:%S"
+
+        valid_z_formats = [
+            ("+0330", 3, 30),
+            ("-0500", -5, 0),
+            ("+0430", 4, 30),
+            ("-0715", -7, -15),
+            ("+0000", 0, 0),
+            ("-0000", 0, 0),
+            ("+1400", 14, 0),
+            ("-1400", -14, 0),
+            ("+0059", 0, 59),
+        ]
+
+        for tz_str, hours, minutes in valid_z_formats:
+            date_string = f"{base_dt_str} {tz_str}"
+            fmt = f"{fmt_base} %z"
+            with self.subTest(date_string=date_string, fmt=fmt):
+                jdt = JalaliDateTime.strptime(date_string, fmt)
+                self.assertIsNotNone(jdt.tzinfo, f"tzinfo should not be None for {date_string}")
+                self.assertIsInstance(jdt.tzinfo, timezone, f"tzinfo should be datetime.timezone for {date_string}")
+                expected_offset = timedelta(hours=hours, minutes=minutes)
+                self.assertEqual(jdt.utcoffset(), expected_offset, f"Offset mismatch for {date_string}")
+                self.assertEqual(jdt.year, 1400)
+                self.assertEqual(jdt.hour, 10)
+
+    def test_strptime_z_directive_invalid_formats(self):
+        base_dt_str = "1400-01-01 10:00:00"
+        fmt_base = "%Y-%m-%d %H:%M:%S"
+
+        invalid_z_formats = [
+            "0330",  # Missing sign: In Python, the %z directive requires a leading '+' or '-' for the timezone offset.
+            "+330",  # Incorrect number of digits (hour)
+            "+033",  # Incorrect number of digits (minute)
+            "+03:3",  # Incorrect number of digits (minute with colon)
+            "+03-30",  # Invalid separator
+            "03:30",  # Missing sign with colon
+            "+03:300",  # Too many minute digits
+            "+030:30",  # Too many hour digits
+            "+0A30",  # Non-numeric hour
+            "+03B0",  # Non-numeric minute
+            "+2500",  # Hour out of range (max is +2359 or +1400 for this specific regex in Python for %z)
+            "+2400",  # Hour part out of range (>=24)
+            "-2400",
+            "+0360",  # Minute part out of range (>=60)
+            "-0360",
+            "+03:60",
+            " +0330",  # Leading space before offset
+            "+0330 ",  # Trailing space after offset (will cause full string match failure)
+            "GMT+0330",  # Non-standard prefix
+        ]
+
+        for tz_str in invalid_z_formats:
+            date_string = f"{base_dt_str} {tz_str}"
+            fmt = f"{fmt_base} %z"
+            with self.subTest(date_string=date_string, fmt=fmt):
+                with self.assertRaises(ValueError, msg=f"Failed for invalid tz string: {tz_str}"):
+                    JalaliDateTime.strptime(date_string, fmt)
+
+        # Test %z without enough characters following
+        with self.assertRaises(ValueError):
+            JalaliDateTime.strptime(f"{base_dt_str} +", f"{fmt_base} %z")
+        with self.assertRaises(ValueError):
+            JalaliDateTime.strptime(f"{base_dt_str} +03", f"{fmt_base} %z")
+
+    def test_strptime_z_directive_locale_independence(self):
+        base_dt_str = "1400-01-01 10:00:00"
+        tz_str = "+0545"
+        fmt = "%Y-%m-%d %H:%M:%S %z"
+        date_string = f"{base_dt_str} {tz_str}"
+        expected_offset = timedelta(hours=5, minutes=45)
+
+        # Test with locale 'en'
+        jdt_en = JalaliDateTime.strptime(date_string, fmt, locale="en")
+        self.assertIsNotNone(jdt_en.tzinfo)
+        self.assertEqual(jdt_en.utcoffset(), expected_offset)
+        self.assertEqual(jdt_en.year, 1400)
+
+        # Test with locale 'fa'
+        jdt_fa = JalaliDateTime.strptime(date_string, fmt, locale="fa")
+        self.assertIsNotNone(jdt_fa.tzinfo)
+        self.assertEqual(jdt_fa.utcoffset(), expected_offset)
+        self.assertEqual(jdt_fa.year, 1400)
+
+        date_string_fa_main = f"۱۴۰۰-۰۱-۰۱ ۱۰:۰۰:۰۰ {tz_str}"
+        jdt_fa_main = JalaliDateTime.strptime(date_string_fa_main, fmt, locale="fa")
+        self.assertIsNotNone(jdt_fa_main.tzinfo)
+        self.assertEqual(jdt_fa_main.utcoffset(), expected_offset)
+        self.assertEqual(jdt_fa_main.year, 1400)
 
     def test_strptime_with_locale_fa(self):
         date_string = "۱۴۰۰-۰۱-۰۱ ۱۲:۳۰:۴۵"
@@ -612,6 +729,11 @@ class TestJalaliDateTime(TestCase):
         with self.assertRaises(ValueError):
             JalaliDateTime.fromisoformat("invalid-date-time")
 
+        self.assertEqual(JalaliDateTime._find_isoformat_datetime_separator("2021W12"), 7)
+
+        with pytest.raises(ValueError, match="Invalid ISO string"):
+            JalaliDateTime._find_isoformat_datetime_separator("2021-W12-")
+
     def test_find_isoformat_datetime_separator(self):
         separator = JalaliDateTime._find_isoformat_datetime_separator("1403-08-09T02:21:45")
         self.assertEqual(separator, 10)
@@ -637,3 +759,66 @@ class TestJalaliDateTime(TestCase):
         iso_format = original.isoformat()
         parsed = JalaliDateTime.fromisoformat(iso_format)
         self.assertEqual(original, parsed)
+
+    def test_isoformat_timezone_representation(self):
+        # 1. UTC Timezone
+        jdt_utc = JalaliDateTime(1400, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        self.assertEqual(jdt_utc.isoformat(), "1400-01-01T12:00:00+00:00")
+
+        # 2. Positive Offset Timezones
+        tz_plus_3_30 = timezone(timedelta(hours=3, minutes=30))
+        jdt_plus_3_30 = JalaliDateTime(1401, 2, 15, 10, 30, 0, tzinfo=tz_plus_3_30)
+        self.assertEqual(jdt_plus_3_30.isoformat(), "1401-02-15T10:30:00+03:30")
+
+        tz_plus_5 = timezone(timedelta(hours=5))
+        jdt_plus_5 = JalaliDateTime(1402, 3, 20, 8, 0, 0, tzinfo=tz_plus_5)
+        self.assertEqual(jdt_plus_5.isoformat(), "1402-03-20T08:00:00+05:00")
+
+        # 3. Negative Offset Timezones
+        tz_minus_4_45 = timezone(timedelta(hours=-4, minutes=-45))
+        jdt_minus_4_45 = JalaliDateTime(1403, 4, 10, 16, 15, 0, tzinfo=tz_minus_4_45)
+        self.assertEqual(jdt_minus_4_45.isoformat(), "1403-04-10T16:15:00-04:45")
+
+        tz_minus_4_45 = timezone(timedelta(hours=-4, minutes=45))
+        jdt_minus_4_45 = JalaliDateTime(1403, 4, 10, 16, 15, 0, tzinfo=tz_minus_4_45)
+        self.assertEqual(jdt_minus_4_45.isoformat(), "1403-04-10T16:15:00-03:15")
+
+        tz_direct_minus_4_45 = timezone(timedelta(seconds=-(4 * 3600 + 45 * 60)))
+        jdt_direct_minus_4_45 = JalaliDateTime(1403, 4, 10, 16, 15, 0, tzinfo=tz_direct_minus_4_45)
+        self.assertEqual(jdt_direct_minus_4_45.isoformat(), "1403-04-10T16:15:00-04:45")
+
+        tz_minus_8 = timezone(timedelta(hours=-8))
+        jdt_minus_8 = JalaliDateTime(1399, 12, 29, 23, 30, 59, tzinfo=tz_minus_8)
+        self.assertEqual(jdt_minus_8.isoformat(), "1399-12-29T23:30:59-08:00")
+
+        # 4. Offsets with zero minutes (covered by +05:00 and -08:00 above)
+        self.assertEqual(
+            JalaliDateTime(1402, 3, 20, 8, 0, 0, tzinfo=timezone(timedelta(hours=5))).isoformat(),
+            "1402-03-20T08:00:00+05:00",
+        )
+
+        # 5. Microseconds with timezone offset
+        jdt_utc_ms = JalaliDateTime(1400, 1, 1, 12, 30, 45, 123456, tzinfo=timezone.utc)
+        self.assertEqual(jdt_utc_ms.isoformat(), "1400-01-01T12:30:45.123456+00:00")
+
+        jdt_offset_ms = JalaliDateTime(1400, 6, 10, 10, 20, 30, 654321, tzinfo=tz_plus_3_30)
+        self.assertEqual(jdt_offset_ms.isoformat(), "1400-06-10T10:20:30.654321+03:30")
+
+        # 6. Default Separator 'T' (implicitly tested in all above cases)
+        self.assertIn("T", jdt_utc.isoformat())
+
+        # 7. Custom Separator
+        jdt_custom_sep = JalaliDateTime(1400, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        self.assertEqual(jdt_custom_sep.isoformat(sep=" "), "1400-01-01 12:00:00+00:00")
+
+        jdt_custom_sep_offset = JalaliDateTime(1401, 5, 5, 10, 10, 10, tzinfo=tz_minus_8)
+        self.assertEqual(jdt_custom_sep_offset.isoformat(sep="_"), "1401-05-05_10:10:10-08:00")
+
+        # 8. Naive JalaliDateTime (no offset string)
+        jdt_naive = JalaliDateTime(1398, 10, 5, 12, 30, 0)
+        self.assertEqual(jdt_naive.isoformat(), "1398-10-05T12:30:00")
+        # With microseconds
+        jdt_naive_ms = JalaliDateTime(1398, 10, 5, 12, 30, 0, 123)
+        self.assertEqual(jdt_naive_ms.isoformat(), "1398-10-05T12:30:00.000123")
+        # With custom separator
+        self.assertEqual(jdt_naive.isoformat(sep=" "), "1398-10-05 12:30:00")

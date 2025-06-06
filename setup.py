@@ -18,7 +18,6 @@ setup(
     long_description_content_type="text/markdown",
     classifiers=[
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Natural Language :: Persian",
         "Operating System :: OS Independent",
         "Programming Language :: Python",

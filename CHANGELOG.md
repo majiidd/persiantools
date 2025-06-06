@@ -1,6 +1,10 @@
 
 # Changelog
 
+## [5.3.0](https://github.com/majiidd/persiantools/compare/5.2.1...5.3.0) - 2025-06-06
+
+- Added `strptime` support to `JalaliDate` for parsing date strings.
+
 ## [5.2.1](https://github.com/majiidd/persiantools/compare/5.2.0...5.2.1) - 2025-06-06
 
 - Added a Support section to the README.

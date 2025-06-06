@@ -90,3 +90,14 @@ class TestDigits(TestCase):
 
         with pytest.raises(TypeError):
             digits.to_word("123")
+
+    def test_fractional_part_too_long(self):
+        old_mantissa = digits.MANTISSA
+        try:
+            digits.MANTISSA = ("دهم",)
+            with self.assertRaises(ValueError, msg="Fractional part is too long"):
+                # 0.15 -> left = "0", right = "15", right.rstrip("0") == "15"
+                # mantissa_index = len("15") - 1 == 1, which is >= len(MANTISSA) == 1.
+                digits.to_word(0.15)
+        finally:
+            digits.MANTISSA = old_mantissa
