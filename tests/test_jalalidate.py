@@ -153,6 +153,9 @@ class TestJalaliDate(TestCase):
         for year, month, day, valid in cases:
             self.assertEqual(JalaliDate.check_date(year, month, day), valid)
 
+        with pytest.raises(ValueError):
+            JalaliDate._check_date_fields(1404, 3, 16, "ar")
+
     def test_completeday(self):
         jdate = JalaliDate(1398, 3, 17)
         self.assertEqual(jdate.year, 1398)
@@ -422,6 +425,24 @@ class TestJalaliDate(TestCase):
 
         with pytest.raises(ValueError):
             JalaliDate.fromisoformat("2021W123")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1395-03")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("13950301")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1395-13-01")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1400-01-32")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1395-03-01 extra")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat(" 1395-03-01")
 
         j_date = JalaliDate(1400, 1, 1)
         self.assertEqual(j_date.strftime("%A, %d %B %Y"), "Yekshanbeh, 01 Farvardin 1400")

@@ -92,6 +92,23 @@ class TestJalaliDateTime(TestCase):
             time.struct_time((1988, 5, 4, 14, 0, 0, 2, 125, 0)),
         )
 
+    def test_check_utc_offset(self):
+        JalaliDateTime.check_utc_offset("utcoffset", None)
+        JalaliDateTime.check_utc_offset("dst", None)
+
+        offset = timedelta(minutes=30)
+        JalaliDateTime.check_utc_offset("utcoffset", offset)
+        JalaliDateTime.check_utc_offset("dst", offset)
+
+        with pytest.raises(AssertionError):
+            JalaliDateTime.check_utc_offset("invalid", timedelta(minutes=30))
+
+        with pytest.raises(TypeError) as excinfo:
+            JalaliDateTime.check_utc_offset("utcoffset", 30)
+
+        with pytest.raises(ValueError) as excinfo:
+            JalaliDateTime.check_utc_offset("dst", timedelta(seconds=61))
+
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time() - 10) <= JalaliDateTime.now())
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
@@ -113,6 +130,9 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(JalaliDateTime.now(pytz.utc).tzname(), "UTC")
         self.assertIsNone(JalaliDateTime.today().tzname())
         self.assertIsNone(JalaliDateTime.today().dst())
+
+        dt = JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc)
+        self.assertEqual(dt.dst(), timedelta(0))
 
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).ctime(),
@@ -708,6 +728,11 @@ class TestJalaliDateTime(TestCase):
     def test_fromisoformat_invalid_string(self):
         with self.assertRaises(ValueError):
             JalaliDateTime.fromisoformat("invalid-date-time")
+        
+        self.assertEqual(JalaliDateTime._find_isoformat_datetime_separator("2021W12"), 7)
+
+        with pytest.raises(ValueError, match="Invalid ISO string"):
+            JalaliDateTime._find_isoformat_datetime_separator("2021-W12-")
 
     def test_find_isoformat_datetime_separator(self):
         separator = JalaliDateTime._find_isoformat_datetime_separator("1403-08-09T02:21:45")
