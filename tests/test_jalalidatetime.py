@@ -365,7 +365,7 @@ class TestJalaliDateTime(TestCase):
             ("+0330", 3, 30),
             ("-0500", -5, 0),
             ("+0430", 4, 30),
-            # ("-0715", -7, 15),
+            ("-0715", -7, -15),
             ("+0000", 0, 0),
             ("-0000", 0, 0),
             ("+1400", 14, 0),
@@ -385,48 +385,44 @@ class TestJalaliDateTime(TestCase):
                 self.assertEqual(jdt.year, 1400)
                 self.assertEqual(jdt.hour, 10)
 
-    # def test_strptime_z_directive_invalid_formats(self):
-    #     base_dt_str = "1400-01-01 10:00:00"
-    #     fmt_base = "%Y-%m-%d %H:%M:%S"
+    def test_strptime_z_directive_invalid_formats(self):
+        base_dt_str = "1400-01-01 10:00:00"
+        fmt_base = "%Y-%m-%d %H:%M:%S"
 
-    #     invalid_z_formats = [
-    #         "0330",       # Missing sign
-    #         "+330",       # Incorrect number of digits (hour)
-    #         "+033",       # Incorrect number of digits (minute)
-    #         "+03:3",      # Incorrect number of digits (minute with colon)
-    #         "+03-30",     # Invalid separator
-    #         "03:30",      # Missing sign with colon
-    #         "+03:300",    # Too many minute digits
-    #         "+030:30",    # Too many hour digits
-    #         "+0A30",      # Non-numeric hour
-    #         "+03B0",      # Non-numeric minute
-    #         "+2500",      # Hour out of range (max is +2359 or +1400 for this specific regex in Python for %z) - Python's %z parse is up to +HHMM or -HHMM
-    #         # Python's strptime %z doesn't seem to strictly enforce +14 / -14 for hours.
-    #         # The regex (?P<z>[-+](?P<zH>[0-1]?[0-9]|2[0-3])(?P<zM>[0-5]?[0-9])
-    #         # in persiantools.jdatetime for %z limits zH to 23.
-    #         # Let's test against that.
-    #         "+2400",      # Hour part out of range (>=24)
-    #         "-2400",
-    #         "+0360",      # Minute part out of range (>=60)
-    #         "-0360",
-    #         "+03:60",
-    #         " +0330",     # Leading space before offset
-    #         "+0330 ",     # Trailing space after offset (will cause full string match failure)
-    #         "GMT+0330",   # Non-standard prefix
-    #     ]
+        invalid_z_formats = [
+            "0330",  # Missing sign: In Python, the %z directive requires a leading '+' or '-' for the timezone offset.
+            "+330",  # Incorrect number of digits (hour)
+            "+033",  # Incorrect number of digits (minute)
+            "+03:3",  # Incorrect number of digits (minute with colon)
+            "+03-30",  # Invalid separator
+            "03:30",  # Missing sign with colon
+            "+03:300",  # Too many minute digits
+            "+030:30",  # Too many hour digits
+            "+0A30",  # Non-numeric hour
+            "+03B0",  # Non-numeric minute
+            "+2500",  # Hour out of range (max is +2359 or +1400 for this specific regex in Python for %z)
+            "+2400",  # Hour part out of range (>=24)
+            "-2400",
+            "+0360",  # Minute part out of range (>=60)
+            "-0360",
+            "+03:60",
+            " +0330",  # Leading space before offset
+            "+0330 ",  # Trailing space after offset (will cause full string match failure)
+            "GMT+0330",  # Non-standard prefix
+        ]
 
-    #     for tz_str in invalid_z_formats:
-    #         date_string = f"{base_dt_str} {tz_str}"
-    #         fmt = f"{fmt_base} %z"
-    #         with self.subTest(date_string=date_string, fmt=fmt):
-    #             with self.assertRaises(ValueError, msg=f"Failed for invalid tz string: {tz_str}"):
-    #                 JalaliDateTime.strptime(date_string, fmt)
+        for tz_str in invalid_z_formats:
+            date_string = f"{base_dt_str} {tz_str}"
+            fmt = f"{fmt_base} %z"
+            with self.subTest(date_string=date_string, fmt=fmt):
+                with self.assertRaises(ValueError, msg=f"Failed for invalid tz string: {tz_str}"):
+                    JalaliDateTime.strptime(date_string, fmt)
 
-    #     # Test %z without enough characters following
-    #     with self.assertRaises(ValueError):
-    #         JalaliDateTime.strptime(f"{base_dt_str} +", f"{fmt_base} %z")
-    #     with self.assertRaises(ValueError):
-    #         JalaliDateTime.strptime(f"{base_dt_str} +03", f"{fmt_base} %z")
+        # Test %z without enough characters following
+        with self.assertRaises(ValueError):
+            JalaliDateTime.strptime(f"{base_dt_str} +", f"{fmt_base} %z")
+        with self.assertRaises(ValueError):
+            JalaliDateTime.strptime(f"{base_dt_str} +03", f"{fmt_base} %z")
 
     def test_strptime_z_directive_locale_independence(self):
         base_dt_str = "1400-01-01 10:00:00"

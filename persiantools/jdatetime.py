@@ -1719,7 +1719,7 @@ class JalaliDateTime(JalaliDate):
         look for the table under "strftime() and strptime() Format Codes" section.
         """
         directives_regex_pattern = {
-            "%Y": r"(?P<Y>\d\d\d\d)",
+            "%Y": r"(?P<Y>\d{4})",
             "%m": r"(?P<m>1[0-2]|0[1-9]|[1-9])",
             "%d": r"(?P<d>3[0-1]|[1-2]\d|0[1-9]|[1-9]| [1-9])",
             "%a": cls._seqToRE(weekday_names_abbr, "a"),
@@ -1732,7 +1732,12 @@ class JalaliDateTime(JalaliDate):
             "%M": r"(?P<M>[0-5]\d|\d)",
             "%S": r"(?P<S>6[0-1]|[0-5]\d|\d)",
             "%f": r"(?P<f>\d{1,6})",
-            "%z": r"(?P<z>[-+](?P<zH>[0-1]?[0-9]|2[0-3])(?P<zM>[0-5]?[0-9])(?P<zS>[0-5]?[0-9])?(\.(?P<zf>(\d{,6})))?)",
+            "%z": (
+                r"(?P<z>[-+](?P<zH>2[0-3]|[0-1]\d)"
+                r"(?:[:]?)(?P<zM>[0-5]\d)"
+                r"(?:[:]?(?P<zS>[0-5]\d))?"
+                r"(?:\.(?P<zf>\d{1,6}))?)"
+            ),
             "%Z": cls._seqToRE(pytz.all_timezones, "Z"),
         }
 
@@ -1746,8 +1751,9 @@ class JalaliDateTime(JalaliDate):
         )
 
         data_string_regex = utils.replace(fmt, directives_regex_pattern)
+        full_pattern = f"^{data_string_regex}$"
 
-        if re.match(data_string_regex, data_string, re.IGNORECASE):
+        if re.match(full_pattern, data_string, re.IGNORECASE):
             directives = re.search(data_string_regex, data_string, re.IGNORECASE).groupdict()
 
             if "Y" in directives.keys() and len(directives.get("Y")) < 4:
