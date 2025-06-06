@@ -103,10 +103,10 @@ class TestJalaliDateTime(TestCase):
         with pytest.raises(AssertionError):
             JalaliDateTime.check_utc_offset("invalid", timedelta(minutes=30))
 
-        with pytest.raises(TypeError) as excinfo:
+        with pytest.raises(TypeError):
             JalaliDateTime.check_utc_offset("utcoffset", 30)
 
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError):
             JalaliDateTime.check_utc_offset("dst", timedelta(seconds=61))
 
     def test_others(self):

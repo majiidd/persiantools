@@ -225,8 +225,15 @@ class TestJalaliDate(TestCase):
 
         with pytest.raises(ValueError):
             JalaliDate.days_before_month(0)
+
         with pytest.raises(ValueError):
             JalaliDate.days_before_month(13)
+
+        with pytest.raises(ValueError):
+            JalaliDate.days_in_month(13, 1404)
+
+        with pytest.raises(ValueError):
+            JalaliDate.days_in_month(0, 1400)
 
     def test_leap(self):
         cases = [
