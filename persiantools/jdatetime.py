@@ -5,8 +5,7 @@ from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, timezone, tzinfo
 from re import escape as re_escape
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from persiantools import digits, utils
 
@@ -1738,7 +1737,7 @@ class JalaliDateTime(JalaliDate):
                 r"(?:[:]?(?P<zS>[0-5]\d))?"
                 r"(?:\.(?P<zf>\d{1,6}))?)"
             ),
-            "%Z": cls._seqToRE(pytz.all_timezones, "Z"),
+            "%Z": r"(?P<Z>[A-Za-z_/\-]+)",
         }
 
         fmt = utils.replace(
@@ -1787,7 +1786,10 @@ class JalaliDateTime(JalaliDate):
                 )
                 tz = timezone(delta)
             elif "Z" in directives.keys():
-                tz = pytz.timezone(directives.get("Z"))
+                try:
+                    tz = ZoneInfo(directives.get("Z"))
+                except Exception:
+                    raise ValueError(f"Unknown time zone name: {directives.get('Z')}")
 
             cls_attrs = {
                 "year": directives.get("Y", 1),
