@@ -160,6 +160,29 @@ class TestJalaliDateTime(TestCase):
             "1367-02-14 04:30:00.000001+00:00",
         )
 
+    def test_dst_fixed_offset_zero(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 0, 0, tzinfo=timezone(timedelta(hours=3)))
+        assert jdt.dst() == timedelta(0)
+
+    def test_tzname_fixed_offset(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 0, 0, tzinfo=timezone(timedelta(hours=-4, minutes=-45)))
+        # stdlib datetime.timezone tzname format is "UTC±HH:MM"
+        assert jdt.tzname() == "UTC-04:45"
+
+    def test_strptime_Z_with_zoneinfo(self):
+        # 1402-01-01 (2023-03-21) after Iran removed DST; Asia/Tehran is fixed +03:30
+        s = "1402-01-01 12:00:00 Asia/Tehran"
+        fmt = "%Y-%m-%d %H:%M:%S %Z"
+        jdt = JalaliDateTime.strptime(s, fmt)
+        assert isinstance(jdt.tzinfo, ZoneInfo)
+        assert jdt.utcoffset() == timedelta(hours=3, minutes=30)
+
+    def test_strptime_Z_invalid_name(self):
+        s = "1400-01-01 12:00:00 Mars/Phobos"
+        fmt = "%Y-%m-%d %H:%M:%S %Z"
+        with pytest.raises(ValueError):
+            JalaliDateTime.strptime(s, fmt)
+
     def test_operators(self):
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) + timedelta(days=30, seconds=15, milliseconds=1),
