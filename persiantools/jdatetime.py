@@ -5,8 +5,7 @@ from datetime import datetime as dt
 from datetime import time as _time
 from datetime import timedelta, timezone, tzinfo
 from re import escape as re_escape
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from persiantools import digits, utils
 
@@ -1567,28 +1566,58 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        offset = self._tzinfo.utcoffset(self.to_gregorian())
+        g = self.to_gregorian()
+        if g.tzinfo is None:
+            g = g.replace(tzinfo=self._tzinfo)
+        try:
+            offset = self._tzinfo.utcoffset(g)
+        except Exception:
+            offset = self._tzinfo.utcoffset(None)
 
+        self.check_utc_offset("utcoffset", offset)
         return offset
 
     def tzname(self):
         if self._tzinfo is None:
             return None
 
-        name = self._tzinfo.tzname(self.to_gregorian())
+        g = self.to_gregorian()
+        if g.tzinfo is None:
+            g = g.replace(tzinfo=self._tzinfo)
+        try:
+            name = self._tzinfo.tzname(g)
+        except Exception:
+            name = self._tzinfo.tzname(None)
 
         if name is not None and not isinstance(name, str):
-            raise TypeError("tzinfo.tzname() must return None or string, " "not '%s'" % type(name))
+            raise TypeError("tzinfo.tzname() must return None or string, not '%s'" % type(name))
 
         return name
 
     def dst(self):
+        """Return DST offset as timedelta or None.
+
+        For stdlib fixed-offset timezones (datetime.timezone, including UTC) this must be timedelta(0).
+        """
         if self._tzinfo is None:
             return None
 
-        offset = self._tzinfo.dst(self.to_gregorian())
-        self.check_utc_offset("dst", offset)
+        from datetime import timedelta as _td
+        from datetime import timezone as _tz
 
+        # datetime.timezone instances (including timezone.utc) never have DST
+        if self._tzinfo is _tz.utc or isinstance(self._tzinfo, type(_tz.utc)):
+            return _td(0)
+
+        g = self.to_gregorian()
+        if g.tzinfo is None:
+            g = g.replace(tzinfo=self._tzinfo)
+        try:
+            offset = self._tzinfo.dst(g)
+        except Exception:
+            offset = self._tzinfo.dst(None)
+
+        self.check_utc_offset("dst", offset)
         return offset
 
     @staticmethod
@@ -1738,7 +1767,7 @@ class JalaliDateTime(JalaliDate):
                 r"(?:[:]?(?P<zS>[0-5]\d))?"
                 r"(?:\.(?P<zf>\d{1,6}))?)"
             ),
-            "%Z": cls._seqToRE(pytz.all_timezones, "Z"),
+            "%Z": r"(?P<Z>[A-Za-z_/\-]+)",
         }
 
         fmt = utils.replace(
@@ -1787,7 +1816,10 @@ class JalaliDateTime(JalaliDate):
                 )
                 tz = timezone(delta)
             elif "Z" in directives.keys():
-                tz = pytz.timezone(directives.get("Z"))
+                try:
+                    tz = ZoneInfo(directives.get("Z"))
+                except Exception:
+                    raise ValueError(f"Unknown time zone name: {directives.get('Z')}")
 
             cls_attrs = {
                 "year": directives.get("Y", 1),

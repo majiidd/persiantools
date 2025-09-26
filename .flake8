@@ -1,19 +1,33 @@
+
 [flake8]
+# Keep flake8 compatible with Black:
+# - E203 and W503 conflict with Black's formatting choices.
+# - E501 (line length) is managed by Black; we still set max-line-length for plugins that read it.
 max-line-length = 120
 extend-ignore =
     E203,
     E501,
     W503,
     C901,
-max-complexity = 10
+# Core error families:
 select = B,C,E,F,W
+
+# Common junk folders we don't want to lint
 exclude =
     .git,
     __pycache__,
+    .tox,
+    .mypy_cache,
+    .pytest_cache,
     build,
     dist,
     migrations,
     venv,
     .venv,
     .eggs,
-    *.egg
+    *.egg,
+    docs/_build
+
+# Tolerate unused imports in package initializers and allow test module oddities
+per-file-ignores =
+    __init__.py:F401

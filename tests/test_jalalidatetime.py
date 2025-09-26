@@ -5,9 +5,9 @@ from datetime import date, datetime
 from datetime import time as _time
 from datetime import timedelta, timezone
 from unittest import TestCase
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from persiantools.jdatetime import JalaliDate, JalaliDateTime, _is_ascii_digit
 
@@ -46,7 +46,7 @@ class TestJalaliDateTime(TestCase):
         g = JalaliDateTime.now()
         self.assertEqual(g.time(), _time(g.hour, g.minute, g.second, g.microsecond))
 
-        g = g.replace(tzinfo=pytz.timezone("America/Los_Angeles"))
+        g = g.replace(tzinfo=ZoneInfo("America/Los_Angeles"))
         self.assertEqual(
             g.timetz(),
             _time(
@@ -54,13 +54,13 @@ class TestJalaliDateTime(TestCase):
                 g.minute,
                 g.second,
                 g.microsecond,
-                pytz.timezone("America/Los_Angeles"),
+                ZoneInfo("America/Los_Angeles"),
             ),
         )
 
         self.assertEqual(
-            JalaliDateTime.fromtimestamp(578723400, pytz.utc),
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc),
+            JalaliDateTime.fromtimestamp(578723400, timezone.utc),
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, timezone.utc),
         )
         self.assertEqual(
             JalaliDateTime.utcfromtimestamp(578723400),
@@ -111,27 +111,27 @@ class TestJalaliDateTime(TestCase):
 
     def test_others(self):
         self.assertTrue(JalaliDateTime.fromtimestamp(time.time() - 10) <= JalaliDateTime.now())
-        self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc).timestamp(), 578723400)
+        self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, timezone.utc).timestamp(), 578723400)
         self.assertEqual(
-            JalaliDateTime.fromtimestamp(578723400, pytz.utc),
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc),
+            JalaliDateTime.fromtimestamp(578723400, timezone.utc),
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, timezone.utc),
         )
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).jdate(), JalaliDate(1367, 2, 14))
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).date(), date(1988, 5, 4))
         self.assertEqual(
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).replace(tzinfo=pytz.utc).__repr__(),
-            "JalaliDateTime(1367, 2, 14, 4, 30, tzinfo=<UTC>)",
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).replace(tzinfo=timezone.utc).__repr__(),
+            "JalaliDateTime(1367, 2, 14, 4, 30, tzinfo=datetime.timezone.utc)",
         )
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).replace(year=1395, day=3, minute=59),
             JalaliDateTime(1395, 2, 3, 4, 59, 4, 4444),
         )
 
-        self.assertEqual(JalaliDateTime.now(pytz.utc).tzname(), "UTC")
+        self.assertEqual(JalaliDateTime.now(timezone.utc).tzname(), "UTC")
         self.assertIsNone(JalaliDateTime.today().tzname())
         self.assertIsNone(JalaliDateTime.today().dst())
 
-        dt = JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, pytz.utc)
+        dt = JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, timezone.utc)
         self.assertEqual(dt.dst(), timedelta(0))
 
         self.assertEqual(
@@ -152,13 +152,36 @@ class TestJalaliDateTime(TestCase):
         )
 
         self.assertEqual(
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 1, pytz.utc).isoformat(),
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 1, timezone.utc).isoformat(),
             "1367-02-14T04:30:00.000001+00:00",
         )
         self.assertEqual(
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 1, pytz.utc).__str__(),
+            JalaliDateTime(1367, 2, 14, 4, 30, 0, 1, timezone.utc).__str__(),
             "1367-02-14 04:30:00.000001+00:00",
         )
+
+    def test_dst_fixed_offset_zero(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 0, 0, tzinfo=timezone(timedelta(hours=3)))
+        assert jdt.dst() == timedelta(0)
+
+    def test_tzname_fixed_offset(self):
+        jdt = JalaliDateTime(1400, 1, 1, 12, 0, 0, tzinfo=timezone(timedelta(hours=-4, minutes=-45)))
+        # stdlib datetime.timezone tzname format is "UTC±HH:MM"
+        assert jdt.tzname() == "UTC-04:45"
+
+    def test_strptime_Z_with_zoneinfo(self):
+        # 1402-01-01 (2023-03-21) after Iran removed DST; Asia/Tehran is fixed +03:30
+        s = "1402-01-01 12:00:00 Asia/Tehran"
+        fmt = "%Y-%m-%d %H:%M:%S %Z"
+        jdt = JalaliDateTime.strptime(s, fmt)
+        assert isinstance(jdt.tzinfo, ZoneInfo)
+        assert jdt.utcoffset() == timedelta(hours=3, minutes=30)
+
+    def test_strptime_Z_invalid_name(self):
+        s = "1400-01-01 12:00:00 Mars/Phobos"
+        fmt = "%Y-%m-%d %H:%M:%S %Z"
+        with pytest.raises(ValueError):
+            JalaliDateTime.strptime(s, fmt)
 
     def test_operators(self):
         self.assertEqual(
@@ -201,13 +224,13 @@ class TestJalaliDateTime(TestCase):
         self.assertTrue(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= datetime(1988, 5, 4, 0, 0, 0, 0))
         self.assertTrue(JalaliDateTime(1395, 4, 15, 20, 13, 59, 0) == JalaliDateTime(1395, 4, 15, 20, 13, 59, 0))
         self.assertTrue(
-            JalaliDateTime(1395, 4, 15, 20, 13, 59, 0, pytz.utc) != JalaliDateTime(1395, 4, 15, 20, 13, 59, 0)
+            JalaliDateTime(1395, 4, 15, 20, 13, 59, 0, timezone.utc) != JalaliDateTime(1395, 4, 15, 20, 13, 59, 0)
         )
 
         self.assertEqual(
-            JalaliDateTime(1395, 4, 16, 20, 14, 30, 0, pytz.utc)
-            - JalaliDateTime(1395, 4, 16, 20, 14, 30, 0, pytz.timezone("Asia/Tehran")),
-            pytz.timezone("Asia/Tehran")._utcoffset,
+            JalaliDateTime(1395, 4, 16, 20, 14, 30, 0, timezone.utc)
+            - JalaliDateTime(1395, 4, 16, 20, 14, 30, 0, ZoneInfo("Asia/Tehran")),
+            timedelta(hours=4, minutes=30),
         )
 
         self.assertFalse(JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) == {"year": 1367})
@@ -233,7 +256,7 @@ class TestJalaliDateTime(TestCase):
             assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) > date(1988, 4, 5)
 
         with pytest.raises(NotImplementedError):
-            assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= pytz.utc
+            assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= timezone.utc
 
         with pytest.raises(TypeError):
             assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) >= JalaliDate(1392, 4, 5)
@@ -245,7 +268,7 @@ class TestJalaliDateTime(TestCase):
             assert JalaliDateTime(1367, 2, 14, 4, 30, 0, 0) - []
 
     def test_hash(self):
-        j1 = JalaliDateTime.today().replace(tzinfo=pytz.utc)
+        j1 = JalaliDateTime.today().replace(tzinfo=timezone.utc)
         j2 = JalaliDateTime(1369, 7, 1, 0, 0, 0, 0)
         j3 = JalaliDateTime(datetime(1990, 9, 23, 0, 0, 0, 0))
 
@@ -268,7 +291,7 @@ class TestJalaliDateTime(TestCase):
 
     def test_pickle(self):
         file = open("save.p", "wb")
-        now = JalaliDateTime.now().replace(tzinfo=pytz.timezone("Asia/Tehran"))
+        now = JalaliDateTime.now().replace(tzinfo=ZoneInfo("Asia/Tehran"))
         pickle.dump(now, file)
         file.close()
 
@@ -282,27 +305,27 @@ class TestJalaliDateTime(TestCase):
 
     def test_format(self):
         self.assertEqual(
-            JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, pytz.utc).strftime("%X %p %z %Z"),
+            JalaliDateTime(1369, 7, 1, 14, 0, 10, 0, timezone.utc).strftime("%X %p %z %Z"),
             "14:00:10 PM +0000 UTC",
         )
 
         self.assertEqual(
-            JalaliDateTime(1367, 2, 14, 14, 0, 10, 0, pytz.utc).strftime("%c"),
+            JalaliDateTime(1367, 2, 14, 14, 0, 10, 0, timezone.utc).strftime("%c"),
             "Chaharshanbeh 14 Ordibehesht 1367 14:00:10",
         )
 
         self.assertEqual(
-            JalaliDateTime(1397, 11, 30, 14, 0, 10, 0, pytz.utc).strftime("%c"),
+            JalaliDateTime(1397, 11, 30, 14, 0, 10, 0, timezone.utc).strftime("%c"),
             "Seshanbeh 30 Bahman 1397 14:00:10",
         )
 
         self.assertEqual(
-            JalaliDateTime(1367, 2, 14, 11, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"),
+            JalaliDateTime(1367, 2, 14, 11, 0, 10, 553, timezone.utc).strftime("%I:%M:%S.%f %p"),
             "11:00:10.000553 AM",
         )
 
         self.assertEqual(
-            JalaliDateTime(1367, 2, 14, 14, 0, 10, 553, pytz.utc).strftime("%I:%M:%S.%f %p"),
+            JalaliDateTime(1367, 2, 14, 14, 0, 10, 553, timezone.utc).strftime("%I:%M:%S.%f %p"),
             "02:00:10.000553 PM",
         )
 
@@ -346,7 +369,7 @@ class TestJalaliDateTime(TestCase):
             JalaliDateTime.strptime("1400-01-01 02:00:10.000553 PM", "%Y-%m-%d %I:%M:%S.%f %p"),
         )
 
-        jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, pytz.utc)
+        jdt = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, timezone.utc)
         self.assertEqual(jdt, JalaliDateTime.strptime(jdt.strftime("%c %f %z %Z"), "%c %f %z %Z"))
 
         jdt_utc_combined = JalaliDateTime(1374, 4, 8, 16, 28, 3, 227, timezone.utc)

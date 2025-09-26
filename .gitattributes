@@ -1,2 +1,41 @@
-* text=auto eol=lf
-*.bat text eol=crlf
+# Normalize text files to LF in repo and working tree (cross‑platform friendly)
+*          text=auto eol=lf
+
+# Windows batch scripts should use CRLF
+*.bat      text eol=crlf
+
+# Common source / config files: keep LF explicitly
+*.py       text eol=lf
+*.pyi      text eol=lf
+*.sh       text eol=lf
+Makefile   text eol=lf
+*.toml     text eol=lf
+*.ini      text eol=lf
+*.cfg      text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.json     text eol=lf
+*.md       text eol=lf
+*.rst      text eol=lf
+
+# Binary assets: never touch line endings or diff them
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.pdf      binary
+*.zip      binary
+*.tar      binary
+*.gz       binary
+*.tgz      binary
+*.xz       binary
+*.bz2      binary
+*.whl      binary
+
+# Patch artifacts should not be normalized
+*.diff     -text
+*.patch    -text
+
+# Exclude CI meta from GitHub source archives (git archive), keep code clean
+/.github   export-ignore

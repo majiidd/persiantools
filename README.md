@@ -104,15 +104,15 @@ The `JalaliDateTime` object represents a date and time in the Jalali calendar.
 
 ```python
 >>> from persiantools.jdatetime import JalaliDateTime
->>> import datetime, pytz
+>>> import datetime
 
 # Current Jalali datetime
 >>> JalaliDateTime.now()
 JalaliDateTime(1404, 3, 16, 2, 17, 14, 907909)
 
-# Current Jalali datetime (timezone-aware)
->>> JalaliDateTime.now(pytz.timezone("Asia/Tehran"))
-JalaliDateTime(1404, 3, 16, 2, 17, 14, 907909, tzinfo=<DstTzInfo 'Asia/Tehran' +0330+3:30:00 STD>)
+>>> from zoneinfo import ZoneInfo
+>>> JalaliDateTime.now(ZoneInfo("Asia/Tehran"))
+JalaliDateTime(1404, 3, 16, 2, 17, 14, 907909, tzinfo=zoneinfo.ZoneInfo(key='Asia/Tehran'))
 
 # Current UTC Jalali datetime
 >>> JalaliDateTime.utcnow()
@@ -132,20 +132,21 @@ JalaliDateTime(1367, 2, 14, 14, 30, 15)
 JalaliDateTime(1400, 1, 1, 15, 30, 0, 10)
 
 # Timezone conversion
->>> tehran_tz = pytz.timezone("Asia/Tehran")
->>> utc_tz = pytz.utc
+>>> from zoneinfo import ZoneInfo
+>>> tehran_tz = ZoneInfo("Asia/Tehran")
+>>> utc_tz = datetime.timezone.utc
 >>> dt_utc = JalaliDateTime.now(utc_tz)
 >>> dt_tehran = dt_utc.astimezone(tehran_tz)
 >>> dt_utc
-JalaliDateTime(1404, 3, 15, 22, 54, 8, 835877, tzinfo=<UTC>)
+JalaliDateTime(1404, 3, 15, 22, 54, 8, 835877, tzinfo=datetime.timezone.utc)
 >>> dt_tehran
-JalaliDateTime(1404, 3, 16, 2, 24, 8, 835877, tzinfo=<DstTzInfo 'Asia/Tehran' +0330+3:30:00 STD>)
+JalaliDateTime(1404, 3, 16, 2, 24, 8, 835877, tzinfo=zoneinfo.ZoneInfo(key='Asia/Tehran'))
 ```
 
 #### Attributes and Methods
 
 ```python
->>> dt_obj = JalaliDateTime(1367, 2, 14, 14, 30, 15, 123, tzinfo=pytz.utc)
+>>> dt_obj = JalaliDateTime(1367, 2, 14, 14, 30, 15, 123, tzinfo=datetime.timezone.utc)
 
 >>> dt_obj.year
 1367
@@ -162,7 +163,7 @@ JalaliDateTime(1404, 3, 16, 2, 24, 8, 835877, tzinfo=<DstTzInfo 'Asia/Tehran' +0
 >>> dt_obj.microsecond
 123
 >>> dt_obj.tzinfo
-<UTC>
+datetime.timezone.utc
 
 # Date part as datetime.date (Gregorian)
 >>> dt_obj.date()
@@ -183,9 +184,9 @@ Based on python `strftime()` behavior
 
 ```python
 >>> from persiantools.jdatetime import JalaliDateTime
->>> import pytz
+>>> from zoneinfo import ZoneInfo
 
->>> dt = JalaliDateTime(1367, 2, 14, 14, 30, 0, tzinfo=pytz.timezone("Asia/Tehran"))
+>>> dt = JalaliDateTime(1367, 2, 14, 14, 30, 0, tzinfo=ZoneInfo("Asia/Tehran"))
 
 >>> dt.strftime("%Y/%m/%d %H:%M:%S")
 '1367/02/14 14:30:00'
@@ -302,6 +303,7 @@ JalaliDate(1367, 2, 14, Chaharshanbeh)
 If you find this project helpful and would like to support its continued development, please consider donating.
 
 *   **Bitcoin (BTC):** `bc1qg5rp7ymznc98wmhltzvpwl2dvfuvjr33m4hy77`
+*   **Ethereum (ETH):** `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad`
 *   **Tron (TRX):** `TDd63bVWZDBHmwVNFgJ6T2WdWmk9z7PBLg`
 *   **Stellar (XLM):** `GDSFPPLY34QSAOTOP4DQDXAI2YDRNRIADZHTN3HCGMQXRLIGPYOEH7L5`
 *   **Solana (SOL):** `CXHKgCBqBYy1hbZKGqaSmMzQoTC4Wx2v8QfL9Z7JBo3A`

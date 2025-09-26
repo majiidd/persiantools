@@ -1,5 +1,10 @@
-
 # Changelog
+
+## [5.4.0](https://github.com/majiidd/persiantools/compare/5.3.0...5.4.0) - 2025-09-26
+
+- Removed `pytz` dependency; migrated fully to `zoneinfo` and `datetime.timezone`.
+- Updated `JalaliDateTime` implementation and fixed timezone handling.
+- Refined CI/CD workflows and linting configuration.
 
 ## [5.3.0](https://github.com/majiidd/persiantools/compare/5.2.1...5.3.0) - 2025-06-06
 
