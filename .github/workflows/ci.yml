@@ -3,7 +3,7 @@ name: ci
 on:
   push:
     branches: ["**"]
-    tags: ["v*.*.*"]
+    tags: ["*.*.*"]
   pull_request:
     branches: ["**"]
   workflow_dispatch:
@@ -79,7 +79,7 @@ jobs:
         run: pipenv run pytest -ra tests/
 
       - name: Upload coverage to Codecov
-        if: runner.os == 'Linux' && matrix.python-version == '3.12'
+        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.12' }}
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
