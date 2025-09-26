@@ -120,7 +120,7 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).date(), date(1988, 5, 4))
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 4, 30, 0, 0).replace(tzinfo=timezone.utc).__repr__(),
-            "JalaliDateTime(1367, 2, 14, 4, 30, tzinfo=<UTC>)",
+            "JalaliDateTime(1367, 2, 14, 4, 30, tzinfo=datetime.timezone.utc)",
         )
         self.assertEqual(
             JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).replace(year=1395, day=3, minute=59),
