@@ -128,3 +128,24 @@ dmypy.json
 
 # Coverage
 cover/
+
+# Ruff linter cache
+.ruff_cache/
+
+# pytype
+.pytype/
+
+# pytest-benchmark
+.benchmarks/
+
+# PEP 582 local packages
+__pypackages__/
+
+# Swap / temp files
+*~
+*.swp
+*.swo
+
+# dotenv variants (keep example)
+.env.*
+!.env.example
