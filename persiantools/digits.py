@@ -1,3 +1,5 @@
+from typing import Union
+
 EN_TO_FA_MAP = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
 AR_TO_FA_MAP = str.maketrans("٠١٢٣٤٥٦٧٨٩", "۰۱۲۳۴۵۶۷۸۹")
 FA_TO_EN_MAP = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789")
@@ -229,7 +231,7 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
         return _to_word(int(left), False)
 
 
-def to_word(number: int | float) -> str:
+def to_word(number: Union[int, float]) -> str:
     """
     Convert a number to its Persian word representation.
 
