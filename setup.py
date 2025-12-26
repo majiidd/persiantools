@@ -23,6 +23,7 @@ setup(
     long_description=readme(),
     long_description_content_type="text/markdown",
     classifiers=[
+        "License :: OSI Approved :: MIT License",
         "Intended Audience :: Developers",
         "Natural Language :: Persian",
         "Operating System :: OS Independent",
