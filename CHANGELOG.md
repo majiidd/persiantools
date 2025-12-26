@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.0.0](https://github.com/majiidd/persiantools/compare/5.4.0...6.0.0) - 2025-12-26
+
+- Add support for Python 3.14.
+- Drop support for Python 3.9.
+
 ## [5.4.0](https://github.com/majiidd/persiantools/compare/5.3.0...5.4.0) - 2025-09-26
 
 - Removed `pytz` dependency; migrated fully to `zoneinfo` and `datetime.timezone`.
