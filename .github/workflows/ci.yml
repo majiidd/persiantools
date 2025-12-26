@@ -16,6 +16,7 @@ jobs:
   tests:
     name: ${{ matrix.os }} / ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -64,22 +65,22 @@ jobs:
           PIPENV_VENV_IN_PROJECT: "1"
         run: pipenv run python -V
 
-      - name: Run tests (with coverage on Linux CPython 3.12)
-        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.12' }}
+      - name: Run tests (with coverage on Linux CPython 3.14)
+        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.14' }}
         env:
           PIPENV_NOSPIN: "1"
           PIPENV_VENV_IN_PROJECT: "1"
         run: pipenv run pytest -ra --cov=persiantools --cov-report xml:coverage.xml tests/
 
       - name: Run tests (no coverage)
-        if: ${{ !(runner.os == 'Linux' && matrix.python-version == '3.12') }}
+        if: ${{ !(runner.os == 'Linux' && matrix.python-version == '3.14') }}
         env:
           PIPENV_NOSPIN: "1"
           PIPENV_VENV_IN_PROJECT: "1"
         run: pipenv run pytest -ra tests/
 
       - name: Upload coverage to Codecov
-        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.12' }}
+        if: ${{ runner.os == 'Linux' && matrix.python-version == '3.14' }}
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
@@ -94,7 +95,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: 'pip'
       - name: Install pre-commit
         run: pip install pre-commit
@@ -117,10 +118,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.14
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: 'pip'
 
       - name: Build sdist and wheel
