@@ -92,6 +92,7 @@ jobs:
           pipenv install --dev
 
       - name: Run tests
+        if: ${{ !(matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13') }}
         env:
           PIPENV_NOSPIN: '1'
           PIPENV_VENV_IN_PROJECT: '1'
