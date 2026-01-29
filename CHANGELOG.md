@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.0](https://github.com/majiidd/persiantools/compare/5.4.0...5.5.0) - 2026-01-30
+
+- Python 3.14 support.
+- Migrated from `setup.py` to `pyproject.toml` (PEP 621).
+- Improved CI/CD pipeline with job dependencies and parallel execution.
+- Marked Python 3.15 as experimental with allowed failures.
+
 ## [5.4.0](https://github.com/majiidd/persiantools/compare/5.3.0...5.4.0) - 2025-09-26
 
 - Removed `pytz` dependency; migrated fully to `zoneinfo` and `datetime.timezone`.
