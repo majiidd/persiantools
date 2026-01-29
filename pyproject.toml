@@ -1,3 +1,69 @@
+[build-system]
+requires = ["setuptools>=80.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persiantools"
+dynamic = ["version"]
+description = "Jalali date and datetime with other tools"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Majid Hajiloo", email = "majid.hajiloo@gmail.com" }
+]
+keywords = [
+    "jalali",
+    "shamsi",
+    "persian",
+    "digits",
+    "characters",
+    "converter",
+    "jalalidate",
+    "jalalidatetime",
+    "date",
+    "datetime",
+    "jdate",
+    "jdatetime",
+    "farsi",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Persian",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Localization",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "tzdata; platform_system == 'Windows'",
+]
+
+[project.urls]
+Homepage = "https://github.com/majiidd/persiantools"
+Source = "https://github.com/majiidd/persiantools"
+Issues = "https://github.com/majiidd/persiantools/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "persiantools.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["persiantools*"]
+
 [tool.black]
 line-length = 120
 target-version = ["py39", "py310", "py311", "py312", "py313", "py314"]
