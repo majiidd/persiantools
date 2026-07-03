@@ -1,5 +1,30 @@
 # Changelog
 
+## [6.0.0](https://github.com/majiidd/persiantools/compare/5.5.1...6.0.0) - Unreleased
+
+Performance:
+
+- Rewrote the core `JalaliDate.to_jalali()` and `JalaliDate.to_gregorian()` conversion methods for performance and readability.
+
+Brought `JalaliDate`/`JalaliDateTime` to feature parity with the `datetime` API as of Python 3.14:
+
+- Added `fold` support (PEP 495) to `JalaliDateTime`: keyword-only constructor argument, `fold` property, propagation through `replace()`, `to_gregorian()`/`to_jalali()`, `combine()`, `time()`/`timetz()`, pickling, `repr()`, and fold-aware equality/hashing for ambiguous wall times.
+- Added `timespec` argument to `JalaliDateTime.isoformat()` (`auto`, `hours`, `minutes`, `seconds`, `milliseconds`, `microseconds`).
+- Added `fromisocalendar()` to `JalaliDate` and `JalaliDateTime`, the inverse of `isocalendar()`.
+- `isocalendar()` now returns a named tuple with `year`, `week`, and `weekday` fields (still compares equal to the old plain tuple).
+- Expanded `fromisoformat()` to accept the basic format `YYYYMMDD` and week dates `YYYY-Www[-D]` / `YYYYWww[d]` (Python 3.11 parity).
+- Added the `%:z` strftime directive (UTC offset with a colon, Python 3.12 parity).
+- Added `copy.replace()` support via `__replace__` on both classes (Python 3.13 parity).
+- Added `%j`, `%w`, `%U`, and `%W` directives to `strptime()` on both classes.
+- Added `min`/`max` class attributes; fixed `JalaliDateTime.resolution` (now `timedelta(microseconds=1)`).
+- Deprecated `JalaliDateTime.utcnow()` and `JalaliDateTime.utcfromtimestamp()` (mirroring Python 3.12); use `now(timezone.utc)` and `fromtimestamp(t, tz=timezone.utc)`.
+- Fixed `JalaliDateTime.fromordinal()`/`to_jalali()` crashing when time components were omitted.
+
+Tooling:
+
+- Migrated development and CI tooling from `pipenv` to [uv](https://docs.astral.sh/uv/); dev dependencies now live in the `[dependency-groups]` table of `pyproject.toml` with a committed `uv.lock`. The published package is unchanged.
+- Added `Makefile`, and Dependabot updates for the `uv` and `github-actions` ecosystems.
+
 ## [5.5.1](https://github.com/majiidd/persiantools/compare/5.5.0...5.5.1) - 2026-05-05
 
 - Fixed `JalaliDateTime` copy-constructor to preserve `tzinfo` when initialized from another timezone-aware `JalaliDateTime` (fixes [#62](https://github.com/majiidd/persiantools/issues/62)).

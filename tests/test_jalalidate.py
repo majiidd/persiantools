@@ -8,122 +8,125 @@ import pytest
 
 from persiantools.jdatetime import MAXYEAR, MINYEAR, JalaliDate
 
+# (jalali_year, jalali_month, jalali_day, gregorian_year, gregorian_month, gregorian_day)
+_JALALI_GREGORIAN_CASES = [
+    # General conversions
+    (1367, 2, 14, 1988, 5, 4),
+    (1395, 3, 21, 2016, 6, 10),
+    (1395, 12, 9, 2017, 2, 27),
+    (1400, 6, 31, 2021, 9, 22),
+    (1396, 7, 27, 2017, 10, 19),
+    (1397, 11, 29, 2019, 2, 18),
+    (1399, 10, 11, 2020, 12, 31),
+    (1399, 11, 23, 2021, 2, 11),
+    (1400, 4, 25, 2021, 7, 16),
+    (1400, 12, 20, 2022, 3, 11),
+    (1403, 1, 5, 2024, 3, 24),
+    (1402, 10, 10, 2023, 12, 31),
+    (1403, 10, 11, 2024, 12, 31),
+    (1403, 2, 23, 2024, 5, 12),
+    (1403, 4, 3, 2024, 6, 23),
+    (1403, 4, 8, 2024, 6, 28),
+    (1403, 8, 18, 2024, 11, 8),
+    (1404, 3, 16, 2025, 6, 6),
+    (1403, 10, 27, 2025, 1, 16),
+    (1404, 7, 4, 2025, 9, 26),
+    (1405, 4, 12, 2026, 7, 3),
+    (1369, 7, 1, 1990, 9, 23),
+    (1392, 6, 25, 2013, 9, 16),
+    (1500, 11, 11, 2122, 1, 31),
+    (1304, 12, 30, 1926, 3, 21),
+    (1320, 6, 3, 1941, 8, 25),
+    (1416, 10, 30, 2038, 1, 19),
+    # Esfand 29 (non-leap year end)
+    (1210, 12, 29, 1832, 3, 19),
+    (1367, 12, 29, 1989, 3, 20),
+    (1392, 12, 29, 2014, 3, 20),
+    (1394, 12, 29, 2016, 3, 19),
+    (1398, 12, 29, 2020, 3, 19),
+    (1399, 12, 29, 2021, 3, 19),
+    (1400, 12, 29, 2022, 3, 20),
+    (1402, 12, 29, 2024, 3, 19),
+    (1403, 12, 29, 2025, 3, 19),
+    (1405, 12, 29, 2027, 3, 20),
+    (1502, 12, 29, 2124, 3, 19),
+    (1504, 12, 29, 2126, 3, 20),
+    (1206, 12, 29, 1828, 3, 20),
+    (1396, 12, 29, 2018, 3, 20),
+    # Esfand 30 (leap year end)
+    (1210, 12, 30, 1832, 3, 20),
+    (1391, 12, 30, 2013, 3, 20),
+    (1395, 12, 30, 2017, 3, 20),
+    (1399, 12, 30, 2021, 3, 20),
+    (1403, 12, 30, 2025, 3, 20),
+    (1408, 12, 30, 2030, 3, 20),
+    (1375, 12, 30, 1997, 3, 20),
+    (1474, 12, 30, 2096, 3, 19),
+    (1498, 12, 30, 2120, 3, 20),
+    # Gregorian New Year (Jan 1)
+    (1366, 10, 11, 1988, 1, 1),
+    (1378, 10, 11, 2000, 1, 1),
+    (1379, 10, 12, 2001, 1, 1),
+    (1390, 10, 11, 2012, 1, 1),
+    (1391, 10, 12, 2013, 1, 1),
+    (1393, 10, 11, 2015, 1, 1),
+    (1398, 10, 11, 2020, 1, 1),
+    (1399, 10, 12, 2021, 1, 1),
+    (1400, 10, 11, 2022, 1, 1),
+    (1402, 10, 11, 2024, 1, 1),
+    (1403, 10, 12, 2025, 1, 1),
+    (1405, 10, 11, 2027, 1, 1),
+    (1379, 10, 11, 2000, 12, 31),
+    # Norouz (Farvardin 1)
+    # (1, 1, 1, 622, 3, 22),
+    (1000, 1, 1, 1621, 3, 21),
+    (1100, 1, 1, 1721, 3, 21),
+    (1206, 1, 1, 1827, 3, 22),
+    (1207, 1, 1, 1828, 3, 21),
+    (1211, 1, 1, 1832, 3, 21),
+    (1218, 1, 1, 1839, 3, 21),
+    (1243, 1, 1, 1864, 3, 20),
+    (1367, 1, 1, 1988, 3, 21),
+    (1388, 1, 1, 2009, 3, 21),
+    (1396, 1, 1, 2017, 3, 21),
+    (1398, 1, 1, 2019, 3, 21),
+    (1399, 1, 1, 2020, 3, 20),
+    (1400, 1, 1, 2021, 3, 21),
+    (1401, 1, 1, 2022, 3, 21),
+    (1402, 1, 1, 2023, 3, 21),
+    (1403, 1, 1, 2024, 3, 20),
+    (1404, 1, 1, 2025, 3, 21),
+    (1405, 1, 1, 2026, 3, 21),
+    (1497, 1, 1, 2118, 3, 21),
+    (1498, 1, 1, 2119, 3, 21),
+    (1500, 1, 1, 2121, 3, 21),
+    (1503, 1, 1, 2124, 3, 21),
+    (1505, 1, 1, 2126, 3, 21),
+    # Gregorian century leap-year boundaries
+    (1278, 12, 9, 1900, 2, 28),
+    (1278, 12, 10, 1900, 3, 1),
+    (1378, 12, 10, 2000, 2, 29),
+    (1478, 12, 10, 2100, 2, 28),
+    (1478, 12, 11, 2100, 3, 1),
+    # Month-end boundaries (1400)
+    (1400, 1, 31, 2021, 4, 20),
+    (1400, 3, 31, 2021, 6, 21),
+    (1400, 7, 1, 2021, 9, 23),
+    (1400, 11, 30, 2022, 2, 19),
+    (1400, 12, 1, 2022, 2, 20),
+]
+
 
 class TestJalaliDate(TestCase):
     def test_shamsi_to_gregorian(self):
-        cases = [
-            (JalaliDate(1100, 1, 1), date(1721, 3, 21)),
-            (JalaliDate(1210, 12, 30), date(1832, 3, 20)),
-            (JalaliDate(1367, 2, 14), date(1988, 5, 4)),
-            (JalaliDate(1395, 3, 21), date(2016, 6, 10)),
-            (JalaliDate(1395, 12, 9), date(2017, 2, 27)),
-            (JalaliDate(1400, 6, 31), date(2021, 9, 22)),
-            (JalaliDate(1396, 7, 27), date(2017, 10, 19)),
-            (JalaliDate(1397, 11, 29), date(2019, 2, 18)),
-            (JalaliDate(1399, 10, 11), date(2020, 12, 31)),
-            (JalaliDate(1399, 11, 23), date(2021, 2, 11)),
-            (JalaliDate(1400, 4, 25), date(2021, 7, 16)),
-            (JalaliDate(1400, 12, 20), date(2022, 3, 11)),
-            (JalaliDate(1403, 1, 5), date(2024, 3, 24)),
-            (JalaliDate(1402, 10, 10), date(2023, 12, 31)),
-            (JalaliDate(1403, 10, 11), date(2024, 12, 31)),
-            (JalaliDate(1403, 2, 23), date(2024, 5, 12)),
-            (JalaliDate(1403, 4, 3), date(2024, 6, 23)),
-            (JalaliDate(1403, 4, 8), date(2024, 6, 28)),
-            (JalaliDate(1403, 8, 18), date(2024, 11, 8)),
-            (JalaliDate(1404, 3, 16), date(2025, 6, 6)),
-            (JalaliDate(1403, 10, 27), date(2025, 1, 16)),
-            (JalaliDate(1404, 7, 4), date(2025, 9, 26)),
-            (JalaliDate(1210, 12, 29), date(1832, 3, 19)),
-            (JalaliDate(1367, 12, 29), date(1989, 3, 20)),
-            (JalaliDate(1392, 12, 29), date(2014, 3, 20)),
-            (JalaliDate(1398, 12, 29), date(2020, 3, 19)),
-            (JalaliDate(1399, 12, 29), date(2021, 3, 19)),
-            (JalaliDate(1400, 12, 29), date(2022, 3, 20)),
-            (JalaliDate(1402, 12, 29), date(2024, 3, 19)),
-            (JalaliDate(1403, 12, 29), date(2025, 3, 19)),
-            (JalaliDate(1504, 12, 29), date(2126, 3, 20)),
-            (JalaliDate(1210, 12, 30), date(1832, 3, 20)),
-            (JalaliDate(1391, 12, 30), date(2013, 3, 20)),
-            (JalaliDate(1395, 12, 30), date(2017, 3, 20)),
-            (JalaliDate(1399, 12, 30), date(2021, 3, 20)),
-            (JalaliDate(1403, 12, 30), date(2025, 3, 20)),
-            (JalaliDate(1408, 12, 30), date(2030, 3, 20)),
-            (JalaliDate(1366, 10, 11), date(1988, 1, 1)),
-            (JalaliDate(1378, 10, 11), date(2000, 1, 1)),
-            (JalaliDate(1379, 10, 12), date(2001, 1, 1)),
-            (JalaliDate(1390, 10, 11), date(2012, 1, 1)),
-            (JalaliDate(1393, 10, 11), date(2015, 1, 1)),
-            (JalaliDate(1398, 10, 11), date(2020, 1, 1)),
-            (JalaliDate(1399, 10, 12), date(2021, 1, 1)),
-            (JalaliDate(1400, 10, 11), date(2022, 1, 1)),
-            (JalaliDate(1402, 10, 11), date(2024, 1, 1)),
-            (JalaliDate(1403, 10, 12), date(2025, 1, 1)),
-            (JalaliDate(1211, 1, 1), date(1832, 3, 21)),
-            (JalaliDate(1367, 1, 1), date(1988, 3, 21)),
-            (JalaliDate(1388, 1, 1), date(2009, 3, 21)),
-            (JalaliDate(1396, 1, 1), date(2017, 3, 21)),
-            (JalaliDate(1399, 1, 1), date(2020, 3, 20)),
-            (JalaliDate(1400, 1, 1), date(2021, 3, 21)),
-            (JalaliDate(1401, 1, 1), date(2022, 3, 21)),
-            (JalaliDate(1402, 1, 1), date(2023, 3, 21)),
-            (JalaliDate(1403, 1, 1), date(2024, 3, 20)),
-            (JalaliDate(1404, 1, 1), date(2025, 3, 21)),
-            (JalaliDate(1498, 12, 30), date(2120, 3, 20)),
-            (JalaliDate(1505, 1, 1), date(2126, 3, 21)),
-            (JalaliDate.today(), date.today()),
-        ]
-        for jdate, gdate in cases:
-            self.assertEqual(jdate.to_gregorian(), gdate)
+        for jy, jm, jd, gy, gm, gd in _JALALI_GREGORIAN_CASES:
+            self.assertEqual(JalaliDate(jy, jm, jd).to_gregorian(), date(gy, gm, gd))
+        self.assertEqual(JalaliDate.today().to_gregorian(), date.today())
 
     def test_gregorian_to_shamsi(self):
-        cases = [
-            (date(1988, 5, 4), JalaliDate(1367, 2, 14)),
-            (date(2122, 1, 31), JalaliDate(1500, 11, 11)),
-            (date(2017, 10, 19), JalaliDate(1396, 7, 27)),
-            (date(2019, 2, 18), JalaliDate(1397, 11, 29)),
-            (date(1990, 9, 23), JalaliDate(1369, 7, 1)),
-            (date(2013, 9, 16), JalaliDate(1392, 6, 25)),
-            (date(2018, 3, 20), JalaliDate(1396, 12, 29)),
-            (date(2021, 2, 11), JalaliDate(1399, 11, 23)),
-            (date(2021, 7, 16), JalaliDate(1400, 4, 25)),
-            (date(2024, 3, 24), JalaliDate(1403, 1, 5)),
-            (date(2020, 3, 19), JalaliDate(1398, 12, 29)),
-            (date(2024, 5, 12), JalaliDate(1403, 2, 23)),
-            (date(2024, 6, 23), JalaliDate(1403, 4, 3)),
-            (date(2000, 12, 31), JalaliDate(1379, 10, 11)),
-            (date(2023, 12, 31), JalaliDate(1402, 10, 10)),
-            (date(2024, 12, 31), JalaliDate(1403, 10, 11)),
-            (date(1832, 3, 19), JalaliDate(1210, 12, 29)),
-            (date(1832, 3, 20), JalaliDate(1210, 12, 30)),
-            (date(2017, 3, 20), JalaliDate(1395, 12, 30)),
-            (date(2021, 3, 20), JalaliDate(1399, 12, 30)),
-            (date(2025, 3, 20), JalaliDate(1403, 12, 30)),
-            (date(1832, 3, 21), JalaliDate(1211, 1, 1)),
-            (date(2000, 1, 1), JalaliDate(1378, 10, 11)),
-            (date(2012, 1, 1), JalaliDate(1390, 10, 11)),
-            (date(2013, 1, 1), JalaliDate(1391, 10, 12)),
-            (date(2020, 1, 1), JalaliDate(1398, 10, 11)),
-            (date(2024, 1, 1), JalaliDate(1402, 10, 11)),
-            (date(2025, 1, 1), JalaliDate(1403, 10, 12)),
-            (date(1988, 3, 21), JalaliDate(1367, 1, 1)),
-            (date(2009, 3, 21), JalaliDate(1388, 1, 1)),
-            (date(2019, 3, 21), JalaliDate(1398, 1, 1)),
-            (date(2020, 3, 20), JalaliDate(1399, 1, 1)),
-            (date(2021, 3, 21), JalaliDate(1400, 1, 1)),
-            (date(2023, 3, 21), JalaliDate(1402, 1, 1)),
-            (date(2024, 3, 20), JalaliDate(1403, 1, 1)),
-            (date(2025, 3, 21), JalaliDate(1404, 1, 1)),
-            (date(1827, 3, 22), JalaliDate(1206, 1, 1)),
-            (date(1828, 3, 21), JalaliDate(1207, 1, 1)),
-            (date(1839, 3, 21), JalaliDate(1218, 1, 1)),
-            (date(1864, 3, 20), JalaliDate(1243, 1, 1)),
-            (date(2118, 3, 21), JalaliDate(1497, 1, 1)),
-            (date(2119, 3, 21), JalaliDate(1498, 1, 1)),
-            (date.today(), JalaliDate.today()),
-        ]
-        for gdate, jdate in cases:
-            self.assertEqual(JalaliDate(gdate), jdate)
+        for jy, jm, jd, gy, gm, gd in _JALALI_GREGORIAN_CASES:
+            self.assertEqual(JalaliDate(date(gy, gm, gd)), JalaliDate(jy, jm, jd))
+        self.assertEqual(JalaliDate(date.today()), JalaliDate.today())
 
     def test_checkdate(self):
         cases = [
@@ -147,6 +150,7 @@ class TestJalaliDate(TestCase):
             (1400, 12, 30, False),
             (1403, 4, 3, True),
             (1403, 12, 30, True),
+            (1405, 12, 30, False),
             (1473, 12, 30, False),
             (1474, 12, 30, True),
             (1498, 12, 30, True),
@@ -394,6 +398,9 @@ class TestJalaliDate(TestCase):
         with pytest.raises(TypeError):
             format(j, 1)
 
+        with pytest.raises(TypeError):
+            j.__format__(1)
+
         j = JalaliDate(1397, 11, 29)
 
         self.assertEqual(j.strftime("%c"), "Doshanbeh 29 Bahman 1397")
@@ -431,14 +438,12 @@ class TestJalaliDate(TestCase):
         with pytest.raises(ValueError):
             JalaliDate.fromisoformat("2021W12-X")
 
-        with pytest.raises(ValueError):
-            JalaliDate.fromisoformat("2021W123")
+        self.assertEqual(JalaliDate.fromisoformat("2021W123"), JalaliDate.fromisocalendar(2021, 12, 3))
 
         with pytest.raises(ValueError):
             JalaliDate.fromisoformat("1395-03")
 
-        with pytest.raises(ValueError):
-            JalaliDate.fromisoformat("13950301")
+        self.assertEqual(JalaliDate.fromisoformat("13950301"), JalaliDate(1395, 3, 1))
 
         with pytest.raises(ValueError):
             JalaliDate.fromisoformat("1395-13-01")
@@ -559,6 +564,9 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1404, 1, 1) - JalaliDate(1403, 12, 29), timedelta(days=2))
         self.assertEqual(JalaliDate(1404, 1, 1) - JalaliDate(1403, 12, 30), timedelta(days=1))
 
+        with pytest.raises(OverflowError):
+            JalaliDate.max + timedelta(days=1)
+
     def test_pickle(self):
         file = open("save.p", "wb")
         pickle.dump(JalaliDate(1367, 2, 14), file, protocol=2)
@@ -598,6 +606,63 @@ class TestJalaliDate(TestCase):
         gdate = date(2021, 3, 20)
         jdate = JalaliDate.to_jalali(gdate)
         self.assertEqual(jdate.to_gregorian(), gdate)
+
+    def test_round_trip_exhaustive(self):
+        """Every day in Jalali years 1300-1500 must round-trip exactly, and
+        consecutive Jalali days must map to consecutive Gregorian days."""
+        one_day = timedelta(days=1)
+        previous_gregorian = JalaliDate(1300, 1, 1).to_gregorian() - one_day
+        for year in range(1300, 1501):
+            for month in range(1, 13):
+                for day in range(1, JalaliDate.days_in_month(month, year) + 1):
+                    jdate = JalaliDate(year, month, day)
+                    gdate = jdate.to_gregorian()
+                    self.assertEqual(gdate, previous_gregorian + one_day)
+                    self.assertEqual(JalaliDate.to_jalali(gdate), jdate)
+                    previous_gregorian = gdate
+
+    def test_to_jalali_argument_forms(self):
+        expected = JalaliDate(1403, 1, 1)
+        self.assertEqual(JalaliDate.to_jalali(date(2024, 3, 20)), expected)
+        self.assertEqual(JalaliDate.to_jalali(2024, 3, 20), expected)
+        self.assertEqual(JalaliDate.to_jalali(year=2024, month=3, day=20), expected)
+
+    def test_gregorian_leap_day_conversions(self):
+        # Gregorian Feb 29 always falls on 10 Esfand in the modern era
+        leap_day_cases = [
+            (1996, 1374),
+            (2000, 1378),
+            (2004, 1382),
+            (2020, 1398),
+            (2024, 1402),
+        ]
+        for gyear, jyear in leap_day_cases:
+            gdate = date(gyear, 2, 29)
+            jdate = JalaliDate(jyear, 12, 10)
+            self.assertEqual(JalaliDate.to_jalali(gdate), jdate)
+            self.assertEqual(jdate.to_gregorian(), gdate)
+
+    def test_round_trip_gregorian_windows(self):
+        one_day = timedelta(days=1)
+        windows = [
+            (date(1601, 1, 1), date(1601, 12, 31)),
+            (date(1700, 2, 1), date(1700, 4, 10)),
+            (date(1800, 2, 1), date(1800, 4, 10)),
+            (date(1900, 2, 1), date(1900, 4, 10)),
+            (date(2000, 2, 1), date(2000, 4, 10)),
+            (date(2100, 2, 1), date(2100, 4, 10)),
+            (date(2123, 3, 1), date(2124, 3, 19)),
+        ]
+        for start, end in windows:
+            previous_jalali = JalaliDate.to_jalali(start)
+            self.assertEqual(previous_jalali.to_gregorian(), start)
+            gdate = start + one_day
+            while gdate <= end:
+                jdate = JalaliDate.to_jalali(gdate)
+                self.assertEqual(jdate - previous_jalali, one_day)
+                self.assertEqual(jdate.to_gregorian(), gdate)
+                previous_jalali = jdate
+                gdate += one_day
 
     def test_string_representation(self):
         self.assertEqual(str(JalaliDate(1403, 4, 7)), "1403-04-07")
@@ -713,6 +778,10 @@ class TestJalaliDate(TestCase):
             JalaliDate.strptime("1400-01-", "%Y-%m-%d")
         with self.assertRaises(ValueError, msg="Year information missing"):
             JalaliDate.strptime("-01-01", "%Y-%m-%d")
+        with self.assertRaises(ValueError, msg="Year directive missing from format"):
+            JalaliDate.strptime("05-10", "%m-%d")
+        with self.assertRaises(ValueError, msg="Day directive missing from format"):
+            JalaliDate.strptime("1400-01", "%Y-%m")
         with self.assertRaises(ValueError):
             JalaliDate.strptime("1402-12-30", "%Y-%m-%d")
         with self.assertRaises(ValueError):
@@ -763,3 +832,129 @@ class TestJalaliDate(TestCase):
         state = bytes([5, 112, 1])  # Invalid length
         with pytest.raises(TypeError, match="not enough arguments"):
             jdate.__setstate__(state)
+
+    def test_isocalendar_named_tuple(self):
+        iso = JalaliDate(1398, 3, 17).isocalendar()
+
+        self.assertEqual(iso, (1398, 12, 7))
+        self.assertEqual(iso.year, 1398)
+        self.assertEqual(iso.week, 12)
+        self.assertEqual(iso.weekday, 7)
+
+    def test_fromisocalendar(self):
+        self.assertEqual(JalaliDate.fromisocalendar(1398, 12, 7), JalaliDate(1398, 3, 17))
+        self.assertEqual(JalaliDate.fromisocalendar(1364, 6, 1), JalaliDate(1364, 1, 31))
+        self.assertEqual(JalaliDate.fromisocalendar(1403, 2, 2), JalaliDate(1403, 1, 5))
+
+        # round trip over two full years (1403 is a leap year)
+        jdate = JalaliDate(1402, 1, 1)
+        for _ in range(730):
+            self.assertEqual(JalaliDate.fromisocalendar(*jdate.isocalendar()), jdate)
+            jdate += timedelta(days=1)
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(1403, 0, 1)
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(1403, 54, 1)
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(1403, 1, 0)
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(1403, 1, 8)
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(MAXYEAR + 1, 1, 1)
+
+        # 1403 starts on Chaharshanbeh (isoweekday 5), so week 1 has no Shanbeh
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(1403, 1, 1)
+
+        # week 53 exists but ends before Jomeh in 1403 (last day is isoweekday 6)
+        self.assertEqual(JalaliDate.fromisocalendar(1402, 53, 1), JalaliDate(1402, 12, 26))
+        self.assertEqual(JalaliDate.fromisocalendar(1403, 53, 6), JalaliDate(1403, 12, 30))
+        with pytest.raises(ValueError):
+            JalaliDate.fromisocalendar(1403, 53, 7)
+
+    def test_fromisoformat_expanded(self):
+        self.assertEqual(JalaliDate.fromisoformat("13950301"), JalaliDate(1395, 3, 1))
+        self.assertEqual(JalaliDate.fromisoformat("۱۳۹۵۰۳۰۱"), JalaliDate(1395, 3, 1))
+
+        # 1403-01-01 is Chaharshanbeh: week 1, isoweekday 5
+        self.assertEqual(JalaliDate.fromisoformat("1403-W01-5"), JalaliDate(1403, 1, 1))
+        self.assertEqual(JalaliDate.fromisoformat("1403W015"), JalaliDate(1403, 1, 1))
+        self.assertEqual(JalaliDate.fromisoformat("1403-W02"), JalaliDate(1403, 1, 4))
+        self.assertEqual(JalaliDate.fromisoformat("1403W02"), JalaliDate(1403, 1, 4))
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1403-W01-9")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1403-W54-1")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1403W01-5")  # inconsistent separator use
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("139503012")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1403W01-05")
+
+        with pytest.raises(ValueError):
+            JalaliDate.fromisoformat("1403011")
+
+    def test_min_max_resolution(self):
+        self.assertEqual(JalaliDate.min, JalaliDate(MINYEAR, 1, 1))
+        self.assertEqual(JalaliDate.max, JalaliDate(MAXYEAR, 12, 30))
+        self.assertEqual(JalaliDate.resolution, timedelta(days=1))
+
+    def test_copy_replace(self):
+        import sys
+
+        if sys.version_info < (3, 13):
+            self.skipTest("copy.replace() requires Python 3.13+")
+
+        import copy
+
+        jdate = JalaliDate(1405, 4, 12)
+
+        self.assertEqual(copy.replace(jdate), jdate)
+        self.assertEqual(copy.replace(jdate, year=1400), JalaliDate(1400, 4, 12))
+        self.assertEqual(copy.replace(jdate, month=1, day=2), JalaliDate(1405, 1, 2))
+        self.assertEqual(copy.replace(jdate, locale="fa").locale, "fa")
+
+    def test_strptime_day_of_year(self):
+        self.assertEqual(JalaliDate.strptime("1403 227", "%Y %j"), JalaliDate(1403, 8, 11))
+        self.assertEqual(JalaliDate.strptime("1403 001", "%Y %j"), JalaliDate(1403, 1, 1))
+        self.assertEqual(JalaliDate.strptime("1403 366", "%Y %j"), JalaliDate(1403, 12, 30))
+
+        # %j takes precedence over explicit month/day, as in CPython
+        self.assertEqual(JalaliDate.strptime("1403 01 01 227", "%Y %m %d %j"), JalaliDate(1403, 8, 11))
+
+        # round trip with strftime
+        jdate = JalaliDate(1398, 3, 17)
+        self.assertEqual(JalaliDate.strptime(jdate.strftime("%Y %j"), "%Y %j"), jdate)
+
+        with pytest.raises(ValueError):
+            JalaliDate.strptime("1402 366", "%Y %j")  # 1402 is not a leap year
+
+    def test_strptime_week_and_weekday(self):
+        jdate = JalaliDate(1403, 5, 14)
+        self.assertEqual(JalaliDate.strptime(jdate.strftime("%Y %W %w"), "%Y %W %w"), jdate)
+        self.assertEqual(JalaliDate.strptime(jdate.strftime("%Y %U %w"), "%Y %U %w"), jdate)
+
+        # week 1 of 1403 starts on Chaharshanbeh (weekday 4)
+        self.assertEqual(JalaliDate.strptime("1403 1 4", "%Y %W %w"), JalaliDate(1403, 1, 1))
+
+        with pytest.raises(ValueError):
+            JalaliDate.strptime("1403 1 0", "%Y %W %w")  # week 1 has no Shanbeh
+
+        # week without weekday does not determine the date
+        with pytest.raises(ValueError):
+            JalaliDate.strptime("1403 21", "%Y %W")
+
+    def test_strftime_colon_z(self):
+        # dates have no UTC offset; %:z formats as an empty string like %z
+        self.assertEqual(JalaliDate(1403, 5, 14).strftime("[%:z]"), "[]")

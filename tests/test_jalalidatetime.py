@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from persiantools.jdatetime import JalaliDate, JalaliDateTime, _is_ascii_digit
+from persiantools.jdatetime import MAXYEAR, MINYEAR, JalaliDate, JalaliDateTime, _is_ascii_digit
 
 
 class TestJalaliDateTime(TestCase):
@@ -66,10 +66,11 @@ class TestJalaliDateTime(TestCase):
             JalaliDateTime.fromtimestamp(578723400, timezone.utc),
             JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, timezone.utc),
         )
-        self.assertEqual(
-            JalaliDateTime.utcfromtimestamp(578723400),
-            JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, tzinfo=timezone.utc),
-        )
+        with pytest.warns(DeprecationWarning):
+            self.assertEqual(
+                JalaliDateTime.utcfromtimestamp(578723400),
+                JalaliDateTime(1367, 2, 14, 4, 30, 0, 0, tzinfo=timezone.utc),
+            )
 
         with pytest.raises(TypeError):
             JalaliDateTime._check_time_fields("20", 1, 61, 1000)
@@ -521,7 +522,8 @@ class TestJalaliDateTime(TestCase):
 
     def test_utcnow(self):
         now_utc = datetime.now(timezone.utc)
-        jalali_now = JalaliDateTime.utcnow()
+        with pytest.warns(DeprecationWarning):
+            jalali_now = JalaliDateTime.utcnow()
         gregorian_now = jalali_now.to_gregorian()
 
         self.assertTrue(
@@ -849,3 +851,233 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(jdt_naive_ms.isoformat(), "1398-10-05T12:30:00.000123")
         # With custom separator
         self.assertEqual(jdt_naive.isoformat(sep=" "), "1398-10-05 12:30:00")
+
+    def test_isoformat_timespec(self):
+        jdt = JalaliDateTime(1403, 1, 1, 12, 30, 45, 123456)
+
+        self.assertEqual(jdt.isoformat(timespec="auto"), "1403-01-01T12:30:45.123456")
+        self.assertEqual(jdt.isoformat(timespec="hours"), "1403-01-01T12")
+        self.assertEqual(jdt.isoformat(timespec="minutes"), "1403-01-01T12:30")
+        self.assertEqual(jdt.isoformat(timespec="seconds"), "1403-01-01T12:30:45")
+        self.assertEqual(jdt.isoformat(timespec="milliseconds"), "1403-01-01T12:30:45.123")
+        self.assertEqual(jdt.isoformat(timespec="microseconds"), "1403-01-01T12:30:45.123456")
+
+        # auto without microseconds omits the fraction
+        self.assertEqual(JalaliDateTime(1403, 1, 1, 12, 30, 45).isoformat(timespec="auto"), "1403-01-01T12:30:45")
+
+        # timespec applies before the UTC offset
+        aware = JalaliDateTime(1403, 1, 1, 12, 30, 45, 123456, tzinfo=timezone.utc)
+        self.assertEqual(aware.isoformat(timespec="minutes"), "1403-01-01T12:30+00:00")
+
+        with pytest.raises(ValueError):
+            jdt.isoformat(timespec="nanoseconds")
+
+    def test_fold(self):
+        jdt = JalaliDateTime(1400, 6, 30, 23, 30)
+        self.assertEqual(jdt.fold, 0)
+
+        jdt_fold = JalaliDateTime(1400, 6, 30, 23, 30, fold=1)
+        self.assertEqual(jdt_fold.fold, 1)
+
+        # fold is keyword-only
+        with pytest.raises(TypeError):
+            JalaliDateTime(1400, 6, 30, 23, 30, 0, 0, None, "en", 1)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime(1400, 6, 30, fold=2)
+
+        # naive comparison and hashing ignore fold
+        self.assertEqual(jdt, jdt_fold)
+        self.assertEqual(hash(jdt), hash(jdt_fold))
+
+        # replace() keeps fold unless overridden
+        self.assertEqual(jdt_fold.replace(minute=45).fold, 1)
+        self.assertEqual(jdt_fold.replace(fold=0).fold, 0)
+
+        # repr shows fold only when set
+        self.assertNotIn("fold", repr(jdt))
+        self.assertIn("fold=1", repr(jdt_fold))
+
+        # copy constructor and conversions preserve fold
+        self.assertEqual(JalaliDateTime(jdt_fold).fold, 1)
+        self.assertEqual(jdt_fold.to_gregorian().fold, 1)
+        self.assertEqual(JalaliDateTime(jdt_fold.to_gregorian()).fold, 1)
+        self.assertEqual(jdt_fold.time().fold, 1)
+        self.assertEqual(jdt_fold.timetz().fold, 1)
+
+    def test_fold_ambiguous_wall_time(self):
+        # 1400-06-30 23:30 (2021-09-21 23:30) is ambiguous in Asia/Tehran:
+        # DST ended at 24:00, repeating the 23:00-24:00 hour
+        tehran = ZoneInfo("Asia/Tehran")
+        first = JalaliDateTime(1400, 6, 30, 23, 30, tzinfo=tehran)
+        second = first.replace(fold=1)
+
+        self.assertEqual(first.utcoffset(), timedelta(hours=4, minutes=30))
+        self.assertEqual(second.utcoffset(), timedelta(hours=3, minutes=30))
+        self.assertEqual(second.timestamp() - first.timestamp(), 3600)
+
+        # PEP 495: an ambiguous time never compares equal across zones
+        as_utc = first.astimezone(timezone.utc)
+        self.assertFalse(first == as_utc)
+        self.assertFalse(second == as_utc)
+
+        # unambiguous times are unaffected by fold
+        plain = JalaliDateTime(1400, 6, 15, 12, 0, tzinfo=tehran)
+        self.assertEqual(plain.utcoffset(), plain.replace(fold=1).utcoffset())
+
+    def test_fold_pickle(self):
+        jdt = JalaliDateTime(1400, 6, 30, 23, 30, tzinfo=ZoneInfo("Asia/Tehran"), fold=1)
+        unpickled = pickle.loads(pickle.dumps(jdt))  # nosec B301
+
+        self.assertEqual(unpickled.fold, 1)
+        self.assertEqual(unpickled.month, 6)
+        self.assertEqual(unpickled.replace(fold=0), jdt.replace(fold=0))
+
+        naive = pickle.loads(pickle.dumps(JalaliDateTime(1367, 2, 14, 14, 0)))  # nosec B301
+        self.assertEqual(naive.fold, 0)
+
+    def test_fromisocalendar_datetime(self):
+        jdt = JalaliDateTime.fromisocalendar(1398, 12, 7)
+
+        self.assertIsInstance(jdt, JalaliDateTime)
+        self.assertEqual(jdt, JalaliDateTime(1398, 3, 17, 0, 0, 0))
+
+    def test_fromisoformat_expanded(self):
+        self.assertEqual(
+            JalaliDateTime.fromisoformat("14030101T123045"),
+            JalaliDateTime(1403, 1, 1, 12, 30, 45),
+        )
+        self.assertEqual(
+            JalaliDateTime.fromisoformat("1403-W01-5T12:30"),
+            JalaliDateTime(1403, 1, 1, 12, 30),
+        )
+        self.assertEqual(
+            JalaliDateTime.fromisoformat("1403-01-01T12:30:45,123456"),
+            JalaliDateTime(1403, 1, 1, 12, 30, 45, 123456),
+        )
+        self.assertEqual(
+            JalaliDateTime.fromisoformat("1403-01-01T12:30:45Z"),
+            JalaliDateTime(1403, 1, 1, 12, 30, 45, tzinfo=timezone.utc),
+        )
+        self.assertEqual(
+            JalaliDateTime.fromisoformat("۱۴۰۳-۰۱-۰۱T۱۲:۳۰:۴۵"),
+            JalaliDateTime(1403, 1, 1, 12, 30, 45),
+        )
+
+    def test_fromisoformat_edge_cases(self):
+        # date-only strings default to midnight
+        self.assertEqual(JalaliDateTime.fromisoformat("1400-01-01"), JalaliDateTime(1400, 1, 1))
+        self.assertEqual(JalaliDateTime.fromisoformat("1403-W12"), JalaliDateTime(1403, 3, 12))
+        self.assertEqual(JalaliDateTime.fromisoformat("1403W12"), JalaliDateTime(1403, 3, 12))
+        self.assertEqual(JalaliDateTime.fromisoformat("1403W123"), JalaliDateTime(1403, 3, 14))
+        self.assertEqual(JalaliDateTime.fromisoformat("1403W123T12:30"), JalaliDateTime(1403, 3, 14, 12, 30))
+
+        # fractions shorter than 6 digits are scaled to microseconds
+        self.assertEqual(
+            JalaliDateTime.fromisoformat("1400-01-01T12:30:45.123"),
+            JalaliDateTime(1400, 1, 1, 12, 30, 45, 123000),
+        )
+
+        with pytest.raises(TypeError):
+            JalaliDateTime.fromisoformat(14000101)
+
+        invalid_strings = [
+            "1400",  # too short
+            "1400-01-01T1",  # isoformat time too short
+            "1400-01-01T12:3",  # incomplete time component
+            "1400-01-01T12:30_45",  # invalid time separator
+            "1400-01-01T12:30:45a",  # invalid microsecond separator
+            "1400-01-01T12:30:45.1234567a",  # non-digit values in unparsed fraction
+            "1400-01-01T12:30+1",  # malformed time zone string
+        ]
+        for value in invalid_strings:
+            with pytest.raises(ValueError):
+                JalaliDateTime.fromisoformat(value)
+
+    def test_tz_methods_with_zoneinfo(self):
+        summer = JalaliDateTime(1404, 5, 1, 12, 0, tzinfo=ZoneInfo("America/New_York"))
+        self.assertEqual(summer.dst(), timedelta(hours=1))
+        self.assertEqual(summer.utcoffset(), timedelta(hours=-4))
+        self.assertEqual(summer.tzname(), "EDT")
+
+        winter = JalaliDateTime(1404, 10, 15, 12, 0, tzinfo=ZoneInfo("America/New_York"))
+        self.assertEqual(winter.dst(), timedelta(0))
+        self.assertEqual(winter.utcoffset(), timedelta(hours=-5))
+        self.assertEqual(winter.tzname(), "EST")
+
+    def test_strptime_p_without_i(self):
+        with pytest.raises(ValueError, match="using %p requires to use %I"):
+            JalaliDateTime.strptime("1400-01-01 AM", "%Y-%m-%d %p")
+
+    def test_add_overflow(self):
+        with pytest.raises(OverflowError):
+            JalaliDateTime.max + timedelta(days=1)
+
+    def test_subtract_equal_offset_different_tzinfo(self):
+        fixed = JalaliDateTime(1404, 5, 1, 12, 0, tzinfo=timezone(timedelta(hours=3, minutes=30)))
+        zoned = JalaliDateTime(1404, 5, 1, 10, 0, tzinfo=ZoneInfo("Asia/Tehran"))
+        self.assertEqual(fixed - zoned, timedelta(hours=2))
+        self.assertEqual(zoned - fixed, timedelta(hours=-2))
+
+    def test_setstate_invalid_tzinfo(self):
+        jdt = JalaliDateTime(1400, 1, 1)
+        with pytest.raises(TypeError, match="bad tzinfo state arg"):
+            jdt.__setstate__(bytes([5, 87, 2, 14, 0, 0, 0, 0, 0, 0]), 123)
+
+    def test_min_max_resolution(self):
+        self.assertEqual(JalaliDateTime.min, JalaliDateTime(MINYEAR, 1, 1))
+        self.assertEqual(JalaliDateTime.max, JalaliDateTime(MAXYEAR, 12, 30, 23, 59, 59, 999999))
+        self.assertEqual(JalaliDateTime.resolution, timedelta(microseconds=1))
+
+    def test_copy_replace(self):
+        import sys
+
+        if sys.version_info < (3, 13):
+            self.skipTest("copy.replace() requires Python 3.13+")
+
+        import copy
+
+        jdt = JalaliDateTime(1403, 5, 14, 12, 30, 45, tzinfo=timezone.utc)
+
+        self.assertEqual(copy.replace(jdt), jdt)
+        self.assertEqual(copy.replace(jdt, hour=1).hour, 1)
+        self.assertEqual(copy.replace(jdt, fold=1).fold, 1)
+        self.assertIsNone(copy.replace(jdt, tzinfo=None).tzinfo)
+
+    def test_strftime_colon_z(self):
+        naive = JalaliDateTime(1403, 1, 1, 12, 0)
+        self.assertEqual(naive.strftime("[%:z]"), "[]")
+
+        aware = JalaliDateTime(1403, 1, 1, 12, 0, tzinfo=timezone(timedelta(hours=3, minutes=30)))
+        self.assertEqual(aware.strftime("%:z"), "+03:30")
+        self.assertEqual(aware.strftime("%z %:z"), "+0330 +03:30")
+
+        negative = JalaliDateTime(1403, 1, 1, 12, 0, tzinfo=timezone(timedelta(hours=-8)))
+        self.assertEqual(negative.strftime("%:z"), "-08:00")
+
+        utc = JalaliDateTime(1403, 1, 1, 12, 0, tzinfo=timezone.utc)
+        self.assertEqual(utc.strftime("%:z"), "+00:00")
+
+    def test_strptime_day_of_year(self):
+        self.assertEqual(
+            JalaliDateTime.strptime("1403 227 13:05", "%Y %j %H:%M"),
+            JalaliDateTime(1403, 8, 11, 13, 5),
+        )
+
+        jdt = JalaliDateTime(1398, 3, 17, 18, 36)
+        self.assertEqual(JalaliDateTime.strptime(jdt.strftime("%Y %j %H:%M"), "%Y %j %H:%M"), jdt)
+
+        with pytest.raises(ValueError):
+            JalaliDateTime.strptime("1402 366 00:00", "%Y %j %H:%M")
+
+    def test_strptime_week_and_weekday(self):
+        jdt = JalaliDateTime(1403, 5, 14, 8, 15)
+        formatted = jdt.strftime("%Y %W %w %H:%M")
+        self.assertEqual(JalaliDateTime.strptime(formatted, "%Y %W %w %H:%M"), jdt)
+
+    def test_utcnow_deprecation(self):
+        with pytest.warns(DeprecationWarning, match="utcnow"):
+            JalaliDateTime.utcnow()
+
+        with pytest.warns(DeprecationWarning, match="utcfromtimestamp"):
+            JalaliDateTime.utcfromtimestamp(578723400)

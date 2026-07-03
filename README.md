@@ -2,270 +2,135 @@
 
 [![PyPI](https://img.shields.io/pypi/v/persiantools.svg)](https://pypi.org/project/persiantools/)
 ![test workflow](https://github.com/majiidd/persiantools/actions/workflows/ci.yml/badge.svg)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/majiidd/persiantools/master.svg)](https://results.pre-commit.ci/latest/github/majiidd/persiantools/master)
 [![codecov](https://codecov.io/gh/majiidd/persiantools/branch/master/graph/badge.svg?token=Q990VL6FGW)](https://codecov.io/gh/majiidd/persiantools)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/persiantools.svg)](https://pypi.org/project/persiantools/)
 [![PyPI - License](https://img.shields.io/pypi/l/persiantools.svg)](https://pypi.org/project/persiantools/)
 
-`PersianTools` is a library written in Python for working with Jalali (Persian or Shamsi) dates and times, converting Persian and Arabic characters and digits, and converting numbers to Persian words.
+`PersianTools` provides Jalali (Shamsi) dates and datetimes that work just like Python's `datetime` — plus handy tools for Persian text: digit conversion between Persian, Arabic, and English, character normalization, and numbers to Persian words.
 
-## Key Features
+If you know `datetime.date` and `datetime.datetime`, you already know `JalaliDate` and `JalaliDateTime`. They support the same operations: comparison, arithmetic with `timedelta`, timezones, `strftime`/`strptime` and formatting, hashing, and pickling.
 
-- Conversion between Jalali and Gregorian dates/datetimes using Python's native datetime module.
-- Full support for operations such as `+`, `-`, `==`, `>` and `>=`.
-- Timezone-aware date and datetime handling.
-- Conversion between Persian, Arabic, and English characters and digits.
-- Conversion of numbers to their Persian word representation.
-
-## Install Package
-
-You can install the package using `pip` with the following command:
+## Installation
 
 ```bash
-python -m pip install persiantools
+pip install persiantools
 ```
 
-## Usage Guide
+Requires Python 3.9 or newer. No dependencies, except `tzdata` on Windows for timezone data.
 
-### Date Operations
-
-The `JalaliDate` object represents a date in the Jalali calendar.
-
-```python
->>> from persiantools.jdatetime import JalaliDate
->>> import datetime
-
-# Today's date
->>> JalaliDate.today()
-JalaliDate(1404, 3, 16, Jomeh)
-
->>> JalaliDate(1367, 2, 14)
-JalaliDate(1367, 2, 14, Chaharshanbeh)
-
-# Convert Gregorian to Jalali
->>> JalaliDate(datetime.date(1988, 5, 4))
-JalaliDate(1367, 2, 14, Chaharshanbeh)
-
-# Convert from Gregorian to Jalali using method
->>> JalaliDate.to_jalali(2013, 9, 16)
-JalaliDate(1392, 6, 25, Doshanbeh)
-
-# Convert from Jalali to Gregorian
->>> JalaliDate(1392, 6, 25).to_gregorian()
-datetime.date(2013, 9, 16)
-
-# From ISO format
->>> JalaliDate.fromisoformat('1404-01-01')
-JalaliDate(1404, 1, 1, Jomeh)
-
-# Create a Jalali date from a Unix timestamp
->>> JalaliDate.fromtimestamp(578707200)
-JalaliDate(1367, 2, 14, Chaharshanbeh)
-
-# ISO format output
->>> JalaliDate(1367, 2, 14).isoformat()
-'1367-02-14'
-
-# Replace date parts
->>> JalaliDate(1400, 1, 1).replace(month=2, day=10)
-JalaliDate(1400, 2, 10, Jomeh)
-```
-#### Attributes and Methods
-
-```python
->>> date_obj = JalaliDate(1367, 2, 14)
-
->>> date_obj.year
-1367
->>> date_obj.month
-2
->>> date_obj.day
-14
-
-# Weekday (Saturday is 0 and Friday is 6)
->>> date_obj.weekday() # 1367/2/14 is Chaharshanbeh (Wednesday)
-4
-
-# ISO Weekday (Monday is 1 and Sunday is 7)
->>> date_obj.isoweekday()
-5
-
->>> date_obj.week_of_year()
-7
-
-# ISO Calendar (ISO year, ISO week number, ISO weekday)
->>> date_obj.isocalendar()
-(1367, 7, 5)
-```
-
-### Datetime Operations
-
-The `JalaliDateTime` object represents a date and time in the Jalali calendar.
-
-```python
->>> from persiantools.jdatetime import JalaliDateTime
->>> import datetime
-
-# Current Jalali datetime
->>> JalaliDateTime.now()
-JalaliDateTime(1404, 3, 16, 2, 17, 14, 907909)
-
->>> from zoneinfo import ZoneInfo
->>> JalaliDateTime.now(ZoneInfo("Asia/Tehran"))
-JalaliDateTime(1404, 3, 16, 2, 17, 14, 907909, tzinfo=zoneinfo.ZoneInfo(key='Asia/Tehran'))
-
-# Current UTC Jalali datetime
->>> JalaliDateTime.utcnow()
-JalaliDateTime(1404, 3, 15, 22, 56, 49, 892339, tzinfo=datetime.timezone.utc)
-
-# Convert Jalali datetime to Gregorian
->>> JalaliDateTime.now().to_gregorian()
-datetime.datetime(2025, 6, 6, 2, 17, 14, 907909)
-
-# Convert Gregorian datetime to Jalali (From a datetime.datetime object)
->>> dt_gregorian = datetime.datetime(1988, 5, 4, 14, 30, 15)
->>> JalaliDateTime(dt_gregorian)
-JalaliDateTime(1367, 2, 14, 14, 30, 15)
-
-# Replace datetime parts
->>> JalaliDateTime(1400, 1, 1, 12, 0, 0).replace(hour=15, minute=30, microsecond=10)
-JalaliDateTime(1400, 1, 1, 15, 30, 0, 10)
-
-# Timezone conversion
->>> from zoneinfo import ZoneInfo
->>> tehran_tz = ZoneInfo("Asia/Tehran")
->>> utc_tz = datetime.timezone.utc
->>> dt_utc = JalaliDateTime.now(utc_tz)
->>> dt_tehran = dt_utc.astimezone(tehran_tz)
->>> dt_utc
-JalaliDateTime(1404, 3, 15, 22, 54, 8, 835877, tzinfo=datetime.timezone.utc)
->>> dt_tehran
-JalaliDateTime(1404, 3, 16, 2, 24, 8, 835877, tzinfo=zoneinfo.ZoneInfo(key='Asia/Tehran'))
-```
-
-#### Attributes and Methods
-
-```python
->>> dt_obj = JalaliDateTime(1367, 2, 14, 14, 30, 15, 123, tzinfo=datetime.timezone.utc)
-
->>> dt_obj.year
-1367
->>> dt_obj.month
-2
->>> dt_obj.day
-14
->>> dt_obj.hour
-14
->>> dt_obj.minute
-30
->>> dt_obj.second
-15
->>> dt_obj.microsecond
-123
->>> dt_obj.tzinfo
-datetime.timezone.utc
-
-# Date part as datetime.date (Gregorian)
->>> dt_obj.date()
-datetime.date(1988, 5, 4)
-
-# JalaliDate object
->>> dt_obj.jdate()
-JalaliDate(1367, 2, 14, Chaharshanbeh)
-
-# Time part as datetime.time
->>> dt_obj.time()
-datetime.time(14, 30, 15, 123)
-```
-
-### Formatting
-
-Based on python `strftime()` behavior
-
-```python
->>> from persiantools.jdatetime import JalaliDateTime
->>> from zoneinfo import ZoneInfo
-
->>> dt = JalaliDateTime(1367, 2, 14, 14, 30, 0, tzinfo=ZoneInfo("Asia/Tehran"))
-
->>> dt.strftime("%Y/%m/%d %H:%M:%S")
-'1367/02/14 14:30:00'
-
->>> dt.strftime("%c", locale='fa')
-'چهارشنبه ۱۴ اردیبهشت ۱۳۶۷ ۱۴:۳۰:۰۰'
-```
-
-### Digits and Character Conversion
-
-This section covers converting between different numeral systems (Persian, Arabic, English) and converting numbers to their Persian word representations. It also includes utilities for converting between Persian and Arabic characters.
-
-```python
->>> from persiantools import digits
-
-# Convert English digits to Persian
->>> digits.en_to_fa("0987654321")
-'۰۹۸۷۶۵۴۳۲۱'
-
-# Convert Arabic digits to Persian
->>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")
-'۰۹۸۷۶۵۴۳۲۱'
-
-# Convert Persian digits to English
->>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
-'0987654321'
-
-# Convert Persian digits to Arabic
->>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
-'٠٩٨٧٦٥٤٣٢١'
-```
-
-#### Numbers to Words
-
-Convert numerical values (integers and floats) into Persian words.
-
-```python
->>> from persiantools import digits
-
->>> digits.to_word(9512026)
-'نه میلیون و پانصد و دوازده هزار و بیست و شش'
-
->>> digits.to_word(15.007)
-'پانزده و هفت هزارم'
-
->>> digits.to_word(-123.45)
-'منفی یکصد و بیست و سه و چهل و پنج صدم'
-
->>> digits.to_word(0)
-'صفر'
-```
-
-#### Character Conversion
-
-Functions for converting specific Arabic characters to their Persian equivalents and vice-versa. This is often needed due to differences in the Unicode representation of similar-looking characters (e.g., `ک` vs `ك`, `ی` vs `ي`).
-
-```python
->>> from persiantools import characters
-
->>> characters.ar_to_fa("كيك") # Input uses Arabic Kaf (U+0643) and Yeh (U+064A)
-'کیک' # Output uses Persian Keh (U+06A9) and Yeh (U+06CC)
-
->>> characters.fa_to_ar("کیک")
-'كيك'
-```
-
-### Operators
-
-Both `JalaliDate` and `JalaliDateTime` objects support standard comparison operators (`<`, `<=`, `==`, `!=`, `>`, `>=`) and arithmetic operations (`+`, `-` with `datetime.timedelta` objects). They can also be compared with their Gregorian counterparts (`datetime.date` and `datetime.datetime`).
+## Quick start
 
 ```python
 >>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
 >>> import datetime
 
->>> JalaliDate(1367, 2, 14) == JalaliDate(datetime.date(1988, 5, 4))
-True
+>>> JalaliDate.today()
+JalaliDate(1405, 4, 12, Jomeh)
 
->>> JalaliDateTime(1367, 2, 14, 4, 30) >= JalaliDateTime(1368, 2, 14, 1, 0)
-False
+>>> JalaliDate(datetime.date(1988, 5, 4))       # Gregorian → Jalali
+JalaliDate(1367, 2, 14, Chaharshanbeh)
+
+>>> JalaliDate(1367, 2, 14).to_gregorian()      # Jalali → Gregorian
+datetime.date(1988, 5, 4)
+
+>>> JalaliDateTime.now().strftime("%A %d %B %Y, %H:%M")
+'Jomeh 12 Tir 1405, 14:30'
+```
+
+## Dates
+
+Create a `JalaliDate` from Jalali values, a Gregorian date, an ISO string, or a timestamp:
+
+```python
+>>> from persiantools.jdatetime import JalaliDate
+>>> import datetime
+
+>>> JalaliDate(1367, 2, 14)
+JalaliDate(1367, 2, 14, Chaharshanbeh)
+
+>>> JalaliDate.to_jalali(2013, 9, 16)
+JalaliDate(1392, 6, 25, Doshanbeh)
+
+>>> JalaliDate.fromisoformat("1404-01-01")
+JalaliDate(1404, 1, 1, Jomeh)
+
+>>> JalaliDate.fromtimestamp(578707200)
+JalaliDate(1367, 2, 14, Chaharshanbeh)
+
+>>> JalaliDate(1400, 1, 1).replace(month=2, day=10)
+JalaliDate(1400, 2, 10, Jomeh)
+```
+
+The week starts on Shanbeh (Saturday). `weekday()` counts from 0 (Shanbeh) to 6 (Jomeh), and `isoweekday()` from 1 to 7:
+
+```python
+>>> d = JalaliDate(1367, 2, 14)  # a Chaharshanbeh (Wednesday)
+>>> d.weekday()
+4
+>>> d.isoweekday()
+5
+>>> d.isocalendar()
+IsoCalendarDate(year=1367, week=7, weekday=5)
+>>> d.isoformat()
+'1367-02-14'
+```
+
+## Datetimes
+
+`JalaliDateTime` adds time and timezone support on top of `JalaliDate`:
+
+```python
+>>> from persiantools.jdatetime import JalaliDateTime
+>>> from zoneinfo import ZoneInfo
+>>> import datetime
+
+>>> JalaliDateTime.now(ZoneInfo("Asia/Tehran"))
+JalaliDateTime(1405, 4, 12, 14, 30, 7, 907909, tzinfo=zoneinfo.ZoneInfo(key='Asia/Tehran'))
+
+>>> JalaliDateTime(datetime.datetime(1988, 5, 4, 14, 30, 15))
+JalaliDateTime(1367, 2, 14, 14, 30, 15)
+
+>>> JalaliDateTime(1367, 2, 14, 14, 30, 15).to_gregorian()
+datetime.datetime(1988, 5, 4, 14, 30, 15)
+
+>>> JalaliDateTime(1367, 2, 14, 14, 30, tzinfo=datetime.timezone.utc).isoformat(timespec="minutes")
+'1367-02-14T14:30+00:00'
+```
+
+## Formatting and parsing
+
+Both classes support `strftime` and `strptime` with the familiar directives, in English or Persian:
+
+```python
+>>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
+
+>>> JalaliDate(1367, 2, 14).strftime("%A %d %B %Y")
+'Chaharshanbeh 14 Ordibehesht 1367'
+
+>>> JalaliDateTime(1367, 2, 14, 14, 30).strftime("%c", locale="fa")
+'چهارشنبه ۱۴ اردیبهشت ۱۳۶۷ ۱۴:۳۰:۰۰'
+
+>>> JalaliDate.strptime("1367-02-14", "%Y-%m-%d")
+JalaliDate(1367, 2, 14, Chaharshanbeh)
+
+>>> JalaliDateTime.strptime("1367/02/14 14:30", "%Y/%m/%d %H:%M")
+JalaliDateTime(1367, 2, 14, 14, 30)
+```
+
+A date created with `locale="fa"` renders itself with Persian digits and names everywhere:
+
+```python
+>>> JalaliDate(1367, 2, 14, locale="fa").isoformat()
+'۱۳۶۷-۰۲-۱۴'
+```
+
+## Comparison and arithmetic
+
+Jalali objects compare and do arithmetic with each other, with `timedelta`, and directly with their Gregorian counterparts:
+
+```python
+>>> from persiantools.jdatetime import JalaliDate, JalaliDateTime
+>>> import datetime
 
 >>> JalaliDate(1367, 2, 14) == datetime.date(1988, 5, 4)
 True
@@ -274,37 +139,69 @@ True
 JalaliDate(1395, 3, 21, Jomeh)
 
 >>> JalaliDateTime(1395, 12, 30) - JalaliDateTime(1395, 1, 1)
-datetime.timedelta(365)
+datetime.timedelta(days=365)
 
->>> JalaliDateTime(1395, 2, 14, 12, 0, 0) + datetime.timedelta(hours=5, minutes=30)
-JalaliDateTime(1395, 2, 14, 17, 30)
+>>> JalaliDate(1399, 12, 30) > JalaliDate(1399, 12, 29)   # leap-year Esfand 30
+True
 ```
 
-### Serializing and Deserializing
+They are also hashable (usable as dict keys) and picklable, like the standard library types.
 
-`JalaliDate` and `JalaliDateTime` objects can be serialized (pickled) and deserialized (unpickled) using Python's standard `pickle` module. This allows for storing these objects or transmitting them.
+## Digits
+
+Convert digits between English, Persian, and Arabic:
 
 ```python
->>> from persiantools.jdatetime import JalaliDate
->>> import pickle
+>>> from persiantools import digits
 
-# Serialize a Jalali date to a file
->>> with open("save.p", "wb") as file:
->>>     pickle.dump(JalaliDate(1367, 2, 14), file)
+>>> digits.en_to_fa("0987654321")
+'۰۹۸۷۶۵۴۳۲۱'
 
-# Deserialize from a file
->>> with open("save.p", "rb") as file:
->>>     jalali = pickle.load(file)
->>> jalali
-JalaliDate(1367, 2, 14, Chaharshanbeh)
+>>> digits.ar_to_fa("٠٩٨٧٦٥٤٣٢١")
+'۰۹۸۷۶۵۴۳۲۱'
+
+>>> digits.fa_to_en("۰۹۸۷۶۵۴۳۲۱")
+'0987654321'
+
+>>> digits.fa_to_ar("۰۹۸۷۶۵۴۳۲۱")
+'٠٩٨٧٦٥٤٣٢١'
 ```
 
-## Support This Project
-If you find this project helpful and would like to support its continued development, please consider donating.
+And spell numbers out in Persian — integers, floats, and negatives:
 
-*   **Bitcoin (BTC):** `bc1qg5rp7ymznc98wmhltzvpwl2dvfuvjr33m4hy77`
-*   **Ethereum (ETH):** `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad`
-*   **Tron (TRX):** `TDd63bVWZDBHmwVNFgJ6T2WdWmk9z7PBLg`
-*   **Stellar (XLM):** `GDSFPPLY34QSAOTOP4DQDXAI2YDRNRIADZHTN3HCGMQXRLIGPYOEH7L5`
-*   **Solana (SOL):** `CXHKgCBqBYy1hbZKGqaSmMzQoTC4Wx2v8QfL9Z7JBo3A`
-*   **Dogecoin (DOGE):** `DRZ2QLuXfa5vV1AG83K3XHfYXAHj9b4h4V`
+```python
+>>> digits.to_word(9512026)
+'نه میلیون و پانصد و دوازده هزار و بیست و شش'
+
+>>> digits.to_word(15.007)
+'پانزده و هفت هزارم'
+
+>>> digits.to_word(-123.45)
+'منفی یکصد و بیست و سه و چهل و پنج صدم'
+```
+
+## Characters
+
+Arabic and Persian share letters that look alike but have different Unicode code points (`ك` vs `ک`, `ي` vs `ی`) — a common source of failed string matching and broken search. Normalize them in either direction:
+
+```python
+>>> from persiantools import characters
+
+>>> characters.ar_to_fa("كيك")
+'کیک'
+
+>>> characters.fa_to_ar("کیک")
+'كيك'
+```
+
+## Support this project
+
+If persiantools saves you time, you can support its development with a donation:
+
+| Coin | Address |
+| --- | --- |
+| Bitcoin (BTC) | `bc1qg5rp7ymznc98wmhltzvpwl2dvfuvjr33m4hy77` |
+| Ethereum (ETH) | `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad` |
+| Tron (TRX) | `TDd63bVWZDBHmwVNFgJ6T2WdWmk9z7PBLg` |
+| Stellar (XLM) | `GDSFPPLY34QSAOTOP4DQDXAI2YDRNRIADZHTN3HCGMQXRLIGPYOEH7L5` |
+| USDT (BSC) | `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad` |
