@@ -1,6 +1,6 @@
 # Changelog
 
-## [6.0.0](https://github.com/majiidd/persiantools/compare/5.5.1...6.0.0) - Unreleased
+## [6.0.0](https://github.com/majiidd/persiantools/compare/5.5.1...6.0.0) - 2026-07-03
 
 Performance:
 
