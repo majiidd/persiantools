@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=80.0"]
+requires = ["setuptools>=82.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "persiantools"
 dynamic = ["version"]
-description = "Jalali date and datetime with other tools"
+description = "Jalali (Shamsi/Persian) date and datetime with Persian digits and character utilities"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -15,19 +15,31 @@ authors = [
 keywords = [
     "jalali",
     "shamsi",
+    "khorshidi",
     "persian",
-    "digits",
-    "characters",
-    "converter",
-    "jalalidate",
-    "jalalidatetime",
+    "farsi",
+    "iranian",
+    "calendar",
     "date",
     "datetime",
+    "timezone",
+    "gregorian",
+    "converter",
     "jdate",
     "jdatetime",
-    "farsi",
+    "jalalidate",
+    "jalalidatetime",
+    "persian-calendar",
+    "persian-date",
+    "persian-digits",
+    "arabic-digits",
+    "number-to-words",
+    "characters",
+    "normalization",
+    "localization",
 ]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Natural Language :: Persian",
     "Operating System :: OS Independent",
@@ -45,6 +57,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Localization",
+    "Topic :: Software Development :: Internationalization",
+    "Topic :: Text Processing",
+    "Topic :: Text Processing :: Linguistic",
     "Topic :: Utilities",
 ]
 
@@ -66,7 +81,7 @@ dev = [
 ]
 
 [tool.uv]
-required-version = ">=0.9"
+required-version = ">=0.11.0"
 
 [tool.setuptools.dynamic]
 version = { attr = "persiantools.__version__" }

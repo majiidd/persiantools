@@ -11,7 +11,7 @@ indent_style = space
 indent_size = 4
 
 # Python: Black uses 4 spaces; max line length here is informational for editors.
-[*.py]
+[*.{py,pyi}]
 indent_style = space
 indent_size = 4
 max_line_length = 120
@@ -23,14 +23,8 @@ indent_size = 2
 
 # Markdown / reStructuredText: keep trailing spaces (for hard line breaks) and allow missing final newline.
 [*.{md,rst,mdx}]
-insert_final_newline = false
 trim_trailing_whitespace = false
 
 # Makefile must use tabs.
-[Makefile]
+[{Makefile,*.mk}]
 indent_style = tab
-
-# Shell scripts: LF endings, ensure final newline.
-[*.sh]
-end_of_line = lf
-insert_final_newline = true
