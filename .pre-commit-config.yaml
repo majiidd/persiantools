@@ -21,10 +21,9 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-case-conflict
-      - id: check-json
-      - id: check-xml
       - id: detect-private-key
       - id: check-shebang-scripts-are-executable
+      - id: check-docstring-first
 
   - repo: https://github.com/PyCQA/isort
     rev: 9.0.0a3
@@ -32,7 +31,7 @@ repos:
       - id: isort
         args: ["--profile", "black"]
 
-  - repo: https://github.com/psf/black
+  - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 26.5.1
     hooks:
       - id: black
@@ -57,6 +56,19 @@ repos:
       - id: python-check-blanket-noqa
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.1.0
+    rev: v2.2.0
     hooks:
       - id: mypy
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-no-log-warn
+      - id: python-check-blanket-type-ignore
+      - id: python-check-mock-methods
+
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+      - id: validate-pyproject
+        additional_dependencies: ["validate-pyproject-schema-store[all]"]

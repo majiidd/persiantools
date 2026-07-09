@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.0.1](https://github.com/majiidd/persiantools/compare/6.0.0...6.0.1) - 2026-07-10
+
+- Hardened GitHub Actions workflow permissions (`contents: read` at workflow and publish-job level).
+- Bumped `astral-sh/setup-uv` to v8.3.2.
+- Switched the Black pre-commit hook to `psf/black-pre-commit-mirror`.
+- Expanded pre-commit checks (`check-docstring-first`, additional `pygrep-hooks`, `validate-pyproject`) and bumped mypy to v2.2.0.
+- Refreshed locked transitive dependencies (`filelock`, `virtualenv`, `python-discovery`).
+
 ## [6.0.0](https://github.com/majiidd/persiantools/compare/5.5.1...6.0.0) - 2026-07-03
 
 Performance:
