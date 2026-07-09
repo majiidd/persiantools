@@ -77,6 +77,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         run: uv run --no-sync pytest -ra --cov=persiantools --cov-report=xml tests/
 
+      - name: Run performance tests
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+        env:
+          PERSIANTOOLS_PERF_TESTS: "1"
+        run: uv run --no-sync pytest -ra -s tests/test_performance.py
+
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         uses: codecov/codecov-action@v7
