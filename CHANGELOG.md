@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.0.2](https://github.com/majiidd/persiantools/compare/6.0.1...6.0.2) - 2026-07-10
+
+- Added performance regression coverage for Jalali/Gregorian date conversion.
+- Refreshed package metadata and documented the contributor and agent development workflow.
+
 ## [6.0.1](https://github.com/majiidd/persiantools/compare/6.0.0...6.0.1) - 2026-07-10
 
 - Hardened GitHub Actions workflow permissions (`contents: read` at workflow and publish-job level).
