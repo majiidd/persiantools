@@ -18,6 +18,25 @@ pip install persiantools
 
 Requires Python 3.9 or newer. No dependencies, except `tzdata` on Windows for timezone data.
 
+## AI Agent Skill
+
+This repo ships [`convert-persian-dates`](.agents/skills/convert-persian-dates/SKILL.md), a portable
+[Agent Skill](https://agentskills.io) that lets AI coding agents convert Shamsi/Jalali dates to and from Gregorian
+(Miladi) using this package instead of approximating calendar math.
+
+OpenAI Codex and Cursor discover it automatically from `.agents/skills/`. For Claude Code and other compatible
+clients, install it with the [Skills CLI](https://github.com/vercel-labs/skills), which detects your agent and picks
+the right destination (add `--global` to enable it in all projects):
+
+```bash
+npx skills add majiidd/persiantools --skill convert-persian-dates
+```
+
+or copy `.agents/skills/convert-persian-dates/` into your client's skills directory (e.g. `.claude/skills/`). Either
+way, the skill needs `pip install persiantools` in the environment where it runs.
+
+Example prompt: `Convert ۱۴۰۳-۰۱-۰۱ Shamsi to Gregorian using $convert-persian-dates.`
+
 ## Quick start
 
 ```python
