@@ -79,12 +79,36 @@ persian_result = digits.en_to_fa(result.isoformat())
 ## Parse named Jalali dates
 
 Use `strptime` instead of maintaining custom parsing logic. PersianTools uses Finglish transliterations for
-`locale="en"`:
+`locale="en"`.
 
-| Kind | `locale="en"` | `locale="fa"` |
+Months (1–12):
+
+| # | `locale="en"` | `locale="fa"` |
 | --- | --- | --- |
-| Months | Farvardin, Ordibehesht, Khordad, Tir, Mordad, Shahrivar, Mehr, Aban, Azar, Dey, Bahman, Esfand | فروردین، اردیبهشت، خرداد، تیر، مرداد، شهریور، مهر، آبان، آذر، دی، بهمن، اسفند |
-| Weekdays | Shanbeh, Yekshanbeh, Doshanbeh, Seshanbeh, Chaharshanbeh, Panjshanbeh, Jomeh | شنبه، یکشنبه، دوشنبه، سه‌شنبه، چهارشنبه، پنجشنبه، جمعه |
+| 1 | Farvardin | فروردین |
+| 2 | Ordibehesht | اردیبهشت |
+| 3 | Khordad | خرداد |
+| 4 | Tir | تیر |
+| 5 | Mordad | مرداد |
+| 6 | Shahrivar | شهریور |
+| 7 | Mehr | مهر |
+| 8 | Aban | آبان |
+| 9 | Azar | آذر |
+| 10 | Dey | دی |
+| 11 | Bahman | بهمن |
+| 12 | Esfand | اسفند |
+
+Weekdays (`isoweekday()`: 1–7; week starts on Shanbeh; `weekday()` is 0–6):
+
+| # | `locale="en"` | `locale="fa"` |
+| --- | --- | --- |
+| 1 | Shanbeh | شنبه |
+| 2 | Yekshanbeh | یکشنبه |
+| 3 | Doshanbeh | دوشنبه |
+| 4 | Seshanbeh | سه‌شنبه |
+| 5 | Chaharshanbeh | چهارشنبه |
+| 6 | Panjshanbeh | پنجشنبه |
+| 7 | Jomeh | جمعه |
 
 Parse full or abbreviated names with `%B`/`%b` for months and `%A`/`%a` for weekdays:
 
