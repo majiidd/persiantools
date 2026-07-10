@@ -194,18 +194,6 @@ Arabic and Persian share letters that look alike but have different Unicode code
 'كيك'
 ```
 
-## Support this project
-
-If persiantools saves you time, you can support its development with a donation:
-
-| Coin | Address |
-| --- | --- |
-| Bitcoin (BTC) | `bc1qg5rp7ymznc98wmhltzvpwl2dvfuvjr33m4hy77` |
-| Ethereum (ETH) | `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad` |
-| Tron (TRX) | `TDd63bVWZDBHmwVNFgJ6T2WdWmk9z7PBLg` |
-| Stellar (XLM) | `GDSFPPLY34QSAOTOP4DQDXAI2YDRNRIADZHTN3HCGMQXRLIGPYOEH7L5` |
-| USDT (BSC) | `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad` |
-
 ## AI Agent Skill
 
 Need your AI assistant to convert Persian (Shamsi/Jalali) dates accurately? Install the
@@ -226,3 +214,15 @@ Convert 1405-01-01 Shamsi to Gregorian.
 ```
 
 The skill needs `pip install persiantools` in the environment where the agent runs Python.
+
+## Support this project
+
+If persiantools saves you time, you can support its development with a donation:
+
+| Coin | Address |
+| --- | --- |
+| Bitcoin (BTC) | `bc1qg5rp7ymznc98wmhltzvpwl2dvfuvjr33m4hy77` |
+| Ethereum (ETH) | `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad` |
+| Tron (TRX) | `TDd63bVWZDBHmwVNFgJ6T2WdWmk9z7PBLg` |
+| Stellar (XLM) | `GDSFPPLY34QSAOTOP4DQDXAI2YDRNRIADZHTN3HCGMQXRLIGPYOEH7L5` |
+| USDT (BSC) | `0xC7D6bf306E456632764D0aD111C8dBBb43a3B9ad` |
