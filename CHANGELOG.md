@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.1.0](https://github.com/majiidd/persiantools/compare/6.0.2...6.1.0) - 2026-07-10
+
+- Added the `convert-persian-dates` AI agent skill (`.agents/skills/convert-persian-dates/`) so AI coding assistants can convert Shamsi/Jalali and Gregorian dates without guessing calendar math.
+- Documented the skill in `README.md`, including installation via `npx skills add`.
+- Pointed `CLAUDE.md` at `AGENTS.md` so Claude picks up the existing agent workflow instructions.
+
 ## [6.0.2](https://github.com/majiidd/persiantools/compare/6.0.1...6.0.2) - 2026-07-10
 
 - Added performance regression coverage for Jalali/Gregorian date conversion.

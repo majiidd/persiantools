@@ -194,6 +194,27 @@ Arabic and Persian share letters that look alike but have different Unicode code
 'كيك'
 ```
 
+## AI Agent Skill
+
+Need your AI assistant to convert Persian (Shamsi/Jalali) dates accurately? Install the
+[`convert-persian-dates`](.agents/skills/convert-persian-dates/SKILL.md) — it teaches the agent to convert between
+Shamsi and Gregorian (Miladi) without guessing calendar math.
+
+```bash
+npx skills add majiidd/persiantools --skill convert-persian-dates
+```
+
+Add `--global` to enable it across all projects. OpenAI Codex and Cursor also pick it up automatically when this
+repo is open. After install, ask naturally:
+
+```text
+امروز چندمه؟
+What is today's date in Shamsi?
+Convert 1405-01-01 Shamsi to Gregorian.
+```
+
+The skill needs `pip install persiantools` in the environment where the agent runs Python.
+
 ## Support this project
 
 If persiantools saves you time, you can support its development with a donation:

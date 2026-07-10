@@ -1,0 +1,4 @@
+interface:
+  display_name: "Persian Calendar Converter"
+  short_description: "Convert Persian and Gregorian dates reliably"
+  default_prompt: "Use $convert-persian-dates to convert this date between the Persian and Gregorian calendars."
