@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import pytest
 
-from persiantools.jdatetime import MAXYEAR, MINYEAR, JalaliDate
+from persiantools.jdatetime import MAXYEAR, MINYEAR, NON_LEAP_CORRECTION_SET, JalaliDate
 
 # (jalali_year, jalali_month, jalali_day, gregorian_year, gregorian_month, gregorian_day)
 _JALALI_GREGORIAN_CASES = [
@@ -101,7 +101,11 @@ _JALALI_GREGORIAN_CASES = [
     (1497, 1, 1, 2118, 3, 21),
     (1498, 1, 1, 2119, 3, 21),
     (1500, 1, 1, 2121, 3, 21),
-    (1503, 1, 1, 2124, 3, 21),
+    # 1502 is a non-leap correction year, so Norouz 1503 falls one day
+    # earlier than the plain 33-year cycle would place it.
+    (1503, 1, 1, 2124, 3, 20),
+    (1503, 12, 30, 2125, 3, 20),
+    (1504, 1, 1, 2125, 3, 21),
     (1505, 1, 1, 2126, 3, 21),
     # Gregorian century leap-year boundaries
     (1278, 12, 9, 1900, 2, 28),
@@ -647,13 +651,15 @@ class TestJalaliDate(TestCase):
     def test_round_trip_gregorian_windows(self):
         one_day = timedelta(days=1)
         windows = [
-            (date(1601, 1, 1), date(1601, 12, 31)),
+            (date(622, 3, 21), date(623, 4, 10)),
+            (date(1000, 2, 1), date(1000, 4, 10)),
+            (date(1600, 2, 1), date(1601, 12, 31)),
             (date(1700, 2, 1), date(1700, 4, 10)),
             (date(1800, 2, 1), date(1800, 4, 10)),
             (date(1900, 2, 1), date(1900, 4, 10)),
             (date(2000, 2, 1), date(2000, 4, 10)),
             (date(2100, 2, 1), date(2100, 4, 10)),
-            (date(2123, 3, 1), date(2124, 3, 19)),
+            (date(2123, 3, 1), date(2125, 4, 2)),
         ]
         for start, end in windows:
             previous_jalali = JalaliDate.to_jalali(start)
@@ -665,6 +671,42 @@ class TestJalaliDate(TestCase):
                 self.assertEqual(jdate.to_gregorian(), gdate)
                 previous_jalali = jdate
                 gdate += one_day
+
+    def test_non_leap_correction_conversion_consistency(self):
+        # Regression: conversions must follow is_leap for the years in
+        # NON_LEAP_CORRECTION_SET, leaving no unrepresentable Gregorian days
+        # (2124-03-20 used to raise ValueError) and no double-mapped Jalali
+        # dates (1503-12-30 and 1504-01-01 used to map to the same day).
+        self.assertEqual(JalaliDate.to_jalali(date(2124, 3, 19)), JalaliDate(1502, 12, 29))
+        self.assertEqual(JalaliDate.to_jalali(date(2124, 3, 20)), JalaliDate(1503, 1, 1))
+        self.assertEqual(JalaliDate(1503, 12, 30).to_gregorian(), date(2125, 3, 20))
+        self.assertEqual(JalaliDate(1504, 1, 1).to_gregorian(), date(2125, 3, 21))
+
+        for year in sorted(NON_LEAP_CORRECTION_SET):
+            if year + 2 > MAXYEAR:
+                continue
+            norouz = JalaliDate(year, 1, 1).to_gregorian()
+            next_norouz = JalaliDate(year + 1, 1, 1).to_gregorian()
+            after_next = JalaliDate(year + 2, 1, 1).to_gregorian()
+            self.assertEqual((next_norouz - norouz).days, 365, f"correction year {year}")
+            self.assertEqual((after_next - next_norouz).days, 366, f"successor year {year + 1}")
+
+    def test_year_boundaries_full_range(self):
+        # Every year's first and last days must convert consistently in both
+        # directions, and every year length must match is_leap.
+        one_day = timedelta(days=1)
+        previous_norouz = JalaliDate(MINYEAR, 1, 1).to_gregorian()
+
+        for year in range(MINYEAR + 1, MAXYEAR + 1):
+            norouz = JalaliDate(year, 1, 1).to_gregorian()
+            expected_length = 366 if JalaliDate.is_leap(year - 1) else 365
+            self.assertEqual((norouz - previous_norouz).days, expected_length, f"year {year - 1}")
+
+            self.assertEqual(JalaliDate.to_jalali(norouz), JalaliDate(year, 1, 1))
+            last_day = 30 if JalaliDate.is_leap(year - 1) else 29
+            self.assertEqual(JalaliDate.to_jalali(norouz - one_day), JalaliDate(year - 1, 12, last_day))
+
+            previous_norouz = norouz
 
     def test_string_representation(self):
         self.assertEqual(str(JalaliDate(1403, 4, 7)), "1403-04-07")
