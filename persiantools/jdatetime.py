@@ -1,7 +1,6 @@
 import operator
 import re
 import warnings
-from bisect import bisect_left
 from collections import namedtuple
 from datetime import date
 from datetime import datetime as dt
@@ -134,16 +133,6 @@ _MONTH_COUNT = [
 
 _FRACTION_CORRECTION = [100000, 10000, 1000, 100, 10]
 
-# Cumulative days before the start of each Gregorian month (index 0 unused),
-# for non-leap years. In to_jalali, February of a leap year is compensated
-# arithmetically, so a single table suffices there.
-_GREGORIAN_DAYS_BEFORE_MONTH = (0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
-
-# Cumulative days at the end of each Gregorian month, used to map a day-of-year
-# back to (month, day) via binary search.
-_GREGORIAN_CUM_DAYS = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365)
-_GREGORIAN_CUM_DAYS_LEAP = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366)
-
 # List of years that are exceptions to the 33-year leap year rule
 # fmt: off
 NON_LEAP_CORRECTION_SET = frozenset(
@@ -160,6 +149,14 @@ NON_LEAP_CORRECTION_SET = frozenset(
 # fmt: on
 
 MIN_NON_LEAP_CORRECTION = 1502
+
+# Offset between a Jalali ordinal (1 == Farvardin 1 of year 1) and the proleptic
+# Gregorian ordinal of the same day (0622-03-21).
+_JDATE_ORDINAL_OFFSET = 226894
+
+# Number of leap years the 33-year rule places in the first r years of a cycle
+# (index 0..32), used to count leap days in closed form. Same rule as is_leap.
+_CYCLE_LEAP_PREFIX = tuple(sum((25 * k + 11) % 33 < 8 for k in range(1, r + 1)) for r in range(33))
 
 
 def _is_ascii_digit(c: str) -> bool:
@@ -416,6 +413,21 @@ class JalaliDate:
 
         return _MONTH_COUNT[month][2]
 
+    @staticmethod
+    def _days_before_year(year: int) -> int:
+        """
+        Days from the Jalali epoch (Farvardin 1 of year 1) to the start of ``year``,
+        counting leap days consistently with is_leap.
+        """
+        prev = year - 1
+        leaps = (prev // 33) * 8 + _CYCLE_LEAP_PREFIX[prev % 33]
+        # A correction year is a 33-rule leap whose leap day is deferred to the
+        # next year, so it does not add a day until that following year.
+        if prev in NON_LEAP_CORRECTION_SET:
+            leaps -= 1
+
+        return 365 * prev + leaps
+
     @classmethod
     def to_jalali(cls, year, month=None, day=None):
         """
@@ -444,40 +456,21 @@ class JalaliDate:
         JalaliDate(1400, 1, 1)
         """
         if month is None and isinstance(year, date):
-            year, month, day = year.year, year.month, year.day
-
-        # Shift the epoch so the arithmetic below operates on small positive numbers.
-        if year <= 1600:
-            jalali_year = 0
-            year -= 621
+            g = year
         else:
-            jalali_year = 979
-            year -= 1600
+            g = date(year, month, day)
 
-        # Past February, count the leap day of the current Gregorian year.
-        leap_adjusted_year = year + 1 if month > 2 else year
+        # Day number since the Jalali epoch (Farvardin 1 of year 1 == 0622-03-21).
+        n = g.toordinal() - _JDATE_ORDINAL_OFFSET
 
-        # Days elapsed since the Jalali epoch (proleptic Gregorian leap rules).
-        days = (
-            365 * year
-            + (leap_adjusted_year + 3) // 4
-            - (leap_adjusted_year + 99) // 100
-            + (leap_adjusted_year + 399) // 400
-            - 80
-            + day
-            + _GREGORIAN_DAYS_BEFORE_MONTH[month]
-        )
+        # No Jalali year exceeds 366 days, so this is a lower bound at most a few
+        # years short; step up to the exact year. The year lengths come from
+        # is_leap, so the result always satisfies days_in_month.
+        jalali_year = max((n - 1) // 366 + 1, MINYEAR)
+        while cls._days_before_year(jalali_year + 1) < n:
+            jalali_year += 1
 
-        # Reduce by whole Jalali cycles: 12053 days = 33 years, 1461 days = 4 years.
-        jalali_year += 33 * (days // 12053)
-        days %= 12053
-        jalali_year += 4 * (days // 1461)
-        days %= 1461
-
-        # The remainder covers up to 4 years; the first may be a leap year (366 days).
-        if days > 365:
-            jalali_year += (days - 1) // 365
-            days = (days - 1) % 365
+        days = n - cls._days_before_year(jalali_year) - 1
 
         # The first 6 Jalali months have 31 days, the remaining 6 have 30.
         if days < 186:
@@ -506,48 +499,7 @@ class JalaliDate:
         >>> print(g_date)
         2021-03-21
         """
-        month = self._month
-        year = self._year + 1595
-
-        # Days elapsed since the Gregorian epoch used by this algorithm,
-        # counting Jalali years (33-year cycle with 8 leap years) and months
-        # (the first 6 months have 31 days, the remaining 6 have 30).
-        days = -355668 + 365 * year + (year // 33) * 8 + ((year % 33) + 3) // 4 + self._day
-        if month < 7:
-            days += (month - 1) * 31
-        else:
-            days += (month - 7) * 30 + 186
-
-        # Reduce by whole Gregorian cycles: 146097 days = 400 years,
-        # 36524 days = 100 years, 1461 days = 4 years.
-        gregorian_year = 400 * (days // 146097)
-        days %= 146097
-
-        if days > 36524:
-            days -= 1
-            gregorian_year += 100 * (days // 36524)
-            days %= 36524
-            if days >= 365:
-                days += 1
-
-        gregorian_year += 4 * (days // 1461)
-        days %= 1461
-        if days > 365:
-            gregorian_year += (days - 1) // 365
-            days = (days - 1) % 365
-
-        day_of_year = days + 1
-
-        if gregorian_year % 4 == 0 and (gregorian_year % 100 != 0 or gregorian_year % 400 == 0):
-            cum_days = _GREGORIAN_CUM_DAYS_LEAP
-        else:
-            cum_days = _GREGORIAN_CUM_DAYS
-
-        # Locate the month whose cumulative day count first reaches day_of_year.
-        gregorian_month = bisect_left(cum_days, day_of_year)
-        gregorian_day = day_of_year - cum_days[gregorian_month - 1]
-
-        return date(gregorian_year, gregorian_month, gregorian_day)
+        return date.fromordinal(self.toordinal() + _JDATE_ORDINAL_OFFSET)
 
     @classmethod
     def today(cls):
@@ -611,11 +563,11 @@ class JalaliDate:
     __str__ = isoformat
 
     def toordinal(self) -> int:
-        return self.to_gregorian().toordinal() - 226894
+        return self._days_before_year(self._year) + self.days_before_month(self._month) + self._day
 
     @classmethod
     def fromordinal(cls, n: int):
-        return cls(date.fromordinal(n + 226894))
+        return cls(date.fromordinal(n + _JDATE_ORDINAL_OFFSET))
 
     @classmethod
     def fromisocalendar(cls, year, week, day):
