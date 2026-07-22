@@ -101,7 +101,7 @@ _JALALI_GREGORIAN_CASES = [
     (1497, 1, 1, 2118, 3, 21),
     (1498, 1, 1, 2119, 3, 21),
     (1500, 1, 1, 2121, 3, 21),
-    (1503, 1, 1, 2124, 3, 21),
+    (1503, 1, 1, 2124, 3, 20),
     (1505, 1, 1, 2126, 3, 21),
     # Gregorian century leap-year boundaries
     (1278, 12, 9, 1900, 2, 28),
@@ -665,6 +665,41 @@ class TestJalaliDate(TestCase):
                 self.assertEqual(jdate.to_gregorian(), gdate)
                 previous_jalali = jdate
                 gdate += one_day
+
+    def test_conversion_honors_leap_correction(self):
+        # Regression for #48: to_gregorian/to_jalali must use is_leap's leap-year
+        # corrections. The uncorrected 33-year cycle made to_jalali(date(2124, 3, 20))
+        # raise "day must be in 1..29" and JalaliDate(1503, 12, 30) alias to 1504-01-01.
+        self.assertEqual(JalaliDate.to_jalali(date(2124, 3, 20)), JalaliDate(1503, 1, 1))
+        self.assertEqual(JalaliDate(1503, 1, 1).to_gregorian(), date(2124, 3, 20))
+
+        self.assertFalse(JalaliDate.is_leap(1502))
+        self.assertEqual(JalaliDate.to_jalali(date(2124, 3, 19)), JalaliDate(1502, 12, 29))
+
+        self.assertTrue(JalaliDate.is_leap(1503))
+        esfand_30 = JalaliDate(1503, 12, 30)
+        self.assertEqual(JalaliDate.to_jalali(esfand_30.to_gregorian()), esfand_30)
+
+    def test_year_length_matches_is_leap(self):
+        # The conversion must agree with is_leap on every year's length, across the
+        # whole leap-correction range (#48).
+        for year in range(MINYEAR, 3001):
+            length = (JalaliDate(year + 1, 1, 1).to_gregorian() - JalaliDate(year, 1, 1).to_gregorian()).days
+            self.assertEqual(length, 366 if JalaliDate.is_leap(year) else 365)
+            self.assertEqual(JalaliDate.days_in_month(12, year), 30 if JalaliDate.is_leap(year) else 29)
+
+    def test_round_trip_correction_years(self):
+        # Round-trip every day of the years around the first leap corrections (#48).
+        one_day = timedelta(days=1)
+        for year in range(1500, 1670):
+            previous_gregorian = JalaliDate(year, 1, 1).to_gregorian() - one_day
+            for month in range(1, 13):
+                for day in range(1, JalaliDate.days_in_month(month, year) + 1):
+                    jdate = JalaliDate(year, month, day)
+                    gdate = jdate.to_gregorian()
+                    self.assertEqual(gdate, previous_gregorian + one_day)
+                    self.assertEqual(JalaliDate.to_jalali(gdate), jdate)
+                    previous_gregorian = gdate
 
     def test_string_representation(self):
         self.assertEqual(str(JalaliDate(1403, 4, 7)), "1403-04-07")
