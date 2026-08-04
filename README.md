@@ -147,6 +147,15 @@ True
 
 They are also hashable (usable as dict keys) and picklable, like the standard library types.
 
+## Calendar model
+
+Supported range: `JalaliDate(1, 1, 1)` (Gregorian 622-03-22) through `JalaliDate(9377, 12, 30)` (Gregorian 9999-03-20). All conversions, ordinals, and leap-year checks derive from one internal model, so every date round-trips exactly.
+
+- **Epoch** — 1 Farvardin of year 1 is Friday, 22 March 622 CE in the proleptic Gregorian calendar (19 March 622 Julian), the documented epoch of the Solar Hijri calendar.
+- **Years 1–1177** — leap years follow the astronomical Persian calendar (vernal equinox at the 52.5°E meridian, per *Calendrical Calculations*), computed with [roozbehp/persiancalendar](https://github.com/roozbehp/persiancalendar). Converters based on plain 33-year arithmetic (jdf and derivatives) differ by one day on some dates before Gregorian 1568; purely astronomical converters may differ by one day in a handful of years (979, 1012, 1045, 1078, 1177) where the equinox falls within minutes of the midday cutoff and persiantools keeps the widely agreed date.
+- **Years 1178–2987** — the 33-year cycle with the [ICU4X correction set](https://github.com/unicode-org/icu4x/blob/main/utils/calendrical_calculations/src/persian.rs), which reproduces the official leap-year table of the Iranian calendar authority (Calendar Center, Institute of Geophysics, University of Tehran, 1206–1498) exactly and matches the astronomical model through year 3000.
+- **Years 2988 and later** — the plain 33-year cycle, as a well-defined convention beyond the range where astronomical projections are meaningful.
+
 ## Digits
 
 Convert digits between English, Persian, and Arabic:

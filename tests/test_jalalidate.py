@@ -79,7 +79,7 @@ _JALALI_GREGORIAN_CASES = [
     (1405, 10, 11, 2027, 1, 1),
     (1379, 10, 11, 2000, 12, 31),
     # Norouz (Farvardin 1)
-    # (1, 1, 1, 622, 3, 22),
+    (1, 1, 1, 622, 3, 22),
     (1000, 1, 1, 1621, 3, 21),
     (1100, 1, 1, 1721, 3, 21),
     (1206, 1, 1, 1827, 3, 22),
@@ -107,6 +107,14 @@ _JALALI_GREGORIAN_CASES = [
     (1503, 12, 30, 2125, 3, 20),
     (1504, 1, 1, 2125, 3, 21),
     (1505, 1, 1, 2126, 3, 21),
+    # Ancient dates follow the astronomical model (epoch 0622-03-22), so
+    # Gregorian 0623-01-01 is 1-10-10 there -- one day off the plain 33-year
+    # arithmetic used by jdf-style converters.
+    (1, 10, 10, 623, 1, 1),
+    (1, 12, 29, 623, 3, 21),
+    (2, 1, 1, 623, 3, 22),
+    (946, 12, 29, 1568, 3, 20),
+    (947, 1, 1, 1568, 3, 21),
     # Gregorian century leap-year boundaries
     (1278, 12, 9, 1900, 2, 28),
     (1278, 12, 10, 1900, 3, 1),
@@ -651,7 +659,7 @@ class TestJalaliDate(TestCase):
     def test_round_trip_gregorian_windows(self):
         one_day = timedelta(days=1)
         windows = [
-            (date(622, 3, 21), date(623, 4, 10)),
+            (date(622, 3, 22), date(623, 4, 10)),
             (date(1000, 2, 1), date(1000, 4, 10)),
             (date(1600, 2, 1), date(1601, 12, 31)),
             (date(1700, 2, 1), date(1700, 4, 10)),
@@ -707,6 +715,88 @@ class TestJalaliDate(TestCase):
             self.assertEqual(JalaliDate.to_jalali(norouz - one_day), JalaliDate(year - 1, 12, last_day))
 
             previous_norouz = norouz
+
+    def test_epoch(self):
+        # The Solar Hijri epoch is Friday 1 Farvardin 1 = 19 March 622
+        # Julian = 22 March 622 proleptic Gregorian.
+        epoch = JalaliDate(1, 1, 1)
+        self.assertEqual(epoch.to_gregorian(), date(622, 3, 22))
+        self.assertEqual(epoch.weekday(), 6)  # Jomeh (Friday)
+        self.assertEqual(epoch.toordinal(), 1)
+        self.assertEqual(JalaliDate.fromordinal(1), epoch)
+
+        # the day before the epoch has no Jalali representation
+        with self.assertRaises(ValueError):
+            JalaliDate.to_jalali(622, 3, 21)
+
+    def test_ancient_gregorian_to_shamsi(self):
+        # Regression: Gregorian 0623-01-01 is 1-10-10 under the astronomical
+        # model (as reported against time.ir), not the 33-year arithmetic
+        # 1-10-11.
+        self.assertEqual(JalaliDate.to_jalali(623, 1, 1), JalaliDate(1, 10, 10))
+        self.assertEqual(JalaliDate(1, 10, 10).to_gregorian(), date(623, 1, 1))
+
+    def test_ancient_astronomical_norouz(self):
+        # Years 1..1177 follow the astronomical Persian calendar
+        # (Calendrical Calculations at the 52.5 E meridian, the model that
+        # reproduces the official 1206-1498 leap-year table exactly).
+        # Expected values generated with
+        # https://github.com/roozbehp/persiancalendar. Years 979, 1012,
+        # 1045, 1078 and 1177 keep the 33-year-rule value, where the
+        # astronomical flip rests on a minutes-level equinox margin and
+        # established implementations agree on the arithmetic date.
+        cases = [
+            (1, 622, 3, 22),
+            (2, 623, 3, 22),
+            (21, 642, 3, 21),
+            (22, 643, 3, 22),
+            (50, 671, 3, 21),
+            (101, 722, 3, 22),
+            (201, 822, 3, 21),
+            (250, 871, 3, 21),
+            (301, 922, 3, 21),
+            (401, 1022, 3, 21),
+            (450, 1071, 3, 21),
+            (501, 1122, 3, 22),
+            (601, 1222, 3, 21),
+            (650, 1271, 3, 21),
+            (701, 1322, 3, 21),
+            (801, 1422, 3, 21),
+            (850, 1471, 3, 21),
+            (901, 1522, 3, 22),
+            (945, 1566, 3, 21),
+            (946, 1567, 3, 22),
+            (947, 1568, 3, 21),
+            (978, 1599, 3, 21),
+            (979, 1600, 3, 20),
+            (1001, 1622, 3, 21),
+            (1050, 1671, 3, 21),
+            (1077, 1698, 3, 20),
+            (1078, 1699, 3, 20),
+            (1101, 1722, 3, 21),
+            (1175, 1796, 3, 20),
+            (1176, 1797, 3, 20),
+            (1177, 1798, 3, 20),
+            (1178, 1799, 3, 21),
+        ]
+        for jy, gy, gm, gd in cases:
+            self.assertEqual(JalaliDate(jy, 1, 1).to_gregorian(), date(gy, gm, gd), f"Norouz {jy}")
+            self.assertEqual(JalaliDate.to_jalali(date(gy, gm, gd)), JalaliDate(jy, 1, 1), f"Norouz {jy}")
+
+    def test_ancient_leap_years(self):
+        # is_leap follows the astronomical model for years 1..1177, encoded
+        # as flips against the 33-year rule.
+        self.assertFalse(JalaliDate.is_leap(1))  # 33-year rule says leap
+        self.assertTrue(JalaliDate.is_leap(21))  # astronomical-only leap
+        self.assertFalse(JalaliDate.is_leap(22))  # 33-year-rule-only leap
+        self.assertTrue(JalaliDate.is_leap(945))
+        self.assertFalse(JalaliDate.is_leap(946))
+
+        # borderline pairs overridden to the consensus 33-year values
+        self.assertFalse(JalaliDate.is_leap(978))
+        self.assertTrue(JalaliDate.is_leap(979))
+        self.assertFalse(JalaliDate.is_leap(1176))
+        self.assertTrue(JalaliDate.is_leap(1177))
 
     def test_string_representation(self):
         self.assertEqual(str(JalaliDate(1403, 4, 7)), "1403-04-07")

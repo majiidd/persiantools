@@ -1,6 +1,7 @@
 import operator
 import re
 import warnings
+from bisect import bisect_left
 from collections import namedtuple
 from datetime import date
 from datetime import datetime as dt
@@ -150,9 +151,13 @@ NON_LEAP_CORRECTION_SET = frozenset(
 
 MIN_NON_LEAP_CORRECTION = 1502
 
-# Proleptic Gregorian ordinal of the day before 1 Farvardin 1 (which is
-# 0622-03-21), so that Jalali ordinals start at 1 like date.toordinal().
-_EPOCH_ORDINAL = 226894
+# Proleptic Gregorian ordinal of the day before 1 Farvardin 1, so that Jalali
+# ordinals start at 1 like date.toordinal(). The epoch of the Solar Hijri
+# calendar is Friday 1 Farvardin 1 = 19 March 622 Julian = 22 March 622
+# proleptic Gregorian (R.D. 226896), following the standard astronomical
+# definition (Calendrical Calculations; the same epoch used by the official
+# Iranian calendar authority's model).
+_EPOCH_ORDINAL = 226895
 
 # Number of leap years among the first `phase` years of a 33-year cycle under
 # the (25 * year + 11) % 33 < 8 rule used by is_leap; entry `phase` covers
@@ -164,16 +169,61 @@ _LEAPS_BEFORE_CYCLE_YEAR = (
 )
 # fmt: on
 
+# Last year of the ancient regime, where leap years follow the astronomical
+# calendar (vernal equinox at the 52.5 E meridian) instead of the plain
+# 33-year rule.
+_ANCIENT_MAX = 1177
+
+# Years 1..1177 whose leap status under the astronomical calendar differs
+# from the (25 * year + 11) % 33 < 8 rule. Data derived from
+# https://github.com/roozbehp/persiancalendar (Apache 2.0), the Calendrical
+# Calculations astronomical Persian calendar at the 52.5 E meridian, which
+# reproduces the official leap-year table of the Iranian calendar authority
+# (Calendar Center, Institute of Geophysics, University of Tehran) exactly.
+# Five astronomical flip pairs -- (978, 979), (1011, 1012), (1044, 1045),
+# (1077, 1078), (1176, 1177) -- are excluded: their effects would reach into
+# Gregorian 1601+, where all established implementations agree with the
+# 33-year rule, and each hinges on an equinox missing the midday cutoff by
+# mere minutes (36 s .. 11 min), far inside ephemeris model uncertainty.
+# From year 1178 on both models coincide, so this table is complete, and
+# conversions are unchanged for every day on or after Gregorian 1568-03-21.
+# fmt: off
+_ANCIENT_LEAP_FLIPS = (
+    1, 21, 22, 25, 26, 29, 30, 33, 34, 54, 55, 58, 59, 62, 63, 66, 67, 87, 88, 91, 92, 95, 96, 99, 100, 120, 121,
+    124, 125, 128, 129, 132, 133, 153, 154, 157, 158, 161, 162, 186, 187, 190, 191, 194, 195, 219, 220, 223, 224,
+    227, 228, 252, 253, 256, 257, 260, 261, 285, 286, 289, 290, 293, 294, 318, 319, 322, 323, 326, 327, 351, 352,
+    355, 356, 359, 360, 384, 385, 388, 389, 392, 393, 417, 418, 421, 422, 450, 451, 454, 455, 483, 484, 487, 488,
+    516, 517, 520, 521, 549, 550, 553, 554, 582, 583, 586, 587, 615, 616, 619, 620, 648, 649, 652, 653, 681, 682,
+    714, 715, 747, 748, 780, 781, 784, 785, 813, 814, 846, 847, 879, 880, 912, 913, 945, 946,
+)
+# fmt: on
+
+_ANCIENT_LEAP_FLIPS_SET = frozenset(_ANCIENT_LEAP_FLIPS)
+
+# Split of the flips by direction, for cumulative-day corrections: "on" years
+# are leap only astronomically, "off" years only under the 33-year rule. The
+# off years outnumber the on years by exactly one, which cancels the epoch
+# falling one day after the arithmetic model's epoch, so both models place
+# every Norouz from 1178 on the same Gregorian day.
+_ANCIENT_FLIPS_ON = tuple(y for y in _ANCIENT_LEAP_FLIPS if (25 * y + 11) % 33 >= 8)
+_ANCIENT_FLIPS_OFF = tuple(y for y in _ANCIENT_LEAP_FLIPS if (25 * y + 11) % 33 < 8)
+
 
 def _days_before_year(year: int) -> int:
     """Number of days from the Jalali epoch to 1 Farvardin of `year`.
 
     Kept exactly consistent with is_leap: each full 33-year cycle contributes
-    8 leap days, and each correction year (never leap, but always followed by
+    8 leap days, each ancient flip year shifts the start of every later year
+    by one day, and each correction year (never leap, but always followed by
     a leap successor) only shifts its successor's start one day earlier.
     """
     cycles, phase = divmod(year - 1, 33)
     days = 365 * (year - 1) + 8 * cycles + _LEAPS_BEFORE_CYCLE_YEAR[phase]
+
+    if year > _ANCIENT_MAX:
+        days -= 1
+    else:
+        days += bisect_left(_ANCIENT_FLIPS_ON, year) - bisect_left(_ANCIENT_FLIPS_OFF, year)
 
     if (year - 1) in NON_LEAP_CORRECTION_SET:
         days -= 1
@@ -370,7 +420,11 @@ class JalaliDate:
         Determines if a given Persian year is a leap year using the 33-year rule,
         with corrections for specific years that deviate from the rule.
 
-        This function is based on the Rust implementation from the ICU4X project:
+        Years 1..1177 follow the astronomical calendar (vernal equinox at the
+        52.5 E meridian, per Calendrical Calculations and the model used by the
+        official Iranian calendar authority), encoded as flips against the
+        33-year rule. Years 1502..2987 apply the correction set from the ICU4X
+        project:
         https://github.com/unicode-org/icu4x/blob/main/utils/calendrical_calculations/src/persian.rs
 
         Args:
@@ -381,6 +435,9 @@ class JalaliDate:
         """
         if not (MINYEAR <= year <= MAXYEAR):
             raise ValueError(f"Year must be between {MINYEAR} and {MAXYEAR}")
+
+        if year <= _ANCIENT_MAX:
+            return ((25 * year + 11) % 33 < 8) != (year in _ANCIENT_LEAP_FLIPS_SET)
 
         if year < MIN_NON_LEAP_CORRECTION:
             return (25 * year + 11) % 33 < 8
@@ -779,7 +836,7 @@ class JalaliDate:
         Returns:
             int: An integer representing the day of the week.
         """
-        return (self.toordinal() + 4) % 7
+        return (self.toordinal() + 5) % 7
 
     def __format__(self, fmt: str):
         if not isinstance(fmt, str):
