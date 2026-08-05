@@ -49,6 +49,22 @@ class TestDigits(TestCase):
         with pytest.raises(TypeError):
             digits.fa_to_ar(12345)
 
+    def test_translate_type_errors(self):
+        for func in (digits.en_to_fa, digits.ar_to_fa, digits.fa_to_en, digits.fa_to_ar):
+            with pytest.raises(TypeError):
+                func(None)
+            with pytest.raises(TypeError):
+                func(b"123")
+            with pytest.raises(TypeError):
+                func(["۱۲۳"])
+
+    def test_translate_round_trip(self):
+        english = "0123456789"
+        self.assertEqual(digits.fa_to_en(digits.en_to_fa(english)), english)
+
+        arabic = "٠١٢٣٤٥٦٧٨٩"
+        self.assertEqual(digits.fa_to_ar(digits.ar_to_fa(arabic)), arabic)
+
     def test_to_letter(self):
         self.assertEqual(digits.to_word(0), "صفر")
         self.assertEqual(digits.to_word(1), "یک")
@@ -101,3 +117,125 @@ class TestDigits(TestCase):
                 digits.to_word(0.15)
         finally:
             digits.MANTISSA = old_mantissa
+
+
+@pytest.mark.parametrize(
+    "number,expected",
+    [
+        (1, "یک"),
+        (2, "دو"),
+        (3, "سه"),
+        (4, "چهار"),
+        (5, "پنج"),
+        (6, "شش"),
+        (7, "هفت"),
+        (8, "هشت"),
+        (9, "نه"),
+        (10, "ده"),
+        (11, "یازده"),
+        (12, "دوازده"),
+        (13, "سیزده"),
+        (14, "چهارده"),
+        (15, "پانزده"),
+        (16, "شانزده"),
+        (17, "هفده"),
+        (18, "هجده"),
+        (19, "نوزده"),
+        (20, "بیست"),
+        (30, "سی"),
+        (40, "چهل"),
+        (50, "پنجاه"),
+        (60, "شصت"),
+        (70, "هفتاد"),
+        (80, "هشتاد"),
+        (90, "نود"),
+        (100, "یکصد"),
+        (200, "دویست"),
+        (300, "سیصد"),
+        (400, "چهارصد"),
+        (500, "پانصد"),
+        (600, "ششصد"),
+        (700, "هفتصد"),
+        (800, "هشتصد"),
+        (900, "نهصد"),
+    ],
+)
+def test_to_word_word_tables(number, expected):
+    assert digits.to_word(number) == expected
+
+
+@pytest.mark.parametrize(
+    "number,expected",
+    [
+        # exact boundaries between ranges
+        (110, "یکصد و ده"),
+        (1000, "یک هزار"),
+        (1_000_000, "یک میلیون"),
+        (1_000_000_000, "یک میلیارد"),
+        (1_000_000_000_000, "یک تریلیون"),
+        # zero chunks in the middle and at the end must be skipped
+        (1_000_001, "یک میلیون و یک"),
+        (1_000_000_001, "یک میلیارد و یک"),
+        (1_000_000_000_001, "یک تریلیون و یک"),
+        (2_000_000_000_000, "دو تریلیون"),
+        # largest supported integer
+        (
+            999_999_999_999_999,
+            "نهصد و نود و نه تریلیون و نهصد و نود و نه میلیارد"
+            " و نهصد و نود و نه میلیون و نهصد و نود و نه هزار و نهصد و نود و نه",
+        ),
+        (
+            -999_999_999_999_999,
+            "منفی نهصد و نود و نه تریلیون و نهصد و نود و نه میلیارد"
+            " و نهصد و نود و نه میلیون و نهصد و نود و نه هزار و نهصد و نود و نه",
+        ),
+    ],
+)
+def test_to_word_boundaries(number, expected):
+    assert digits.to_word(number) == expected
+
+
+@pytest.mark.parametrize("number", [10**15, 10**15 + 1, -(10**15), -(10**15) - 1])
+def test_to_word_out_of_range(number):
+    with pytest.raises(digits.OutOfRangeException):
+        digits.to_word(number)
+
+
+@pytest.mark.parametrize(
+    "number,expected",
+    [
+        (0.0, "صفر"),
+        (-0.0, "صفر"),
+        # zero integer part: no "صفر و" prefix
+        (0.5, "پنج دهم"),
+        (-0.5, "منفی پنج دهم"),
+        # 14 decimal places: the maximum supported precision
+        (
+            0.12345678901234,
+            "دوازده تریلیون و سیصد و چهل و پنج میلیارد و ششصد و هفتاد و هشت میلیون"
+            " و نهصد و یک هزار و دویست و سی و چهار صد تریلیونیم",
+        ),
+    ],
+)
+def test_to_word_float_edges(number, expected):
+    assert digits.to_word(number) == expected
+
+
+def test_to_word_float_integer_part_out_of_range():
+    with pytest.raises(digits.OutOfRangeException):
+        digits.to_word(1e15)
+
+
+def test_to_word_scientific_notation_unsupported():
+    # Current behavior: floats whose repr() uses scientific notation (e.g. 1e16,
+    # 1e-7) are not supported and fail with a raw ValueError from str.split(".").
+    with pytest.raises(ValueError):
+        digits.to_word(1e16)
+    with pytest.raises(ValueError):
+        digits.to_word(1e-7)
+
+
+@pytest.mark.parametrize("invalid", [None, "123", b"123", [123], (123,), {123}, 3 + 4j])
+def test_to_word_type_errors(invalid):
+    with pytest.raises(TypeError):
+        digits.to_word(invalid)
