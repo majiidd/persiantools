@@ -128,6 +128,11 @@ documented workflow.
 - Be careful with Jalali/Gregorian conversion edge cases: Norouz boundaries,
   Esfand 29/30, Gregorian century leap-year boundaries, min/max supported years,
   and timestamp/from-ordinal behavior.
+- The calendar model is layered (astronomical leap data for years 1-1177, the
+  33-year rule plus the ICU4X correction set for 1178-2987, the plain 33-year
+  rule beyond); see the README "Calendar model" section. Keep every conversion
+  derived from `_days_before_year`/`is_leap` in `persiantools/jdatetime.py` --
+  never reintroduce independent conversion arithmetic.
 - Timezone behavior should use `zoneinfo`, `datetime.timezone`, and the stdlib
   `datetime` model. Do not reintroduce `pytz`.
 - Locale-sensitive behavior currently uses `"en"` and `"fa"`. Keep Persian digit

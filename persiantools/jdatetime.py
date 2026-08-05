@@ -13,16 +13,10 @@ from zoneinfo import ZoneInfo
 
 from persiantools import digits, utils
 
-# The minimum year supported by the JalaliDate module
 MINYEAR = 1
-
-# The maximum year supported by the JalaliDate module
 MAXYEAR = 9377
-
-# The maximum ordinal value supported by the JalaliDate module
 _MAXORDINAL = 3424878
 
-# Full month names in English for the Jalali calendar
 MONTH_NAMES_EN = [
     None,
     "Farvardin",
@@ -39,7 +33,6 @@ MONTH_NAMES_EN = [
     "Esfand",
 ]
 
-# Full month names in Persian for the Jalali calendar
 MONTH_NAMES_FA = [
     None,
     "فروردین",
@@ -56,7 +49,6 @@ MONTH_NAMES_FA = [
     "اسفند",
 ]
 
-# Abbreviated month names in English for the Jalali calendar
 MONTH_NAMES_ABBR_EN = [
     None,
     "Far",
@@ -73,7 +65,6 @@ MONTH_NAMES_ABBR_EN = [
     "Esf",
 ]
 
-# Abbreviated month names in Persian for the Jalali calendar
 MONTH_NAMES_ABBR_FA = [
     None,
     "فرو",
@@ -90,7 +81,6 @@ MONTH_NAMES_ABBR_FA = [
     "اسف",
 ]
 
-# Full weekday names in English for the Jalali calendar
 WEEKDAY_NAMES_EN = [
     "Shanbeh",
     "Yekshanbeh",
@@ -101,50 +91,41 @@ WEEKDAY_NAMES_EN = [
     "Jomeh",
 ]
 
-# Full weekday names in Persian for the Jalali calendar
 WEEKDAY_NAMES_FA = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
 
-# Abbreviated weekday names in English for the Jalali calendar
 WEEKDAY_NAMES_ABBR_EN = ["Sha", "Yek", "Dos", "Ses", "Cha", "Pan", "Jom"]
 
-# Abbreviated weekday names in Persian for the Jalali calendar
 WEEKDAY_NAMES_ABBR_FA = ["ش", "ی", "د", "س", "چ", "پ", "ج"]
 
-# The number of days in each month of the Jalali calendar.
-# Each list contains the following columns:
-# 1. The number of days in the month for a non-leap year.
-# 2. The number of days in the month for a leap year.
-# 3. The cumulative number of days from the start of the year to the start of the month (in a non-leap year).
-# The first entry is for indexing purposes and is not used in calculations.
+# Columns: [common-year days, leap-year days, days before month in a common year].
+# Index 0 is unused so months are 1-indexed.
 _MONTH_COUNT = [
-    [-1, -1, -1],  # for indexing purposes
-    [31, 31, 0],  # Farvardin
-    [31, 31, 31],  # Ordibehesht
-    [31, 31, 62],  # Khordad
-    [31, 31, 93],  # Tir
-    [31, 31, 124],  # Mordad
-    [31, 31, 155],  # Shahrivar
-    [30, 30, 186],  # Mehr
-    [30, 30, 216],  # Aban
-    [30, 30, 246],  # Azar
-    [30, 30, 276],  # Dey
-    [30, 30, 306],  # Bahman
-    [29, 30, 336],  # Esfand
+    [-1, -1, -1],
+    [31, 31, 0],
+    [31, 31, 31],
+    [31, 31, 62],
+    [31, 31, 93],
+    [31, 31, 124],
+    [31, 31, 155],
+    [30, 30, 186],
+    [30, 30, 216],
+    [30, 30, 246],
+    [30, 30, 276],
+    [30, 30, 306],
+    [29, 30, 336],
 ]
 
 _FRACTION_CORRECTION = [100000, 10000, 1000, 100, 10]
 
-# Cumulative days before the start of each Gregorian month (index 0 unused),
-# for non-leap years. In to_jalali, February of a leap year is compensated
-# arithmetically, so a single table suffices there.
-_GREGORIAN_DAYS_BEFORE_MONTH = (0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
+_MONTH_DAYS = tuple(row[0] for row in _MONTH_COUNT)
+_MONTH_DAYS_LEAP = tuple(row[1] for row in _MONTH_COUNT)
+_DAYS_BEFORE_MONTH = tuple(row[2] for row in _MONTH_COUNT)
 
-# Cumulative days at the end of each Gregorian month, used to map a day-of-year
-# back to (month, day) via binary search.
-_GREGORIAN_CUM_DAYS = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365)
-_GREGORIAN_CUM_DAYS_LEAP = (0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366)
+_LOCALES = ("en", "fa")
 
-# List of years that are exceptions to the 33-year leap year rule
+_STRFTIME_DIRECTIVE_RE = re.compile(r"%(:z|.)")
+
+# Years that are exceptions to the 33-year leap year rule.
 # fmt: off
 NON_LEAP_CORRECTION_SET = frozenset(
     [
@@ -161,12 +142,117 @@ NON_LEAP_CORRECTION_SET = frozenset(
 
 MIN_NON_LEAP_CORRECTION = 1502
 
+# Proleptic Gregorian ordinal of the day before 1 Farvardin 1, so that Jalali
+# ordinals start at 1 like date.toordinal(). The epoch of the Solar Hijri
+# calendar is Friday 1 Farvardin 1 = 19 March 622 Julian = 22 March 622
+# proleptic Gregorian (R.D. 226896), following the standard astronomical
+# definition (Calendrical Calculations; the same epoch used by the official
+# Iranian calendar authority's model).
+_EPOCH_ORDINAL = 226895
+
+# Number of leap years among the first `phase` years of a 33-year cycle under
+# the (25 * year + 11) % 33 < 8 rule used by is_leap; entry `phase` covers
+# years 33 * cycles + 1 through 33 * cycles + phase.
+# fmt: off
+_LEAPS_BEFORE_CYCLE_YEAR = (
+    0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+    5, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8,
+)
+# fmt: on
+
+# Last year of the ancient regime, where leap years follow the astronomical
+# calendar (vernal equinox at the 52.5 E meridian) instead of the plain
+# 33-year rule.
+_ANCIENT_MAX = 1177
+
+# Years 1..1177 whose leap status under the astronomical calendar differs
+# from the (25 * year + 11) % 33 < 8 rule. Data derived from
+# https://github.com/roozbehp/persiancalendar (Apache 2.0), the Calendrical
+# Calculations astronomical Persian calendar at the 52.5 E meridian, which
+# reproduces the official leap-year table of the Iranian calendar authority
+# (Calendar Center, Institute of Geophysics, University of Tehran) exactly.
+# Five astronomical flip pairs -- (978, 979), (1011, 1012), (1044, 1045),
+# (1077, 1078), (1176, 1177) -- are excluded: their effects would reach into
+# Gregorian 1601+, where all established implementations agree with the
+# 33-year rule, and each hinges on an equinox missing the midday cutoff by
+# mere minutes (36 s .. 11 min), far inside ephemeris model uncertainty.
+# From year 1178 on both models coincide, so this table is complete, and
+# conversions are unchanged for every day on or after Gregorian 1568-03-21.
+# fmt: off
+_ANCIENT_LEAP_FLIPS = (
+    1, 21, 22, 25, 26, 29, 30, 33, 34, 54, 55, 58, 59, 62, 63, 66, 67, 87, 88, 91, 92, 95, 96, 99, 100, 120, 121,
+    124, 125, 128, 129, 132, 133, 153, 154, 157, 158, 161, 162, 186, 187, 190, 191, 194, 195, 219, 220, 223, 224,
+    227, 228, 252, 253, 256, 257, 260, 261, 285, 286, 289, 290, 293, 294, 318, 319, 322, 323, 326, 327, 351, 352,
+    355, 356, 359, 360, 384, 385, 388, 389, 392, 393, 417, 418, 421, 422, 450, 451, 454, 455, 483, 484, 487, 488,
+    516, 517, 520, 521, 549, 550, 553, 554, 582, 583, 586, 587, 615, 616, 619, 620, 648, 649, 652, 653, 681, 682,
+    714, 715, 747, 748, 780, 781, 784, 785, 813, 814, 846, 847, 879, 880, 912, 913, 945, 946,
+)
+# fmt: on
+
+_ANCIENT_LEAP_FLIPS_SET = frozenset(_ANCIENT_LEAP_FLIPS)
+
+# Split of the flips by direction, for cumulative-day corrections: "on" years
+# are leap only astronomically, "off" years only under the 33-year rule. The
+# off years outnumber the on years by exactly one, which cancels the epoch
+# falling one day after the arithmetic model's epoch, so both models place
+# every Norouz from 1178 on the same Gregorian day.
+_ANCIENT_FLIPS_ON = tuple(y for y in _ANCIENT_LEAP_FLIPS if (25 * y + 11) % 33 >= 8)
+_ANCIENT_FLIPS_OFF = tuple(y for y in _ANCIENT_LEAP_FLIPS if (25 * y + 11) % 33 < 8)
+
+
+def _days_before_year(year: int) -> int:
+    """Number of days from the Jalali epoch to 1 Farvardin of `year`.
+
+    Kept exactly consistent with is_leap: each full 33-year cycle contributes
+    8 leap days, each ancient flip year shifts the start of every later year
+    by one day, and each correction year (never leap, but always followed by
+    a leap successor) only shifts its successor's start one day earlier.
+    """
+    cycles, phase = divmod(year - 1, 33)
+    days = 365 * (year - 1) + 8 * cycles + _LEAPS_BEFORE_CYCLE_YEAR[phase]
+
+    if year > _ANCIENT_MAX:
+        days -= 1
+        # Correction years are all >= 1502, so this lookup is only needed here.
+        if (year - 1) in NON_LEAP_CORRECTION_SET:
+            days -= 1
+    else:
+        days += bisect_left(_ANCIENT_FLIPS_ON, year) - bisect_left(_ANCIENT_FLIPS_OFF, year)
+
+    return days
+
 
 def _is_ascii_digit(c: str) -> bool:
     return c in "0123456789"
 
 
-# Result type of JalaliDate.isocalendar(), mirroring datetime.date.isocalendar()
+def _jalali_from_days(days: int):
+    """Jalali (year, month, day) fields from days since the Jalali epoch (1 Farvardin 1 = day 1)."""
+    # First approximation from the cycle's mean year length (12053 days
+    # per 33 years), then settle on the year whose span contains the day.
+    # The estimate is off by at most a year or two, so each loop below
+    # runs O(1) times.
+    days_before_year = _days_before_year
+    jalali_year = days * 33 // 12053 + 1
+    while days <= days_before_year(jalali_year):
+        jalali_year -= 1
+    while days > days_before_year(jalali_year + 1):
+        jalali_year += 1
+
+    day_of_year = days - days_before_year(jalali_year)
+
+    # The first 6 Jalali months have 31 days, the remaining 6 have 30.
+    if day_of_year <= 186:
+        jalali_month = 1 + (day_of_year - 1) // 31
+        jalali_day = 1 + (day_of_year - 1) % 31
+    else:
+        jalali_month = 7 + (day_of_year - 187) // 30
+        jalali_day = 1 + (day_of_year - 187) % 30
+
+    return jalali_year, jalali_month, jalali_day
+
+
+# Mirrors datetime.date.isocalendar() result type.
 IsoCalendarDate = namedtuple("IsoCalendarDate", ["year", "week", "weekday"])
 
 
@@ -181,17 +267,8 @@ class JalaliDate:
         locale (str): The locale for the Jalali date ('en' or 'fa').
     """
 
-    # Using __slots__ to declare a fixed set of attributes for the JalaliDate class.
-    # This helps to save memory by preventing the creation of a __dict__ for each instance.
-    # The attributes are:
-    # _year: The year of the Jalali date.
-    # _month: The month of the Jalali date.
-    # _day: The day of the Jalali date.
-    # _locale: The locale for the date representation (e.g., 'en' or 'fa').
-    # _hashcode: Cached hash code for the instance to speed up hash-based operations.
     __slots__ = "_year", "_month", "_day", "_locale", "_hashcode"
 
-    # Earliest and latest representable dates; assigned after the class body.
     min: ClassVar["JalaliDate"]
     max: ClassVar["JalaliDate"]
 
@@ -218,15 +295,14 @@ class JalaliDate:
             - If `year` is a 4-byte representation or a string starting with '[', the state will be set from these representations.
 
         """
-        if locale not in ["en", "fa"]:
+        if locale not in _LOCALES:
             raise ValueError("locale must be 'en' or 'fa'")
 
         if isinstance(year, JalaliDate) and month is None:
             year, month, day, locale = year.year, year.month, year.day, year.locale
 
         elif isinstance(year, date):
-            jdate = self.to_jalali(year)
-            year, month, day = jdate.year, jdate.month, jdate.day
+            year, month, day = _jalali_from_days(year.toordinal() - _EPOCH_ORDINAL)
 
         elif (isinstance(year, bytes) and len(year) == 4 and 1 <= year[2] <= 12) or (
             isinstance(year, str) and year.startswith("[", 0, 1)
@@ -316,7 +392,7 @@ class JalaliDate:
         if not 1 <= day <= dim:
             raise ValueError(f"day must be in 1..{dim}", day)
 
-        if locale not in ["en", "fa"]:
+        if locale not in _LOCALES:
             raise ValueError("locale must be 'en' or 'fa'")
 
         return year, month, day, locale
@@ -351,7 +427,11 @@ class JalaliDate:
         Determines if a given Persian year is a leap year using the 33-year rule,
         with corrections for specific years that deviate from the rule.
 
-        This function is based on the Rust implementation from the ICU4X project:
+        Years 1..1177 follow the astronomical calendar (vernal equinox at the
+        52.5 E meridian, per Calendrical Calculations and the model used by the
+        official Iranian calendar authority), encoded as flips against the
+        33-year rule. Years 1502..2987 apply the correction set from the ICU4X
+        project:
         https://github.com/unicode-org/icu4x/blob/main/utils/calendrical_calculations/src/persian.rs
 
         Args:
@@ -363,16 +443,17 @@ class JalaliDate:
         if not (MINYEAR <= year <= MAXYEAR):
             raise ValueError(f"Year must be between {MINYEAR} and {MAXYEAR}")
 
-        if year < MIN_NON_LEAP_CORRECTION:
+        if year > _ANCIENT_MAX:
+            if year >= MIN_NON_LEAP_CORRECTION:
+                if year in NON_LEAP_CORRECTION_SET:
+                    return False
+
+                if (year - 1) in NON_LEAP_CORRECTION_SET:
+                    return True
+
             return (25 * year + 11) % 33 < 8
 
-        if year in NON_LEAP_CORRECTION_SET:
-            return False
-
-        if (year - 1) in NON_LEAP_CORRECTION_SET:
-            return True
-
-        return (25 * year + 11) % 33 < 8
+        return ((25 * year + 11) % 33 < 8) != (year in _ANCIENT_LEAP_FLIPS_SET)
 
     @classmethod
     def days_in_month(cls, month: int, year: int) -> int:
@@ -393,9 +474,9 @@ class JalaliDate:
             raise ValueError("month must be in 1..12")
 
         if month == 12 and cls.is_leap(year):
-            return _MONTH_COUNT[month][1]
+            return _MONTH_DAYS_LEAP[12]
 
-        return _MONTH_COUNT[month][0]
+        return _MONTH_DAYS[month]
 
     @staticmethod
     def days_before_month(month: int) -> int:
@@ -414,7 +495,7 @@ class JalaliDate:
         if not 1 <= month <= 12:
             raise ValueError("month must be in 1..12")
 
-        return _MONTH_COUNT[month][2]
+        return _DAYS_BEFORE_MONTH[month]
 
     @classmethod
     def to_jalali(cls, year, month=None, day=None):
@@ -446,47 +527,23 @@ class JalaliDate:
         if month is None and isinstance(year, date):
             year, month, day = year.year, year.month, year.day
 
-        # Shift the epoch so the arithmetic below operates on small positive numbers.
-        if year <= 1600:
-            jalali_year = 0
-            year -= 621
-        else:
-            jalali_year = 979
-            year -= 1600
+        return cls._from_days(date(year, month, day).toordinal() - _EPOCH_ORDINAL)
 
-        # Past February, count the leap day of the current Gregorian year.
-        leap_adjusted_year = year + 1 if month > 2 else year
+    @classmethod
+    def _from_days(cls, days: int):
+        """Build an instance from days since the Jalali epoch (1 Farvardin 1 = day 1)."""
+        jalali_year, jalali_month, jalali_day = _jalali_from_days(days)
 
-        # Days elapsed since the Jalali epoch (proleptic Gregorian leap rules).
-        days = (
-            365 * year
-            + (leap_adjusted_year + 3) // 4
-            - (leap_adjusted_year + 99) // 100
-            + (leap_adjusted_year + 399) // 400
-            - 80
-            + day
-            + _GREGORIAN_DAYS_BEFORE_MONTH[month]
-        )
-
-        # Reduce by whole Jalali cycles: 12053 days = 33 years, 1461 days = 4 years.
-        jalali_year += 33 * (days // 12053)
-        days %= 12053
-        jalali_year += 4 * (days // 1461)
-        days %= 1461
-
-        # The remainder covers up to 4 years; the first may be a leap year (366 days).
-        if days > 365:
-            jalali_year += (days - 1) // 365
-            days = (days - 1) % 365
-
-        # The first 6 Jalali months have 31 days, the remaining 6 have 30.
-        if days < 186:
-            jalali_month = 1 + days // 31
-            jalali_day = 1 + days % 31
-        else:
-            days -= 186
-            jalali_month = 7 + days // 30
-            jalali_day = 1 + days % 30
+        if cls is JalaliDate and MINYEAR <= jalali_year <= MAXYEAR:
+            # Fast path: the computed fields are known to be valid, so the
+            # instance can be populated without re-validating in __init__.
+            self = object.__new__(cls)
+            self._year = jalali_year
+            self._month = jalali_month
+            self._day = jalali_day
+            self._locale = "en"
+            self._hashcode = -1
+            return self
 
         return cls(jalali_year, jalali_month, jalali_day)
 
@@ -506,48 +563,7 @@ class JalaliDate:
         >>> print(g_date)
         2021-03-21
         """
-        month = self._month
-        year = self._year + 1595
-
-        # Days elapsed since the Gregorian epoch used by this algorithm,
-        # counting Jalali years (33-year cycle with 8 leap years) and months
-        # (the first 6 months have 31 days, the remaining 6 have 30).
-        days = -355668 + 365 * year + (year // 33) * 8 + ((year % 33) + 3) // 4 + self._day
-        if month < 7:
-            days += (month - 1) * 31
-        else:
-            days += (month - 7) * 30 + 186
-
-        # Reduce by whole Gregorian cycles: 146097 days = 400 years,
-        # 36524 days = 100 years, 1461 days = 4 years.
-        gregorian_year = 400 * (days // 146097)
-        days %= 146097
-
-        if days > 36524:
-            days -= 1
-            gregorian_year += 100 * (days // 36524)
-            days %= 36524
-            if days >= 365:
-                days += 1
-
-        gregorian_year += 4 * (days // 1461)
-        days %= 1461
-        if days > 365:
-            gregorian_year += (days - 1) // 365
-            days = (days - 1) % 365
-
-        day_of_year = days + 1
-
-        if gregorian_year % 4 == 0 and (gregorian_year % 100 != 0 or gregorian_year % 400 == 0):
-            cum_days = _GREGORIAN_CUM_DAYS_LEAP
-        else:
-            cum_days = _GREGORIAN_CUM_DAYS
-
-        # Locate the month whose cumulative day count first reaches day_of_year.
-        gregorian_month = bisect_left(cum_days, day_of_year)
-        gregorian_day = day_of_year - cum_days[gregorian_month - 1]
-
-        return date(gregorian_year, gregorian_month, gregorian_day)
+        return date.fromordinal(_EPOCH_ORDINAL + self.toordinal())
 
     @classmethod
     def today(cls):
@@ -611,11 +627,11 @@ class JalaliDate:
     __str__ = isoformat
 
     def toordinal(self) -> int:
-        return self.to_gregorian().toordinal() - 226894
+        return _days_before_year(self._year) + _DAYS_BEFORE_MONTH[self._month] + self._day
 
     @classmethod
     def fromordinal(cls, n: int):
-        return cls(date.fromordinal(n + 226894))
+        return cls._from_days(n)
 
     @classmethod
     def fromisocalendar(cls, year, week, day):
@@ -820,7 +836,7 @@ class JalaliDate:
         Returns:
             int: An integer representing the day of the week.
         """
-        return (self.toordinal() + 4) % 7
+        return (self.toordinal() + 5) % 7
 
     def __format__(self, fmt: str):
         if not isinstance(fmt, str):
@@ -848,8 +864,10 @@ class JalaliDate:
         Returns:
             int: The week number of the year, starting from 1.
         """
-        o = JalaliDate(self._year, 1, 1).weekday()
-        days = self.days_before_month(self._month) + self._day + o
+        # Weekday of 1 Farvardin of this year, inlined from
+        # JalaliDate(self._year, 1, 1).weekday() to avoid building an instance.
+        o = (_days_before_year(self._year) + 6) % 7
+        days = _DAYS_BEFORE_MONTH[self._month] + self._day + o
 
         week_no, r = divmod(days, 7)
 
@@ -903,40 +921,21 @@ class JalaliDate:
             >>> j_date.strftime("%A, %d %B %Y", locale="fa")
             'یکشنبه, ۰۱ فروردین ۱۴۰۰'
         """
-        if locale is None or locale not in ["fa", "en"]:
+        if locale is None or locale not in _LOCALES:
             locale = self._locale
 
-        month_names = MONTH_NAMES_EN if locale == "en" else MONTH_NAMES_FA
-        month_names_abbr = MONTH_NAMES_ABBR_EN if locale == "en" else MONTH_NAMES_ABBR_FA
-        day_names = WEEKDAY_NAMES_EN if locale == "en" else WEEKDAY_NAMES_FA
-        day_names_abbr = WEEKDAY_NAMES_ABBR_EN if locale == "en" else WEEKDAY_NAMES_ABBR_FA
-        am = "AM" if locale == "en" else "ق.ظ"
-
-        format_time = {
-            "%a": day_names_abbr[self.weekday()],
-            "%A": day_names[self.weekday()],
-            "%w": str(self.weekday()),
-            "%d": f"{self._day:02d}",
-            "%b": month_names_abbr[self._month],
-            "%B": month_names[self._month],
-            "%m": f"{self._month:02d}",
-            "%y": f"{self._year % 100:02d}",
-            "%Y": f"{self._year:04d}",
-            "%H": "00",
-            "%I": "00",
-            "%p": am,
-            "%M": "00",
-            "%S": "00",
-            "%f": "000000",
-            "%:z": "",
-            "%z": "",
-            "%Z": "",
-            "%j": f"{self.days_before_month(self._month) + self._day:03d}",
-            "%U": f"{self.week_of_year():02d}",
-            "%W": f"{self.week_of_year():02d}",
-            "%X": "00:00:00",
-            "%%": "%",
-        }
+        if locale == "en":
+            month_names = MONTH_NAMES_EN
+            month_names_abbr = MONTH_NAMES_ABBR_EN
+            day_names = WEEKDAY_NAMES_EN
+            day_names_abbr = WEEKDAY_NAMES_ABBR_EN
+            am = "AM"
+        else:
+            month_names = MONTH_NAMES_FA
+            month_names_abbr = MONTH_NAMES_ABBR_FA
+            day_names = WEEKDAY_NAMES_FA
+            day_names_abbr = WEEKDAY_NAMES_ABBR_FA
+            am = "ق.ظ"
 
         if "%c" in fmt:
             fmt = utils.replace(fmt, {"%c": "%A %d %B %Y"})
@@ -944,7 +943,69 @@ class JalaliDate:
         if "%x" in fmt:
             fmt = utils.replace(fmt, {"%x": "%y/%m/%d"})
 
-        result = utils.replace(fmt, format_time)
+        # Single-pass substitution with lazily computed values: only the
+        # directives actually present in the format string are evaluated,
+        # and repeated directives share the computed value.
+        values: dict[str, str] = {}
+        weekday = -1
+        week_of_year = -1
+
+        def _replace_directive(match):
+            nonlocal weekday, week_of_year
+
+            code = match.group(1)
+            value = values.get(code)
+            if value is not None:
+                return value
+
+            if code == "d":
+                value = "%02d" % self._day
+            elif code == "m":
+                value = "%02d" % self._month
+            elif code == "y":
+                value = "%02d" % (self._year % 100)
+            elif code == "Y":
+                value = "%04d" % self._year
+            elif code == "b":
+                value = month_names_abbr[self._month]
+            elif code == "B":
+                value = month_names[self._month]
+            elif code == "a" or code == "A" or code == "w":
+                if weekday < 0:
+                    weekday = self.weekday()
+
+                if code == "a":
+                    value = day_names_abbr[weekday]
+                elif code == "A":
+                    value = day_names[weekday]
+                else:
+                    value = str(weekday)
+            elif code == "j":
+                value = "%03d" % (_DAYS_BEFORE_MONTH[self._month] + self._day)
+            elif code == "U" or code == "W":
+                if week_of_year < 0:
+                    week_of_year = self.week_of_year()
+
+                value = "%02d" % week_of_year
+            elif code == "H" or code == "I" or code == "M" or code == "S":
+                value = "00"
+            elif code == "p":
+                value = am
+            elif code == "f":
+                value = "000000"
+            elif code == ":z" or code == "z" or code == "Z":
+                value = ""
+            elif code == "X":
+                value = "00:00:00"
+            elif code == "%":
+                value = "%"
+            else:
+                return match.group(0)
+
+            values[code] = value
+            return value
+
+        result = _STRFTIME_DIRECTIVE_RE.sub(_replace_directive, fmt)
 
         if locale == "fa":
             result = digits.en_to_fa(result)
@@ -954,16 +1015,23 @@ class JalaliDate:
     def _compare(self, other):
         assert isinstance(other, JalaliDate)
 
-        y, m, d = self._year, self._month, self._day
-        y2, m2, d2 = other.year, other.month, other.day
+        t1 = (self._year, self._month, self._day)
+        t2 = (other._year, other._month, other._day)
 
-        return 0 if (y, m, d) == (y2, m2, d2) else 1 if (y, m, d) > (y2, m2, d2) else -1
+        return (t1 > t2) - (t1 < t2)
+
+    def _compare_date(self, other):
+        """Compare with a datetime.date (or datetime) operand without building a JalaliDate."""
+        t1 = (self._year, self._month, self._day)
+        t2 = _jalali_from_days(other.toordinal() - _EPOCH_ORDINAL)
+
+        return (t1 > t2) - (t1 < t2)
 
     def __eq__(self, other):
         if isinstance(other, JalaliDate):
             return self._compare(other) == 0
         elif isinstance(other, date):
-            return self._compare(JalaliDate(other)) == 0
+            return self._compare_date(other) == 0
 
         return False
 
@@ -971,7 +1039,7 @@ class JalaliDate:
         if isinstance(other, JalaliDate):
             return self._compare(other) != 0
         elif isinstance(other, date):
-            return self._compare(JalaliDate(other)) != 0
+            return self._compare_date(other) != 0
 
         return True
 
@@ -979,7 +1047,7 @@ class JalaliDate:
         if isinstance(other, JalaliDate):
             return self._compare(other) <= 0
         elif isinstance(other, date):
-            return self._compare(JalaliDate(other)) <= 0
+            return self._compare_date(other) <= 0
 
         raise NotImplementedError
 
@@ -987,7 +1055,7 @@ class JalaliDate:
         if isinstance(other, JalaliDate):
             return self._compare(other) < 0
         elif isinstance(other, date):
-            return self._compare(JalaliDate(other)) < 0
+            return self._compare_date(other) < 0
 
         raise NotImplementedError
 
@@ -995,7 +1063,7 @@ class JalaliDate:
         if isinstance(other, JalaliDate):
             return self._compare(other) >= 0
         elif isinstance(other, date):
-            return self._compare(JalaliDate(other)) >= 0
+            return self._compare_date(other) >= 0
 
         raise NotImplementedError
 
@@ -1003,7 +1071,7 @@ class JalaliDate:
         if isinstance(other, JalaliDate):
             return self._compare(other) > 0
         elif isinstance(other, date):
-            return self._compare(JalaliDate(other)) > 0
+            return self._compare_date(other) > 0
 
         raise NotImplementedError
 
@@ -1033,7 +1101,8 @@ class JalaliDate:
 
         if isinstance(other, date):
             days1 = self.toordinal()
-            days2 = JalaliDate(other).toordinal()
+            y, m, d = _jalali_from_days(other.toordinal() - _EPOCH_ORDINAL)
+            days2 = _days_before_year(y) + _DAYS_BEFORE_MONTH[m] + d
 
             return timedelta(days1 - days2)
 
@@ -1041,7 +1110,7 @@ class JalaliDate:
 
     @classmethod
     def strptime(cls, data_string, fmt, locale="en"):
-        if locale not in ["en", "fa"]:
+        if locale not in _LOCALES:
             raise ValueError("locale must be 'en' or 'fa'")
 
         if locale == "fa":
@@ -1096,12 +1165,8 @@ class JalaliDate:
         yy = parsed_components.get("y")
 
         if year is None and yy is not None:
-            # Heuristic: if yy > 70, assume 13yy, else 14yy.
-            year = (
-                (1300 + yy) if yy > (2070 - 2000) else (1400 + yy)
-            )  # Adjusted heuristic to be roughly 70 for 1300 century.
-            # Current Jalali year is around 140x. So values like 01, 02.. up to e.g. 70 => 14xx.
-            # values like 71, 72 .. 99 => 13xx.
+            # Heuristic: yy > 70 => 13yy, else 14yy (current era is ~140x).
+            year = (1300 + yy) if yy > (2070 - 2000) else (1400 + yy)
         elif year is None:
             raise ValueError("Year information is missing from the date string or format.")
 
@@ -1165,7 +1230,6 @@ _tzinfo_class = tzinfo
 class JalaliDateTime(JalaliDate):
     __slots__ = JalaliDate.__slots__ + ("_hour", "_minute", "_second", "_microsecond", "_tzinfo", "_fold")
 
-    # Earliest and latest representable datetimes; assigned after the class body.
     min: ClassVar["JalaliDateTime"]
     max: ClassVar["JalaliDateTime"]
 
@@ -1185,8 +1249,6 @@ class JalaliDateTime(JalaliDate):
         *,
         fold=0,
     ):
-        # Pickle support
-
         if isinstance(year, JalaliDateTime) and month is None:
             month = year.month
             day = year.day
@@ -1197,12 +1259,11 @@ class JalaliDateTime(JalaliDate):
             if tzinfo is None:
                 tzinfo = year.tzinfo
             fold = year.fold
+            locale = year.locale
             year = year.year
 
         elif isinstance(year, dt) and month is None:
-            j = JalaliDate(year.date())
-            month = j.month
-            day = j.day
+            j_year, month, day = _jalali_from_days(year.toordinal() - _EPOCH_ORDINAL)
             hour = year.hour
             minute = year.minute
             second = year.second
@@ -1212,7 +1273,7 @@ class JalaliDateTime(JalaliDate):
                 tzinfo = year.tzinfo
 
             fold = year.fold
-            year = j.year
+            year = j_year
 
         elif (isinstance(year, bytes) and len(year) == 10) or (isinstance(year, str) and year.startswith("[", 0, 1)):
             self.__setstate__(year, month)
@@ -1428,7 +1489,6 @@ class JalaliDateTime(JalaliDate):
         if len(date_string) < 7:
             raise ValueError(f"Invalid isoformat string: {date_string!r}")
 
-        # Split this at the separator
         try:
             separator_location = cls._find_isoformat_datetime_separator(date_string)
             dstr = date_string[0:separator_location]
@@ -1691,9 +1751,11 @@ class JalaliDateTime(JalaliDate):
                 off = -off
             else:
                 sign = "+"
-            hh, mm = divmod(off.total_seconds(), timedelta(hours=1).total_seconds())
-            assert not mm % timedelta(minutes=1).total_seconds(), "whole minute"
-            mm //= timedelta(minutes=1).total_seconds()
+            # utcoffset() is validated to be a whole number of minutes
+            off_seconds = off.days * 86400 + off.seconds
+            hh, mm = divmod(off_seconds, 3600)
+            assert not mm % 60, "whole minute"
+            mm //= 60
             s += "%s%02d:%02d" % (sign, hh, mm)
         return s
 
@@ -1703,24 +1765,26 @@ class JalaliDateTime(JalaliDate):
         if timespec == "auto":
             timespec = "microseconds" if self._microsecond else "seconds"
 
-        specs = {
-            "hours": "%02d",
-            "minutes": "%02d:%02d",
-            "seconds": "%02d:%02d:%02d",
-            "milliseconds": "%02d:%02d:%02d.%03d",
-            "microseconds": "%02d:%02d:%02d.%06d",
-        }
+        hour = self._hour
+        minute = self._minute
+        second = self._second
 
-        try:
-            fmt = specs[timespec]
-        except KeyError:
-            raise ValueError(f"Unknown timespec value: {timespec!r}")
+        if timespec == "hours":
+            return "%02d" % hour
 
-        microsecond = self._microsecond
+        if timespec == "minutes":
+            return "%02d:%02d" % (hour, minute)
+
+        if timespec == "seconds":
+            return "%02d:%02d:%02d" % (hour, minute, second)
+
         if timespec == "milliseconds":
-            microsecond //= 1000
+            return "%02d:%02d:%02d.%03d" % (hour, minute, second, self._microsecond // 1000)
 
-        return fmt % ((self._hour, self._minute, self._second, microsecond)[: fmt.count("%")])
+        if timespec == "microseconds":
+            return "%02d:%02d:%02d.%06d" % (hour, minute, second, self._microsecond)
+
+        raise ValueError(f"Unknown timespec value: {timespec!r}")
 
     def utcoffset(self):
         if self._tzinfo is None:
@@ -1759,12 +1823,9 @@ class JalaliDateTime(JalaliDate):
         if self._tzinfo is None:
             return None
 
-        from datetime import timedelta as _td
-        from datetime import timezone as _tz
-
         # datetime.timezone instances (including timezone.utc) never have DST
-        if self._tzinfo is _tz.utc or isinstance(self._tzinfo, type(_tz.utc)):
-            return _td(0)
+        if self._tzinfo is timezone.utc or isinstance(self._tzinfo, type(timezone.utc)):
+            return timedelta(0)
 
         g = self.to_gregorian()
         try:
@@ -1893,7 +1954,7 @@ class JalaliDateTime(JalaliDate):
 
     @classmethod
     def strptime(cls, data_string, fmt, locale="en"):
-        if locale not in ["en", "fa"]:
+        if locale not in _LOCALES:
             raise ValueError("locale must be 'en' or 'fa'")
 
         if locale == "fa":
@@ -1954,21 +2015,18 @@ class JalaliDateTime(JalaliDate):
 
             directives = {k: int(v) if v.isdigit() else v for k, v in directives.items() if v}
 
-            # extraction of month number from %b|%B format
             if ("b" in directives.keys() or "B" in directives.keys()) and "m" not in directives.keys():
                 name, is_abbr = (
                     (directives.pop("b"), True) if "b" in directives.keys() else (directives.pop("B"), False)
                 )
                 directives["m"] = (month_names_abbr.index(name) if is_abbr else month_names.index(name)) + 1
 
-            # extraction of hour from periodic time format
             if "p" in directives.keys():
                 if "I" in directives.keys():
                     directives["H"] = directives.pop("I") + (0 if directives["p"].upper() == periods[0] else 12)
                 else:
                     raise ValueError("using %p requires to use %I (12 hour format) as well")
 
-            # extraction of timezone information if provided
             tz = None
             if "z" in directives.keys():
                 sign = 1 if directives["z"][0] == "+" else -1
@@ -2029,7 +2087,7 @@ class JalaliDateTime(JalaliDate):
         d_datetime = [
             self._year,
             self._month,
-            self._day,  # These are never zero
+            self._day,
             self._hour,
             self._minute,
             self._second,
@@ -2059,22 +2117,8 @@ class JalaliDateTime(JalaliDate):
         return self.isoformat(sep=" ")
 
     def strftime(self, fmt: str, locale=None) -> str:
-        if locale is None or locale not in ["fa", "en"]:
+        if locale is None or locale not in _LOCALES:
             locale = self._locale
-
-        datetime = self.to_gregorian()
-
-        offset = self.utcoffset()
-        if offset is None:
-            colon_z = ""
-        else:
-            if offset.days < 0:
-                sign = "-"
-                offset = -offset
-            else:
-                sign = "+"
-            hh, mm = divmod(offset // timedelta(minutes=1), 60)
-            colon_z = "%s%02d:%02d" % (sign, hh, mm)
 
         format_time = {
             "%H": "%02d" % self._hour,
@@ -2083,11 +2127,42 @@ class JalaliDateTime(JalaliDate):
             "%M": "%02d" % self._minute,
             "%S": "%02d" % self._second,
             "%f": "%06d" % self._microsecond,
-            "%:z": colon_z,
-            "%z": datetime.strftime("%z"),
-            "%Z": ("" if not self._tzinfo else self._tzinfo.tzname(datetime)),
             "%X": "%02d:%02d:%02d" % (self._hour, self._minute, self._second),
         }
+
+        # The Gregorian conversion and the UTC offset are only needed for the
+        # timezone directives; compute them lazily.
+        if "%:z" in fmt:
+            offset = self.utcoffset()
+            if offset is None:
+                colon_z = ""
+            else:
+                if offset.days < 0:
+                    sign = "-"
+                    offset = -offset
+                else:
+                    sign = "+"
+                hh, mm = divmod(offset // timedelta(minutes=1), 60)
+                colon_z = "%s%02d:%02d" % (sign, hh, mm)
+
+            format_time["%:z"] = colon_z
+
+        if "%z" in fmt or "%Z" in fmt:
+            if self._tzinfo is None:
+                # Naive datetimes always format %z and %Z as empty strings.
+                if "%z" in fmt:
+                    format_time["%z"] = ""
+
+                if "%Z" in fmt:
+                    format_time["%Z"] = ""
+            else:
+                datetime = self.to_gregorian()
+
+                if "%z" in fmt:
+                    format_time["%z"] = datetime.strftime("%z")
+
+                if "%Z" in fmt:
+                    format_time["%Z"] = self._tzinfo.tzname(datetime)
 
         if "%c" in fmt:
             fmt = utils.replace(fmt, {"%c": "%A %d %B %Y %X"})
@@ -2101,30 +2176,18 @@ class JalaliDateTime(JalaliDate):
     def __base_compare(self, other):
         assert isinstance(other, JalaliDateTime)
 
-        y, mo, d, h, m, s, ms = [
-            self._year,
-            self._month,
-            self._day,
-            self._hour,
-            self._minute,
-            self._second,
-            self._microsecond,
-        ]
-        y2, mo2, d2, h2, m2, s2, ms2 = [
-            other.year,
-            other.month,
-            other.day,
-            other.hour,
-            other.minute,
-            other.second,
-            other.microsecond,
-        ]
-
-        return (
-            0
-            if (y, mo, d, h, m, s, ms) == (y2, mo2, d2, h2, m2, s2, ms2)
-            else 1 if (y, mo, d, h, m, s, ms) > (y2, mo2, d2, h2, m2, s2, ms2) else -1
+        t1 = (self._year, self._month, self._day, self._hour, self._minute, self._second, self._microsecond)
+        t2 = (
+            other._year,
+            other._month,
+            other._day,
+            other._hour,
+            other._minute,
+            other._second,
+            other._microsecond,
         )
+
+        return (t1 > t2) - (t1 < t2)
 
     def _cmp(self, other, allow_mixed=False):
         """
@@ -2265,10 +2328,24 @@ class JalaliDateTime(JalaliDate):
         minute, second = divmod(rem, 60)
 
         if 0 < delta.days <= _MAXORDINAL:
-            return JalaliDateTime.combine(
-                JalaliDate.fromordinal(delta.days),
-                _time(hour, minute, second, delta.microseconds, tzinfo=self._tzinfo),
-            )
+            # Fast path: the resulting fields are all within their valid
+            # ranges, so the instance can be populated directly. As with
+            # JalaliDateTime.combine(), the result keeps this instance's
+            # tzinfo, uses the default locale, and resets fold to 0.
+            year, month, day = _jalali_from_days(delta.days)
+            result = object.__new__(JalaliDateTime)
+            result._year = year
+            result._month = month
+            result._day = day
+            result._locale = "en"
+            result._hashcode = -1
+            result._hour = hour
+            result._minute = minute
+            result._second = second
+            result._microsecond = delta.microseconds
+            result._tzinfo = self._tzinfo
+            result._fold = 0
+            return result
 
         raise OverflowError("result out of range")
 

@@ -47,6 +47,14 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(JalaliDateTime(aware_source).tzinfo, tehran_tz)
         self.assertEqual(JalaliDateTime(aware_source, tzinfo=timezone.utc).tzinfo, timezone.utc)
 
+        fa_source = JalaliDateTime(1400, 1, 1, 12, 0, locale="fa")
+        self.assertEqual(JalaliDateTime(fa_source).locale, "fa")
+        self.assertEqual(JalaliDateTime(JalaliDate(1400, 1, 1, "fa")).locale, "fa")
+        self.assertEqual(
+            JalaliDateTime(1367, 2, 14, 4, 30, 4, 4444).jalali_date(),
+            JalaliDate(1367, 2, 14),
+        )
+
         g = JalaliDateTime.now()
         self.assertEqual(g.time(), _time(g.hour, g.minute, g.second, g.microsecond))
 
@@ -554,6 +562,13 @@ class TestJalaliDateTime(TestCase):
         self.assertEqual(combined.minute, 30)
         self.assertEqual(combined.second, 1)
 
+        aware = JalaliDateTime.combine(
+            JalaliDate(1400, 1, 1),
+            _time(23, 30, tzinfo=timezone.utc, fold=1),
+        )
+        self.assertEqual(aware.tzinfo, timezone.utc)
+        self.assertEqual(aware.fold, 1)
+
         with self.assertRaises(TypeError):
             JalaliDateTime.combine("InvalidDate", _time(12, 30, 45))
 
@@ -697,6 +712,18 @@ class TestJalaliDateTime(TestCase):
         dt = datetime.now(timezone.utc)
         jdate = JalaliDateTime.to_jalali(dt)
         self.assertEqual(jdate.tzinfo, timezone.utc)
+
+    def test_to_jalali_argument_forms(self):
+        expected = JalaliDateTime(1403, 1, 1, 15, 30, 45, 123, timezone.utc)
+        self.assertEqual(
+            JalaliDateTime.to_jalali(2024, 3, 20, 15, 30, 45, 123, timezone.utc),
+            expected,
+        )
+        self.assertEqual(JalaliDateTime.to_jalali(2024, 3, 20), JalaliDateTime(1403, 1, 1))
+        self.assertEqual(
+            JalaliDateTime.to_jalali(datetime(2024, 3, 20, 15, 30, 45, 123, tzinfo=timezone.utc)),
+            expected,
+        )
 
     def test_strftime_basic(self):
         jdate = JalaliDateTime(1400, 1, 1, 15, 30, 45)
@@ -1012,6 +1039,12 @@ class TestJalaliDateTime(TestCase):
     def test_add_overflow(self):
         with pytest.raises(OverflowError):
             JalaliDateTime.max + timedelta(days=1)
+
+        with pytest.raises(OverflowError):
+            JalaliDateTime.min - timedelta(days=1)
+
+        aware = JalaliDateTime(1403, 1, 1, 12, 0, tzinfo=timezone.utc)
+        self.assertEqual((aware + timedelta(hours=1)).tzinfo, timezone.utc)
 
     def test_subtract_equal_offset_different_tzinfo(self):
         fixed = JalaliDateTime(1404, 5, 1, 12, 0, tzinfo=timezone(timedelta(hours=3, minutes=30)))

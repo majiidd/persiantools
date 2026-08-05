@@ -30,21 +30,6 @@ ZERO = "صفر"
 DELI = " و "
 NEGATIVE = "منفی "
 
-DECISION = {
-    10: lambda n, depth: ONES[n - 1],
-    20: lambda n, depth: RANGE[n - 10],
-    100: lambda n, depth: TENS[n // 10 - 2] + _to_word(n % 10, True),
-    1000: lambda n, depth: HUNDREDS[n // 100 - 1] + _to_word(n % 100, True),
-    1_000_000: lambda n, depth: _to_word(n // 1_000, depth) + BIG_RANGE[0] + _to_word(n % 1_000, True),
-    1_000_000_000: lambda n, depth: _to_word(n // 1_000_000, depth) + BIG_RANGE[1] + _to_word(n % 1_000_000, True),
-    1_000_000_000_000: lambda n, depth: _to_word(n // 1_000_000_000, depth)
-    + BIG_RANGE[2]
-    + _to_word(n % 1_000_000_000, True),
-    1_000_000_000_000_000: lambda n, depth: _to_word(n // 1_000_000_000_000, depth)
-    + BIG_RANGE[3]
-    + _to_word(n % 1_000_000_000_000, True),
-}
-
 
 class OutOfRangeException(Exception):
     pass
@@ -177,14 +162,30 @@ def _to_word(number: int, depth: bool) -> str:
     if number < 0:
         return NEGATIVE + _to_word(-number, depth)
 
-    words = ""
-    if depth:
-        words = DELI
-        depth = False
+    words = DELI if depth else ""
 
-    for key in DECISION:
-        if number < key:
-            return words + DECISION[key](number, depth)
+    if number < 10:
+        return words + ONES[number - 1]
+    if number < 20:
+        return words + RANGE[number - 10]
+    if number < 100:
+        quotient, remainder = divmod(number, 10)
+        return words + TENS[quotient - 2] + _to_word(remainder, True)
+    if number < 1_000:
+        quotient, remainder = divmod(number, 100)
+        return words + HUNDREDS[quotient - 1] + _to_word(remainder, True)
+    if number < 1_000_000:
+        quotient, remainder = divmod(number, 1_000)
+        return words + _to_word(quotient, False) + BIG_RANGE[0] + _to_word(remainder, True)
+    if number < 1_000_000_000:
+        quotient, remainder = divmod(number, 1_000_000)
+        return words + _to_word(quotient, False) + BIG_RANGE[1] + _to_word(remainder, True)
+    if number < 1_000_000_000_000:
+        quotient, remainder = divmod(number, 1_000_000_000)
+        return words + _to_word(quotient, False) + BIG_RANGE[2] + _to_word(remainder, True)
+    if number < 1_000_000_000_000_000:
+        quotient, remainder = divmod(number, 1_000_000_000_000)
+        return words + _to_word(quotient, False) + BIG_RANGE[3] + _to_word(remainder, True)
 
     raise OutOfRangeException("number must be lower than 1000000000000000")
 
@@ -214,9 +215,11 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
     if len(right) > 14:
         raise OutOfRangeException("You are allowed to use 14 digits for a floating point")
 
-    if right.strip("0"):
-        left_word = _to_word(int(left), False)
-        mantissa_index = len(right.rstrip("0")) - 1
+    stripped_right = right.rstrip("0")
+    left_int = int(left)
+    if stripped_right:
+        left_word = _to_word(left_int, False)
+        mantissa_index = len(stripped_right) - 1
         if mantissa_index >= len(MANTISSA):
             raise ValueError("Fractional part is too long")
         result = (
@@ -225,10 +228,10 @@ def _floating_number_to_word(number: float, depth: bool) -> str:
         if number < 0:
             return NEGATIVE + result
         return result
-    else:
-        if number < 0:
-            return NEGATIVE + _to_word(int(left), False)
-        return _to_word(int(left), False)
+
+    if number < 0:
+        return NEGATIVE + _to_word(left_int, False)
+    return _to_word(left_int, False)
 
 
 def to_word(number: Union[int, float]) -> str:

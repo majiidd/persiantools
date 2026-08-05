@@ -61,6 +61,7 @@ classifiers = [
     "Topic :: Text Processing",
     "Topic :: Text Processing :: Linguistic",
     "Topic :: Utilities",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -71,6 +72,7 @@ dependencies = [
 Homepage = "https://github.com/majiidd/persiantools"
 Source = "https://github.com/majiidd/persiantools"
 Issues = "https://github.com/majiidd/persiantools/issues"
+Changelog = "https://github.com/majiidd/persiantools/blob/master/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
@@ -88,6 +90,9 @@ version = { attr = "persiantools.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["persiantools*"]
+
+[tool.setuptools.package-data]
+persiantools = ["py.typed"]
 
 [tool.black]
 line-length = 120
