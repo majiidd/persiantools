@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.0](https://github.com/majiidd/persiantools/compare/6.1.0...6.2.0) - 2026-08-05
+
+- Adopted the astronomical calendar model (vernal equinox at the 52.5 E meridian) for ancient Jalali years 1-1177, reproducing the official leap-year table of the Iranian calendar authority; conversions on or after Gregorian 1568-03-21 are unchanged.
+- Derived every Jalali/Gregorian conversion from `_days_before_year`/`is_leap`, keeping the calendar model consistent across the full supported year range (1-9377).
+- Reworked `JalaliDate`/`JalaliDateTime` hot paths for performance with no behavior changes: `strftime()` is 3-8x faster via lazy single-pass directive substitution, and conversions, date arithmetic, comparisons, `fromordinal()`, `week_of_year()`, and `isocalendar()` are 1.5-3x faster.
+- Added conversion test coverage validated against official Iranian calendar authority (kabise) data.
+
 ## [6.1.0](https://github.com/majiidd/persiantools/compare/6.0.2...6.1.0) - 2026-07-10
 
 - Added the `convert-persian-dates` AI agent skill (`.agents/skills/convert-persian-dates/`) so AI coding assistants can convert Shamsi/Jalali and Gregorian dates without guessing calendar math.
