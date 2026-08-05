@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "persiantools"
 dynamic = ["version"]
-description = "Jalali (Shamsi/Persian) date and datetime with Persian digits and character utilities"
+description = "Jalali (Shamsi/Persian) date and datetime conversion, Persian/Arabic/English digit conversion, character normalization, and number-to-Persian-words utilities"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -33,10 +33,17 @@ keywords = [
     "persian-date",
     "persian-digits",
     "arabic-digits",
+    "persian-numbers",
+    "persian-words",
     "number-to-words",
     "characters",
     "normalization",
     "localization",
+    "solar-hijri",
+    "nowruz",
+    "iran",
+    "ordinal",
+    "ar-to-fa",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -61,6 +68,7 @@ classifiers = [
     "Topic :: Text Processing",
     "Topic :: Text Processing :: Linguistic",
     "Topic :: Utilities",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -71,6 +79,8 @@ dependencies = [
 Homepage = "https://github.com/majiidd/persiantools"
 Source = "https://github.com/majiidd/persiantools"
 Issues = "https://github.com/majiidd/persiantools/issues"
+Changelog = "https://github.com/majiidd/persiantools/blob/master/CHANGELOG.md"
+Documentation = "https://github.com/majiidd/persiantools#readme"
 
 [dependency-groups]
 dev = [
@@ -88,6 +98,9 @@ version = { attr = "persiantools.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["persiantools*"]
+
+[tool.setuptools.package-data]
+persiantools = ["py.typed"]
 
 [tool.black]
 line-length = 120
