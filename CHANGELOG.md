@@ -5,7 +5,10 @@
 - Adopted the astronomical calendar model (vernal equinox at the 52.5 E meridian) for ancient Jalali years 1-1177, reproducing the official leap-year table of the Iranian calendar authority; conversions on or after Gregorian 1568-03-21 are unchanged.
 - Derived every Jalali/Gregorian conversion from `_days_before_year`/`is_leap`, keeping the calendar model consistent across the full supported year range (1-9377).
 - Reworked `JalaliDate`/`JalaliDateTime` hot paths for performance with no behavior changes: `strftime()` is 3-8x faster via lazy single-pass directive substitution, and conversions, date arithmetic, comparisons, `fromordinal()`, `week_of_year()`, and `isocalendar()` are 1.5-3x faster.
-- Added conversion test coverage validated against official Iranian calendar authority (kabise) data.
+- Fixed `JalaliDateTime` copy-constructor to preserve `locale` when initialized from another `JalaliDateTime`.
+- Marked the package as typed (`py.typed`) and enriched PyPI metadata for typing consumers.
+- Simplified `digits.to_word` conversion and expanded digit test coverage.
+- Added conversion test coverage validated against official Iranian calendar authority (kabise) data, plus edge-case coverage for underflow, leap-day `replace()`, `combine` fold/tzinfo, and `to_jalali` argument forms.
 
 ## [6.1.0](https://github.com/majiidd/persiantools/compare/6.0.2...6.1.0) - 2026-07-10
 
