@@ -232,10 +232,10 @@ class TestJalaliDate(TestCase):
         self.assertEqual(JalaliDate(1395, 1, 1).replace(1367), JalaliDate(1367, 1, 1))
         self.assertEqual(JalaliDate(1395, 1, 1).replace(month=2), JalaliDate(1395, 2, 1))
         self.assertEqual(JalaliDate(1367, 1, 1).replace(year=1396, month=7), JalaliDate(1396, 7, 1))
-        self.assertEqual(
-            JalaliDate(1395, 1, 1, "en").replace(1367, 2, 14, "fa"),
-            JalaliDate(1367, 2, 14, "en"),
-        )
+        replaced = JalaliDate(1395, 1, 1, "en").replace(1367, 2, 14, "fa")
+        self.assertEqual(replaced, JalaliDate(1367, 2, 14))
+        self.assertEqual(replaced.locale, "fa")
+        self.assertEqual(JalaliDate(JalaliDate(1400, 1, 1, "fa")).locale, "fa")
 
         self.assertEqual(JalaliDate.fromtimestamp(time()), JalaliDate.today())
         self.assertEqual(JalaliDate.fromtimestamp(578707200), JalaliDate(1367, 2, 14))
@@ -247,6 +247,10 @@ class TestJalaliDate(TestCase):
         jdate = JalaliDate.today()
         with pytest.raises(ValueError, match="locale must be 'en' or 'fa'"):
             jdate.replace(locale="de")
+
+        # Esfand 30 is invalid when the replacement year is not a leap year
+        with pytest.raises(ValueError):
+            JalaliDate(1403, 12, 30).replace(year=1404)
 
         with pytest.raises(ValueError):
             JalaliDate.days_before_month(0)
@@ -586,6 +590,11 @@ class TestJalaliDate(TestCase):
 
         with pytest.raises(OverflowError):
             JalaliDate.max + timedelta(days=1)
+
+        with pytest.raises(OverflowError):
+            JalaliDate.min - timedelta(days=1)
+
+        self.assertEqual(JalaliDate.fromordinal(JalaliDate(1403, 1, 1).toordinal()), JalaliDate(1403, 1, 1))
 
     def test_pickle(self):
         file = open("save.p", "wb")

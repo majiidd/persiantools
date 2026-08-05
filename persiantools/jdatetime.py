@@ -1259,6 +1259,7 @@ class JalaliDateTime(JalaliDate):
             if tzinfo is None:
                 tzinfo = year.tzinfo
             fold = year.fold
+            locale = year.locale
             year = year.year
 
         elif isinstance(year, dt) and month is None:
